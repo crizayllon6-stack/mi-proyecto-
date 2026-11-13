@@ -102,6 +102,8 @@ Escenas: `[TITULO: TEXTO | subtítulo]` `[MAPA: Lugar, País | lat, lon]` `[FECH
 - Cambia de escena cada **40 a 100 palabras**. Nunca dos escenas iguales seguidas.
 - 3 a 5 `[TITULO]` como capítulos (incluido el principal).
 - `[TEXTO]` sirve para la pregunta o frase clave de cada bloque: es un gancho visual.
+  Como es una pantalla casi quieta, la narración que va debajo de un `[TEXTO]` debe ser **corta (máx. 35 palabras)**.
+  Después, cambia a otra escena (MAPA, FECHA, FICHA, DOC) aunque sea el mismo tema.
 - Extensión: **1 400 a 1 600 palabras narradas** (unos 10 minutos).
 
 ## 11. Honestidad (no negociable)

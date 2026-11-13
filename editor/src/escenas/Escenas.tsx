@@ -187,10 +187,18 @@ export const Texto: React.FC<P> = ({ datos, duracion }) => {
   const vel = Math.max(0.8, texto.length / Math.max(20, duracion * 0.5));
   const visible = escribir(texto, f, vel, 4);
   const cursor = Math.floor(f / 15) % 2 === 0;
+  // En escenas largas la frase sube y se achica para que la pantalla no se quede quieta
+  const larga = duracion > 240;
+  const sube = larga ? interpolate(f, [150, 190], [0, 1], clamp) : 0;
   return (
-    <Camara duracion={duracion} hasta={1.05}>
+    <Camara duracion={duracion} hasta={larga ? 1.15 : 1.05}>
       <AbsoluteFill style={{ justifyContent: 'center', alignItems: 'center', padding: 160 }}>
+        {larga && sube > 0 && (
+          <div style={{ position: 'absolute', top: 470, width: 900 * sube, height: 4, background: C.rojo,
+            boxShadow: `0 0 20px ${C.rojo}`, opacity: 0.8 }} />
+        )}
         <div style={{ fontFamily: F.maquina, fontSize: 88, color: C.texto, textAlign: 'center', lineHeight: 1.25,
+          transform: `translateY(${-sube * 120}px) scale(${1 - sube * 0.3})`,
           textShadow: '0 0 30px rgba(0,0,0,0.9)' }}>
           {visible}<span style={{ color: C.rojo, opacity: cursor ? 1 : 0 }}>▌</span>
         </div>

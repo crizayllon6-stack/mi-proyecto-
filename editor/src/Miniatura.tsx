@@ -20,7 +20,7 @@ export const Miniatura: React.FC<{ datos: Datos }> = ({ datos }) => {
           objectFit: 'cover', filter: 'contrast(1.3) saturate(0.6) brightness(0.8)' }} />
       ) : coords ? (
         <div style={{ position: 'absolute', left: 420, top: 0 }}>
-          <Globo lat={coords[0]} lon={coords[1]} progreso={0.45} ancho={1000} alto={720} f={0} />
+          <Globo lat={coords[0]} lon={coords[1]} progreso={1} zoom={0.9} ancho={1000} alto={720} f={20} />
         </div>
       ) : null}
       <AbsoluteFill style={{ background: 'linear-gradient(90deg, rgba(0,0,0,0.95) 30%, rgba(0,0,0,0.2) 75%, rgba(80,0,0,0.4))' }} />
@@ -40,7 +40,7 @@ export const Miniatura: React.FC<{ datos: Datos }> = ({ datos }) => {
         background: C.rojo, padding: '4px 26px', transform: 'rotate(-3deg)', boxShadow: '6px 6px 0 #000' }}>
         {etiqueta}
       </div>
-      <svg style={{ position: 'absolute', right: 120, top: 200 }} width={260} height={260}>
+      <svg style={{ position: 'absolute', left: coords && !imagen ? 790 : 900, top: 230 }} width={260} height={260}>
         <circle cx={130} cy={130} r={110} fill="none" stroke={C.rojo} strokeWidth={12} />
       </svg>
     </AbsoluteFill>

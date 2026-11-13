@@ -15,12 +15,12 @@ export const leerCoordenadas = (txt?: string): [number, number] | null => {
 };
 
 // Globo terráqueo que gira y hace zoom hasta el lugar del caso.
-export const Globo: React.FC<{ lat: number; lon: number; progreso: number; ancho: number; alto: number; f: number }> = ({
-  lat, lon, progreso, ancho, alto, f,
+export const Globo: React.FC<{ lat: number; lon: number; progreso: number; ancho: number; alto: number; f: number; zoom?: number }> = ({
+  lat, lon, progreso, ancho, alto, f, zoom = 1,
 }) => {
   const pais = useMemo(() => paises.find((p) => geoContains(p, [lon, lat])), [lat, lon]);
   const rot: [number, number] = [-(lon - 70 * (1 - progreso)), -(lat - 25 * (1 - progreso))];
-  const escala = interpolate(progreso, [0, 1], [alto * 0.42, alto * 1.5]);
+  const escala = interpolate(progreso, [0, 1], [alto * 0.42, alto * 1.5]) * zoom;
   const proy = geoOrthographic().rotate(rot).scale(escala).translate([ancho / 2, alto / 2]).clipAngle(90);
   const camino = geoPath(proy);
   const punto = proy([lon, lat]);
