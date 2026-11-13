@@ -1,0 +1,8 @@
+node_modules/
+editor/public/proyecto/
+editor/public/sfx/
+videos/*/salida/
+videos/*/voz.wav
+videos/*/voz.mp3
+videos/*/musica.*
+.DS_Store
