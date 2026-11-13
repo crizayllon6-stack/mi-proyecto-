@@ -1,4 +1,4 @@
-// Uso:  node scripts/render.mjs ../videos/mi-caso [--voz-prueba] [--solo-miniatura] [--rapido]
+// Uso:  node scripts/render.mjs ../videos/mi-caso [--voz-prueba | --sin-voz] [--hasta 60] [--solo-miniatura] [--rapido]
 //
 // Prepara el guion + audio y renderiza:
 //   <carpeta>/salida/video.mp4
@@ -8,17 +8,17 @@ import path from 'node:path';
 import os from 'node:os';
 import { bundle } from '@remotion/bundler';
 import { renderMedia, renderStill, selectComposition } from '@remotion/renderer';
-import { preparar } from './preparar.mjs';
+import { opcionesDeArgs, preparar } from './preparar.mjs';
 
 const EDITOR = path.resolve(path.dirname(new URL(import.meta.url).pathname), '..');
 const args = process.argv.slice(2);
-const carpeta = args.find((a) => !a.startsWith('--'));
+const carpeta = args.find((a, i) => !a.startsWith('--') && args[i - 1] !== '--hasta');
 if (!carpeta) {
-  console.log('Uso: node scripts/render.mjs <carpeta-del-video> [--voz-prueba] [--solo-miniatura] [--rapido]');
+  console.log('Uso: node scripts/render.mjs <carpeta-del-video> [--voz-prueba | --sin-voz] [--hasta 60] [--solo-miniatura] [--rapido]');
   process.exit(1);
 }
 
-const listo = preparar(carpeta, { vozPrueba: args.includes('--voz-prueba') });
+const listo = preparar(carpeta, opcionesDeArgs(process.argv));
 if (!listo) process.exit(0);
 const { datos } = listo;
 

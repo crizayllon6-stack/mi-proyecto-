@@ -12,7 +12,7 @@ import { leerGuion, textoParaVoz } from './guion.mjs';
 const FPS = 30;
 const EDITOR = path.resolve(path.dirname(new URL(import.meta.url).pathname), '..');
 
-export function preparar(carpeta, { vozPrueba = false } = {}) {
+export function preparar(carpeta, { vozPrueba = false, sinVoz = false, hasta = null } = {}) {
   carpeta = path.resolve(carpeta);
   const slug = path.basename(carpeta).toLowerCase().replace(/[^a-z0-9-]/g, '-');
   const guionPath = path.join(carpeta, 'guion.md');
@@ -40,6 +40,8 @@ export function preparar(carpeta, { vozPrueba = false } = {}) {
   let audioPath;
   if (vozPrueba) {
     ({ tiempos, audioPath } = vozDePrueba(escenas, salidaPublic));
+  } else if (sinVoz) {
+    ({ tiempos, audioPath } = tiemposSinVoz(escenas, salidaPublic));
   } else {
     const encontrado = ['voz.wav', 'voz.mp3', 'voz.m4a', 'voz.ogg', 'audio.wav', 'audio.mp3']
       .map((f) => path.join(carpeta, f)).find((f) => fs.existsSync(f));
@@ -51,7 +53,20 @@ export function preparar(carpeta, { vozPrueba = false } = {}) {
     execFileSync('ffmpeg', ['-y', '-loglevel', 'error', '-i', encontrado, '-ac', '1', '-ar', '44100', audioPath]);
     tiempos = sincronizar(escenas, audioPath);
   }
-  const duracion = duracionAudio(audioPath) + 2.5; // colita final
+  let duracion = duracionAudio(audioPath) + 2.5; // colita final
+  let n = escenas.length;
+  if (hasta && hasta < duracion) {
+    // Sólo los primeros `hasta` segundos (para pruebas rápidas)
+    duracion = hasta;
+    n = Math.max(1, tiempos.filter(([a]) => a < hasta).length);
+    escenas.splice(n);
+    tiempos.splice(n);
+    tiempos[n - 1][1] = Math.min(tiempos[n - 1][1], hasta);
+    const recorte = audioPath + '.tmp.wav';
+    execFileSync('ffmpeg', ['-y', '-loglevel', 'error', '-i', audioPath, '-t', String(hasta), recorte]);
+    fs.renameSync(recorte, audioPath);
+    console.log(`  (recortado a los primeros ${hasta} s)`);
+  }
 
   // ---- música ----
   const musicaOrigen = ['musica.mp3', 'musica.wav', 'musica.m4a'].map((f) => path.join(carpeta, f))
@@ -91,7 +106,7 @@ export function preparar(carpeta, { vozPrueba = false } = {}) {
   const subtitulos = [];
   escenas.forEach((e, i) => {
     if (!e.narracion) return;
-    subtitulos.push(...trozos(e.narracion, tiempos[i][0], tiempos[i][1]));
+    subtitulos.push(...trozos(e.narracion, tiempos[i][0], tiempos[i][1]).filter((s) => s.inicio < duracion));
   });
 
   const imagenMiniatura = buscarImagen(meta.imagen_miniatura);
@@ -121,6 +136,15 @@ export function preparar(carpeta, { vozPrueba = false } = {}) {
   escribirCapitulos(carpeta, escenasFinal);
   console.log(`✔ Sincronizado: ${escenasFinal.length} escenas, ${(duracion / 60).toFixed(1)} min`);
   return { datos, carpeta };
+}
+
+export function opcionesDeArgs(argv) {
+  const i = argv.indexOf('--hasta');
+  return {
+    vozPrueba: argv.includes('--voz-prueba'),
+    sinVoz: argv.includes('--sin-voz'),
+    hasta: i > -1 ? parseFloat(argv[i + 1]) : null,
+  };
 }
 
 function leerPronunciacion(carpeta) {
@@ -214,6 +238,25 @@ function trozos(texto, inicio, fin) {
   });
 }
 
+// Sin audio: estima los tiempos con la velocidad típica de Loquendo (~2.6 palabras por segundo)
+// y deja un audio en silencio, para ver el ritmo del video antes de grabar la voz.
+function tiemposSinVoz(escenas, dir) {
+  const PPS = 2.6;
+  const tiempos = [];
+  let t = 0.6;
+  for (const e of escenas) {
+    let d = 0;
+    if (e.tipo === 'PAUSA') d = parseFloat(e.datos[0]) || 1;
+    else if (e.voz) d = (e.voz.match(/\S+/g) || []).length / PPS + 0.45;
+    tiempos.push([t, t + d]);
+    t += d;
+  }
+  const audioPath = path.join(dir, 'voz.wav');
+  execFileSync('ffmpeg', ['-y', '-loglevel', 'error', '-f', 'lavfi', '-i', 'anullsrc=r=44100:cl=mono',
+    '-t', String(t), audioPath]);
+  return { tiempos: repartirVacias(escenas, tiempos), audioPath };
+}
+
 function vozDePrueba(escenas, dir) {
   const partes = [];
   const tiempos = [];
@@ -294,5 +337,5 @@ if (process.argv[1] && import.meta.url.endsWith(path.basename(process.argv[1])))
     console.log('Uso: node scripts/preparar.mjs <carpeta-del-video> [--voz-prueba]');
     process.exit(1);
   }
-  preparar(carpeta, { vozPrueba: process.argv.includes('--voz-prueba') });
+  preparar(carpeta, opcionesDeArgs(process.argv));
 }
