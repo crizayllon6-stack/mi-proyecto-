@@ -11,7 +11,7 @@ export const Short: React.FC<PropsShort> = ({ datos, inicio, fin, gancho }) => {
   const f = useCurrentFrame();
   const { fps, width } = useVideoConfig();
   const dur = fin - inicio;
-  const escala = 0.76; // 1920x1080 → 1459x821, se recortan los lados
+  const escala = 0.66; // 1920x1080 → 1267x713, se recortan sólo los bordes vacíos
   const alto = 1080 * escala;
   const entra = spring({ frame: f, fps, config: { damping: 13 } });
   const subs = datos.subtitulos
@@ -31,17 +31,17 @@ export const Short: React.FC<PropsShort> = ({ datos, inicio, fin, gancho }) => {
           </Sequence>
         </div>
       </div>
+      <Pelicula />
       {/* gancho arriba */}
       <AbsoluteFill style={{ height: 560, justifyContent: 'center', alignItems: 'center', padding: '0 60px' }}>
         <div style={{ fontFamily: F.normal, fontSize: 30, letterSpacing: 8, color: C.rojo, marginBottom: 14,
           opacity: entra }}>● CASO SIN RESOLVER</div>
-        <div style={{ fontFamily: F.titulo, fontSize: gancho.length > 30 ? 96 : 118, lineHeight: 0.95, color: '#fff',
+        <div style={{ fontFamily: F.titulo, fontSize: gancho.length > 30 ? 112 : 136, lineHeight: 0.95, color: '#fff',
           textAlign: 'center', transform: `scale(${0.8 + entra * 0.2})`, opacity: entra,
           textShadow: '6px 6px 0 #000' }}>
           {gancho.toUpperCase()}
         </div>
       </AbsoluteFill>
-      <Pelicula />
       {/* subtítulos abajo */}
       <div style={{ position: 'absolute', top: 560 + alto + 40, left: 0, right: 0, height: 420 }}>
         <Subtitulos subs={subs} tam={74} abajo={0} ancho={960} />
