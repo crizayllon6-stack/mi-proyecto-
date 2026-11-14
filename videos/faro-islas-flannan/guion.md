@@ -1,6 +1,6 @@
 ---
 titulo: Los fareros de las islas Flannan
-miniatura: TRES HOMBRES, UN ABRIGO
+miniatura: UNO SALIÓ SIN ABRIGO
 etiqueta: SIN RESOLVER
 ---
 [TEXTO: El reloj se había parado]

@@ -54,7 +54,7 @@ Pero la familia tenía un secreto que todo el pueblo conocía.
 En 1915, un tribunal condenó a Andreas y a Viktoria por una relación prohibida entre padre e hija.
 Él pasó un año en prisión.
 Ella, un mes.
-Por eso, en el pueblo, todos sabían quiénes eran los Gruber.
+
 
 [TEXTO: ¿Quién era el padre de Josef?]
 Hay una pregunta que nunca se respondió.

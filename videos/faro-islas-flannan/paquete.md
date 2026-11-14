@@ -3,7 +3,7 @@
 ## Títulos (máx. 60 caracteres)
 1. ⭐ **3 fareros desaparecieron. Uno salió sin su abrigo**
 2. El faro se apagó y sus 3 fareros no volvieron jamás
-3. El diario de este faro es falso… y el caso empeora
+3. Su diario era falso. Su desaparición, no
 4. Reloj parado, camas vacías: el faro de las Flannan
 5. Una ola de 11 pisos… ¿o algo que vieron desde arriba?
 
