@@ -92,7 +92,6 @@ No encontró a nadie.
 Pero eso no fue lo más extraño.
 En la granja apareció un periódico de Múnich.
 Nadie de la familia lo había comprado.
-Nadie en toda la zona estaba suscrito a ese periódico.
 
 [TEXTO: Y las llaves desaparecieron]
 Después desaparecieron las llaves de la casa.
@@ -135,7 +134,6 @@ Y se fueron.
 El domingo, la familia no fue a misa.
 Viktoria, la que cantaba en el coro, no apareció.
 El lunes, Cäzilia volvió a faltar a la escuela.
-El correo empezó a acumularse.
 Pero nadie fue a mirar.
 ¿Cuántos días tarda un pueblo en preocuparse por una familia que nadie quiere?
 
@@ -157,7 +155,7 @@ No sabía lo que había dentro.
 [FICHA: Lorenz Schlittenbauer | edad desconocida | Vecino | ENCONTRÓ A LA FAMILIA]
 Esa tarde, Lorenz Schlittenbauer mandó a sus hijos a ver qué pasaba.
 Volvieron sin ver a nadie.
-Entonces fue él mismo, con dos vecinos, Michael Pöll y Jakob Sigl.
+Entonces fue él mismo, con dos vecinos.
 Entraron al granero.
 Debajo de un montón de heno encontraron a cuatro de ellos.
 Andreas, su esposa, Viktoria y la pequeña Cäzilia.
@@ -174,18 +172,18 @@ Ninguno volvió a la casa.
 Pero lo peor no era eso.
 Lo peor era lo que alguien había hecho después.
 
-[DOC: Lo que vio la policía | Ganado alimentado. Pan comido. Carne cortada.]
-El ganado estaba alimentado.
+[DOC: Lo que se contó después | Ganado alimentado. Pan comido. Carne cortada.]
+Según los relatos del caso, el ganado estaba alimentado.
 Alguien lo había cuidado durante días.
 El pan de la cocina se había comido.
-En la despensa alguien había cortado carne.
+Y en la despensa alguien había cortado carne.
 Algunas versiones dicen que los vecinos vieron humo en la chimenea esos días.
-Quien mató a seis personas se había quedado a vivir en la casa con ellas.
+Todo apunta a que quien mató a seis personas se quedó en la casa con ellas.
 
 [TEXTO: No se llevó el dinero]
-Y no fue para robar.
-En la casa había mucho dinero.
-Nadie lo tocó.
+Y no parece que fuera para robar.
+En la casa, la policía encontró mucho dinero.
+Por eso casi nadie cree en un simple robo.
 Entonces, ¿qué buscaba?
 
 [TITULO: LA INVESTIGACIÓN | Más de cien sospechosos]
@@ -196,8 +194,9 @@ Tardaron unas cinco horas en llegar.
 Cuando llegaron, la escena ya estaba arruinada.
 Vecinos y curiosos habían movido cosas.
 Incluso habían cocinado y comido en la cocina.
-Hasta 1930, la policía abrió más de cien investigaciones contra distintos sospechosos.
-Ninguno fue condenado.
+Durante décadas, la policía interrogó a más de cien sospechosos.
+Los últimos interrogatorios fueron en 1986.
+Nadie fue condenado.
 
 [TEXTO: Teoría uno: el marido que volvió]
 La primera teoría era Karl Gabriel, el marido de Viktoria.
@@ -205,7 +204,7 @@ La primera teoría era Karl Gabriel, el marido de Viktoria.
 
 [DOC: Frente de Francia, 1914 | Cuerpo nunca identificado]
 Su cuerpo nunca se identificó.
-Pero varios compañeros dijeron que lo habían visto muerto en 1914.
+Pero, según los informes, sus compañeros lo dieron por muerto en 1914.
 La policía descartó esta teoría.
 Y aun así, nunca ha desaparecido del todo.
 
@@ -232,7 +231,7 @@ Y movió a las víctimas con una calma que llamó la atención.
 
 [TEXTO: ¿Calma o culpa?]
 La policía lo interrogó muchas veces.
-Pero nunca pudo situarlo en la granja esa noche.
+Pero nunca encontró pruebas contra él.
 Dijeron que era la impresión.
 Nunca fue acusado.
 
@@ -241,9 +240,8 @@ Nunca fue acusado.
 [FECHA: 1923 | Un año después]
 Un año después, en 1923, derribaron la granja.
 Y mientras la desmontaban, los obreros encontraron algo en el ático.
-Era la herramienta del crimen.
-Estaba escondida allí arriba.
-Y entre el heno del granero apareció también una navaja.
+Era, muy probablemente, la herramienta del crimen.
+Estaba escondida bajo el suelo del ático.
 En el mismo lugar donde Andreas había oído pasos.
 En el mismo lugar del que había huido la criada anterior.
 

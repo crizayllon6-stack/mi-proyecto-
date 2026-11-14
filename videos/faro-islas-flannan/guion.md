@@ -40,7 +40,7 @@ Pero un año después de encenderse, se apagó.
 [FICHA: James Ducat | 43 años | farero principal | DESAPARECIDO]
 El jefe era James Ducat, de 43 años.
 En tierra lo esperaban su mujer y sus cuatro hijos.
-Un año antes, el superintendente Robert Muirhead lo había convencido de aceptar ese destino.
+Su superior era el superintendente Robert Muirhead.
 Guarda ese nombre, Muirhead.
 Él será quien escriba la última palabra oficial sobre este caso.
 
@@ -55,7 +55,7 @@ Era un farero ocasional, un suplente.
 Cubría a otro hombre, William Ross, que estaba de baja por enfermedad.
 MacArthur era de Breasclete, en Lewis.
 Estaba casado y tenía hijos.
-Fue a la isla a hacer un favor de unas semanas.
+Fue a la isla solo para cubrir ese turno.
 
 [TEXTO: ¿Tú habrías aceptado ese turno?]
 ¿Tú habrías aceptado pasar diciembre en esa roca, por cubrir a un compañero enfermo?
@@ -67,8 +67,8 @@ La noche del 15 de diciembre, un vapor llamado Archtor navegaba de Filadelfia ha
 Pasó cerca de las Flannan hacia la medianoche.
 No vio la luz del faro.
 El faro nuevo, el que tenía que brillar toda la noche, estaba a oscuras.
-Pero el aviso del Archtor tardó.
-No llegó a la junta de faros hasta después de Navidad.
+El Archtor dio el aviso al llegar a puerto, días después.
+Pero nadie pudo ir a revisar.
 
 [TEXTO: Once días a oscuras]
 Mientras tanto, nadie en tierra sabía nada.
@@ -138,7 +138,7 @@ Lo que les pasó, pasó a plena luz del día.
 
 [FECHA: 29 de diciembre de 1900 | Llega el superintendente Muirhead]
 El 29 de diciembre llegó Robert Muirhead.
-El hombre que había contratado a los tres.
+El jefe de los tres.
 Ahora le tocaba buscarlos.
 Bajó al embarcadero del oeste, el lado que da al océano abierto.
 
@@ -155,11 +155,11 @@ Pero la grúa estaba intacta, con el brazo bajado y bien sujeto.
 Algo había golpeado esa roca a once pisos de altura.
 Con tanta fuerza como para doblar hierro.
 
-[DOC: Informe de Robert Muirhead, 8 de enero de 1901 | Un rodillo inesperadamente grande subió por la isla.]
+[DOC: Informe de Robert Muirhead, 8 de enero de 1901 | Una ola inesperada subió por la isla y se los llevó.]
 Muirhead escribió su informe el 8 de enero de 1901.
 Su conclusión fue esta.
-La tarde del 15, los hombres bajaron a asegurar la caja y las cuerdas.
-Y una ola enorme, lo que los marineros llaman un rodillo, subió por el acantilado y se los llevó.
+El 15, después de la comida, los hombres bajaron a asegurar la caja y las cuerdas.
+Y una ola enorme, inesperada, subió por el acantilado y se los llevó.
 Caso cerrado.
 Pero años después, apareció el diario.
 
@@ -179,7 +179,7 @@ La tormenta terminó. Mar en calma. Dios está sobre todo.
 
 [PAUSA: 1]
 
-[TEXTO: Nadie escribió esas palabras]
+[TEXTO: Palabras sin rastro]
 Pero hay un problema.
 Nadie ha podido demostrar que esas frases existieran jamás.
 
@@ -187,9 +187,10 @@ Nadie ha podido demostrar que esas frases existieran jamás.
 La primera vez que se ve ese texto impreso, de forma comprobada, es en 1965.
 En un libro de un autor estadounidense de temas paranormales, Vincent Gaddis.
 Sesenta y cinco años después de los hechos.
+Gaddis dijo que lo sacó de una revista de 1929. Nadie ha encontrado ese artículo.
 El investigador Mike Dash revisó las fuentes de la época.
 No encontró ni rastro de esas anotaciones.
-La propia junta de faros dice que las últimas notas escritas en el diario eran del día 13.
+Según los registros, las últimas notas escritas en el diario eran del día 13.
 Lo del 14 y el 15 estaba solo en la pizarra.
 Y hay algo más.
 Marshall tenía 28 años.
@@ -256,14 +257,14 @@ No a tiempo de salvarse.
 Es una reconstrucción. Encaja con la ropa. Pero nadie puede probarla.
 
 [FECHA: Marzo de 1901 | Pensiones para las viudas]
-En marzo de 1901 se aprobaron pensiones para la viuda de Ducat y sus hijos, y para la viuda de MacArthur y su familia.
+En marzo de 1901 se aprobaron una pensión y ayudas para la viuda de Ducat y sus hijos, y ayudas de dinero para la viuda de MacArthur y su familia.
 El diario original del faro hoy no está en los archivos nacionales de Escocia.
 Nadie sabe dónde acabó.
 
 [DOC: Lo que sí se sabe | Apagaron la luz por la mañana. Antes de la noche, ya no estaban.]
 Esto es lo que sí sabemos.
 La mañana del 15 de diciembre de 1900, tres hombres apagaron la luz de un faro y, antes de la noche, ya no estaban.
-Uno de ellos salió corriendo sin su abrigo.
+Según el informe oficial, uno de ellos salió sin su abrigo.
 Lo que no sabemos es qué vio.
 
 [TEXTO: Te leo en los comentarios]

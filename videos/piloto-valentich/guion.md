@@ -21,7 +21,7 @@ Nunca encontraron un cuerpo.
 Ni un asiento, ni un ala, ni un trozo de metal.
 Pero cinco años después, el mar devolvió algo.
 Una sola pieza, en una playa donde no tenía que estar.
-Y lo que dijeron los expertos sobre esa pieza es lo más inquietante de toda esta historia.
+Y lo que pasó con esa pieza es una de las partes más extrañas de toda esta historia.
 Para entenderlo, hay que escuchar los últimos seis minutos de esa conversación.
 
 [TITULO: NO ES UN AVIÓN | Seis minutos de radio. Ningún resto.]
@@ -46,7 +46,7 @@ Según el escéptico Brian Dunning, era su primer vuelo nocturno sobre el agua.
 [TEXTO: ¿A qué iba a esa isla?]
 A los controladores les dijo que iba a recoger a unos amigos.
 A otras personas les dijo que iba a buscar langostas.
-Ninguna de las dos cosas era verdad.
+Según los investigadores, ninguna de las dos cosas era verdad.
 
 [FECHA: 21 de octubre de 1978 | 19:00, cabo Otway]
 Hay algo más.
@@ -82,8 +82,8 @@ Poco después, dijo que se movían.
 Se está acercando desde el este, directo hacia mí.
 Imagina estar ahí.
 Solo, de noche, sobre el mar negro, con una luz que viene hacia ti.
-Según la versión publicada por la prensa de la época, dijo también que parecía estar jugando a algún juego.
-Esa frase, ojo, no aparece en todas las transcripciones.
+Según las transcripciones, dijo también que parecía estar jugando a algún tipo de juego.
+Ojo, las versiones no coinciden palabra por palabra.
 ¿Tú habrías dado la vuelta?
 
 [TEXTO: Es una forma alargada]
@@ -92,8 +92,8 @@ Dijo que era una forma alargada.
 Que no podía identificar nada más.
 Pero entonces lo vio más de cerca.
 
-[DOC: Transcripción de radio | It's got a green light and sort of metallic like... it's all shiny on the outside]
-Tiene una luz verde.
+[DOC: Transcripción de radio (fragmentos) | green light ... sort of metallic ... shiny]
+Según la transcripción, dijo que tenía una luz verde.
 Y algo como metálico.
 Todo brillante por fuera.
 Esa luz verde es el detalle en el que más se fijan los ufólogos.
@@ -118,14 +118,14 @@ Y no es un avión.
 
 [FECHA: 21 de octubre de 1978 | 19:12:28]
 A las siete y doce minutos y veintiocho segundos, Frederick dijo su matrícula y llamó a Melbourne por última vez.
-Delta Sierra Juliet, Melbourne.
+Solo eso: su matrícula, y Melbourne.
 Y no dijo nada más.
 El micrófono se quedó abierto diecisiete segundos.
 En la grabación se oye un ruido extraño, como un pulso.
 Algunos lo describen como metálico.
 Después, nada.
-El audio completo nunca se ha publicado de forma oficial.
-Lo que circula es una copia de muy mala calidad.
+Según varias fuentes, la grabación completa nunca se publicó de forma oficial.
+Lo que circula son copias de muy mala calidad.
 ¿Qué hace un ruido así, de noche, sobre el mar?
 
 [MAPA: King Island, Australia | -39.88, 143.88]
@@ -141,16 +141,15 @@ Una avioneta entera se había borrado del mapa.
 
 [FECHA: 27 de abril de 1982 | Informe del Departamento de Transporte]
 El informe oficial se aprobó tres años y medio después.
-Tiene apenas tres páginas.
-Dice que no se pudo determinar por qué desapareció el avión.
+En una sola frase, dice que no se pudo determinar por qué desapareció el avión.
 Sobre el piloto, solo dos palabras en inglés.
 
 [DOC: Informe oficial, 1982 | Presumed fatal]
 Se presume muerto.
 No dice que murió.
 Dice que lo presumen.
-El departamento añadió que no había pruebas del objeto que él describió.
-Pero tampoco había una explicación para lo que sí pasó.
+El informe no explica qué era lo que él describió.
+Ni tampoco qué pasó con el avión.
 Y eso dejó la puerta abierta a todas las teorías.
 Algunos sitios dicen que esa noche hubo más testigos de luces en la costa.
 Esos reportes nunca se confirmaron.
@@ -161,7 +160,7 @@ Esos reportes nunca se confirmaron.
 La primera dice que Frederick desapareció a propósito.
 Mintió sobre el viaje.
 No avisó a la isla.
-Y su avión todavía tenía combustible para seguir volando.
+Y, según quienes la defienden, su avión aún tenía combustible para seguir volando.
 
 [FICHA: Frederick Valentich | 20 años | teoría 1: fingió su desaparición | SIN PRUEBAS]
 Para quienes creen esto, todo fue una actuación por radio.
@@ -180,8 +179,8 @@ Nadie lo ha demostrado.
 La segunda teoría mira al cielo.
 Dos escépticos, Jim McGaha y Joe Nickell, propusieron en 2013 que las luces eran planetas.
 Venus, Marte, Mercurio, y una estrella muy brillante, Antares.
-Explicaría unas luces quietas.
-Pero no explica una luz que se acerca, ni un motor que tose.
+Según ellos, Frederick miraba esas luces mientras su avión caía hacia el mar sin que él lo notara.
+Pero los planetas, por sí solos, no explican un motor que tose.
 
 [TEXTO: ¿Volaba boca abajo?]
 La tercera es la explicación favorita de los escépticos.
@@ -199,7 +198,7 @@ Tiene sentido.
 Pero sin restos, nadie lo puede comprobar.
 Y hay una cuarta teoría, que es la que nunca terminó de irse.
 
-[FICHA: Guido Valentich | padre de Frederick | creía que su hijo seguía vivo | MURIÓ EN 2000]
+[FICHA: Guido Valentich | padre de Frederick | creía que su hijo seguía vivo | YA FALLECIDO]
 ¿Recuerdas el detalle que te pedí guardar?
 Frederick creía en los ovnis.
 Pero según su padre, no solo creía.
@@ -223,10 +222,10 @@ Flinders Island está muy al este, lejos de la zona donde se buscó a Frederick.
 
 [FECHA: Julio de 1983 | Oficina de Seguridad Aérea]
 Los investigadores la analizaron.
-Venía de una avioneta Cessna del mismo modelo.
-Y de una serie de fabricación que incluía justo el avión de Frederick.
-La oficina preguntó a la Armada si la pieza podía haber viajado hasta allí.
-Un científico de la Armada dijo que sí, que una tormenta podía haberla arrastrado.
+Según los informes, venía de una avioneta Cessna del mismo modelo.
+Y de una serie de fabricación que incluía el avión de Frederick.
+La oficina preguntó a la Armada si la pieza podía haber viajado hasta allí desde la zona de la desaparición.
+Según el expediente, la respuesta fue que era posible.
 
 [PAUSA: 2]
 
@@ -236,19 +235,19 @@ Podía ser de su avión.
 O de cualquier otro.
 Una pieza que lo explica todo, o que no explica nada.
 
-[FICHA: Guido Valentich | padre de Frederick | creía que su hijo seguía vivo | MURIÓ EN 2000]
+[FICHA: Guido Valentich | padre de Frederick | creía que su hijo seguía vivo | YA FALLECIDO]
 Guido nunca aceptó esa respuesta.
 Pocos días después de la desaparición, dijo a la prensa que creía que su hijo seguía vivo.
 Pensaba que se lo había llevado un ovni.
 Cada aniversario, la familia volvía al cabo Otway.
-En 2014, treinta y seis años después, un portavoz de la familia dijo que su madre aún tenía esperanza.
+En 2014, treinta y seis años después, su hermano menor, Richard, contó que su madre aún tenía esperanza.
 No pedían una teoría.
 Solo querían saber qué había pasado.
-Guido murió en el año 2000, sin saber qué le pasó a su hijo.
+Guido murió sin saber qué le pasó a su hijo.
 
 [MAPA: Cabo Otway, Australia | -38.86, 143.51]
 Hoy, junto al faro del cabo Otway, hay una placa con el nombre de Frederick.
-Es el último punto de tierra que vio.
+Es el último punto de tierra que reportó por radio.
 Lo que sí sabemos es esto: un piloto joven despegó sin decir la verdad sobre su viaje.
 Describió una luz verde, un motor que fallaba, y luego se calló.
 Lo que nadie sabe es qué había encima de él a las siete y doce.
