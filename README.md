@@ -18,6 +18,15 @@ Sistema para hacer videos de **misterios sin resolver** para YouTube casi sin ed
    Te deja `videos/<caso>/salida/video.mp4` y `miniatura.png`.
 4. **Subir** – revisa el video y súbelo a YouTube con un título de `paquete.md` y los capítulos de `capitulos.txt`.
 
+## Shorts
+```
+cd editor
+npm run shorts -- ../videos/<caso>
+```
+Saca 3 Shorts verticales (máx. 58 s) con gancho arriba y subtítulos grandes.
+
+**Instalar en tu compu:** ver [INSTALAR.md](INSTALAR.md).
+
 ## Extras opcionales en la carpeta del caso
 | Archivo | Para qué |
 |---|---|
@@ -40,9 +49,10 @@ Sistema para hacer videos de **misterios sin resolver** para YouTube casi sin ed
 ## Probar sin grabar voz
 ```
 cd editor
-npm run render -- ../videos/prueba-dyatlov --voz-prueba
+npm run render -- ../videos/<caso> --sin-voz --hasta 60
 ```
-Usa una voz robótica (espeak-ng) sólo para ver cómo queda.
+`--sin-voz` calcula los tiempos como si hablara Loquendo (sin audio). `--hasta 60` hace sólo el primer minuto.
+`--voz-prueba` usa una voz robótica (necesita espeak-ng, sólo Linux).
 
 ## Instalar en tu compu (una sola vez)
 1. Instala [Node.js](https://nodejs.org) (versión 20 o más) y [FFmpeg](https://ffmpeg.org/download.html) (que funcione el comando `ffmpeg`).

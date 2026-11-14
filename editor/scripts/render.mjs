@@ -5,12 +5,13 @@
 //   <carpeta>/salida/miniatura.png
 import fs from 'node:fs';
 import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 import os from 'node:os';
 import { bundle } from '@remotion/bundler';
 import { renderMedia, renderStill, selectComposition } from '@remotion/renderer';
 import { opcionesDeArgs, preparar } from './preparar.mjs';
 
-const EDITOR = path.resolve(path.dirname(new URL(import.meta.url).pathname), '..');
+const EDITOR = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const args = process.argv.slice(2);
 const carpeta = args.find((a, i) => !a.startsWith('--') && args[i - 1] !== '--hasta');
 if (!carpeta) {

@@ -6,7 +6,8 @@
   "scripts": {
     "estudio": "remotion studio src/index.ts",
     "preparar": "node scripts/preparar.mjs",
-    "render": "node scripts/render.mjs"
+    "render": "node scripts/render.mjs",
+    "shorts": "node scripts/shorts.mjs"
   },
   "dependencies": {
     "@fontsource/bebas-neue": "5.3.0",

@@ -6,11 +6,12 @@
 //    Con --voz-prueba genera una voz robótica de prueba (espeak-ng) para ver el resultado.
 import fs from 'node:fs';
 import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { execFileSync, spawnSync } from 'node:child_process';
 import { leerGuion, textoParaVoz } from './guion.mjs';
 
 const FPS = 30;
-const EDITOR = path.resolve(path.dirname(new URL(import.meta.url).pathname), '..');
+const EDITOR = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 
 export function preparar(carpeta, { vozPrueba = false, sinVoz = false, hasta = null } = {}) {
   carpeta = path.resolve(carpeta);
@@ -282,7 +283,7 @@ function vozDePrueba(escenas, dir) {
     tiempos.push([t, t + d + 0.45]); t += d + 0.45;
   });
   const lista = path.join(dir, 'lista.txt');
-  fs.writeFileSync(lista, partes.map((p) => `file '${p}'`).join('\n'));
+  fs.writeFileSync(lista, partes.map((p) => `file '${p.replace(/\\/g, '/')}'`).join('\n'));
   const audioPath = path.join(dir, 'voz.wav');
   execFileSync('ffmpeg', ['-y', '-loglevel', 'error', '-f', 'concat', '-safe', '0', '-i', lista,
     '-ac', '1', '-ar', '44100', audioPath]);
@@ -331,7 +332,7 @@ function escribirCapitulos(carpeta, escenas) {
   }
 }
 
-if (process.argv[1] && import.meta.url.endsWith(path.basename(process.argv[1]))) {
+if (process.argv[1] && fileURLToPath(import.meta.url) === path.resolve(process.argv[1])) {
   const carpeta = process.argv[2];
   if (!carpeta) {
     console.log('Uso: node scripts/preparar.mjs <carpeta-del-video> [--voz-prueba]');

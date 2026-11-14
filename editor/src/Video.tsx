@@ -17,7 +17,9 @@ const golpe = (e: Escena) => {
   return null;
 };
 
-const Subtitulos: React.FC<{ subs: Datos['subtitulos'] }> = ({ subs }) => {
+export const Subtitulos: React.FC<{ subs: Datos['subtitulos']; tam?: number; abajo?: number; ancho?: number }> = ({
+  subs, tam = 58, abajo = 70, ancho = 1500,
+}) => {
   const f = useCurrentFrame();
   const { fps } = useVideoConfig();
   const s = subs.find((x) => f >= x.inicio && f < x.fin);
@@ -27,9 +29,9 @@ const Subtitulos: React.FC<{ subs: Datos['subtitulos'] }> = ({ subs }) => {
   const progreso = (f - s.inicio) / Math.max(1, s.fin - s.inicio);
   const activa = Math.min(palabras.length - 1, Math.floor(progreso * palabras.length));
   return (
-    <AbsoluteFill style={{ justifyContent: 'flex-end', alignItems: 'center', paddingBottom: 70 }}>
-      <div style={{ fontFamily: F.normal, fontWeight: 600, fontSize: 58, color: '#fff', textAlign: 'center',
-        maxWidth: 1500, transform: `scale(${0.85 + pop * 0.15})`, letterSpacing: 1,
+    <AbsoluteFill style={{ justifyContent: 'flex-end', alignItems: 'center', paddingBottom: abajo }}>
+      <div style={{ fontFamily: F.normal, fontWeight: 600, fontSize: tam, color: '#fff', textAlign: 'center',
+        maxWidth: ancho, transform: `scale(${0.85 + pop * 0.15})`, letterSpacing: 1,
         textShadow: '0 0 6px #000, 3px 3px 0 #000, -3px -3px 0 #000, 3px -3px 0 #000, -3px 3px 0 #000' }}>
         {palabras.map((p, i) => (
           <span key={i} style={{ color: i === activa ? C.amarillo : '#fff' }}>{p} </span>
@@ -39,7 +41,7 @@ const Subtitulos: React.FC<{ subs: Datos['subtitulos'] }> = ({ subs }) => {
   );
 };
 
-export const Video: React.FC<{ datos: Datos }> = ({ datos }) => {
+export const Video: React.FC<{ datos: Datos; sinSubtitulos?: boolean }> = ({ datos, sinSubtitulos }) => {
   const f = useCurrentFrame();
   const total = datos.duracionFrames;
   const volMusica = interpolate(f, [0, 30, total - 60, total], [0, 0.22, 0.22, 0], {
@@ -65,7 +67,7 @@ export const Video: React.FC<{ datos: Datos }> = ({ datos }) => {
         );
       })}
       <Pelicula />
-      <Subtitulos subs={datos.subtitulos} />
+      {!sinSubtitulos && <Subtitulos subs={datos.subtitulos} />}
       <Audio src={staticFile(datos.audio)} />
       <Audio src={staticFile(datos.musica)} volume={volMusica} loop />
     </AbsoluteFill>
