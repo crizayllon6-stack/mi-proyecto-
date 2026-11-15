@@ -14,10 +14,13 @@
 //   [TEXTO: ¿Por qué cortaron la tienda desde dentro?]
 //   [IMAGEN: archivo.jpg | Pie de foto opcional]
 //   [PAUSA: 1.5]
+//   [EVIDENCIA: coche | Un coche en Glenelg | El libro estaba en el asiento trasero | foto.jpg]
+//   [NOTA: línea 1 / línea 2 | pie | real]
+//   [LINEA: 6:30 | Encuentran el cuerpo en la playa]
 //
 // Cada etiqueta empieza una escena que dura hasta la siguiente.
 
-const TIPOS = ['TITULO', 'MAPA', 'FECHA', 'FICHA', 'DOC', 'TEXTO', 'IMAGEN', 'PAUSA'];
+const TIPOS = ['TITULO', 'MAPA', 'FECHA', 'FICHA', 'DOC', 'TEXTO', 'IMAGEN', 'PAUSA', 'EVIDENCIA', 'NOTA', 'LINEA'];
 
 export function leerGuion(texto) {
   let meta = {};

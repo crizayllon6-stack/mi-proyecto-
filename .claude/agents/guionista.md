@@ -110,7 +110,18 @@ etiqueta: SIN RESOLVER
 Escenas: `[TITULO: TEXTO | subtítulo]` `[MAPA: Lugar, País | lat, lon]` `[FECHA: fecha | detalle]`
 `[FICHA: Nombre | edad | rol | ESTADO]` `[DOC: Documento | frase textual]` `[TEXTO: frase corta]`
 `[PAUSA: segundos]`
+`[EVIDENCIA: objeto | título | detalle]` (el objeto se dibuja como RECONSTRUCCIÓN; objetos: coche, carta, papel,
+libro, teléfono, maleta, llave, reloj, periódico, casa, barco, avión, faro, radio, huella, cigarrillo, frasco,
+cámara, dinero, tienda, herramienta, anillo)
+`[NOTA: línea 1 / línea 2 / línea 3 | pie | real]` (carta, mensaje o código escrito a mano; pon `real` sólo si es
+el texto exacto documentado; si se reconstruye por descripciones, déjalo vacío y sale "RECONSTRUCCIÓN")
+`[LINEA: momento | qué pasó]` (línea de tiempo que va creciendo: cada LINEA se suma a las anteriores)
 (No uses `[IMAGEN]`: las fotos reales las agrega después el buscador de recursos.)
+
+**Muestra lo que nombras.** Si la narración menciona un objeto concreto (un coche, una carta, una maleta, un libro),
+pon su `[EVIDENCIA]` justo ahí. Si menciona un texto (carta, nota, código, mensaje), pon su `[NOTA]` con el texto
+(exacto si está documentado). Cuando la historia avance por horas o fechas, usa `[LINEA]` en cada hecho para que
+el espectador vea siempre dónde está en la cronología (mínimo 4 `[LINEA]` por video).
 
 - Cambia de escena cada **20 a 50 palabras** (8–20 segundos): el video tiene que moverse todo el tiempo.
   Nunca dos escenas iguales seguidas. Usa mucho FECHA, FICHA, DOC y MAPA: cada dato concreto merece su escena.

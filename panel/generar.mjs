@@ -238,7 +238,7 @@ details.caso>summary{display:flex;gap:12px;align-items:center}.ct{flex:1;min-wid
 th,td{border:1px solid var(--bd);padding:6px 8px;text-align:left;vertical-align:top}th{background:var(--card2)}
 blockquote{border-left:3px solid var(--ac);margin:8px 0;padding:2px 12px;color:var(--mut)}pre{white-space:pre-wrap;background:var(--card2);padding:10px;border-radius:8px}
 .guion p{margin:6px 0}.tag{display:inline-block;font-size:.8rem;font-weight:700;border-radius:6px;padding:2px 8px;background:#3a2f58;color:var(--tx)}
-.t-titulo{background:var(--roj)}.t-mapa{background:#2c6e8f}.t-fecha{background:#7a5c12}.t-ficha{background:#6b4e2e}.t-doc{background:#5a5a2a}.t-texto{background:#444}.t-imagen{background:#2f6b4a}.t-pausa{background:#333;color:var(--mut)}
+.t-titulo{background:var(--roj)}.t-mapa{background:#2c6e8f}.t-fecha{background:#7a5c12}.t-ficha{background:#6b4e2e}.t-doc{background:#5a5a2a}.t-texto{background:#444}.t-imagen{background:#2f6b4a}.t-pausa{background:#333;color:var(--mut)}.t-evidencia{background:#7a4a1e}.t-nota{background:#3f4f7a}.t-linea{background:#8f2c3a}
 .fotos{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:10px;margin-top:12px}
 .fotos figure{margin:0}.fotos img{width:100%;aspect-ratio:16/10;object-fit:cover;border-radius:8px}.fotos figcaption{font-size:.75rem;color:var(--mut)}
 .vid{background:var(--card);border:1px solid var(--bd);border-radius:14px;padding:18px;margin-bottom:18px}.vid h2{margin:0}.vid small{color:var(--mut)}

@@ -19,7 +19,8 @@ export const F = {
 };
 
 export type Escena = {
-  tipo: 'TITULO' | 'MAPA' | 'FECHA' | 'FICHA' | 'DOC' | 'TEXTO' | 'IMAGEN' | 'PAUSA';
+  tipo: 'TITULO' | 'MAPA' | 'FECHA' | 'FICHA' | 'DOC' | 'TEXTO' | 'IMAGEN' | 'PAUSA' | 'EVIDENCIA' | 'NOTA' | 'LINEA';
+  linea?: { puntos: { momento: string; evento: string }[]; actual: number };
   datos: string[];
   imagen: string | null;
   imagenes?: string[];

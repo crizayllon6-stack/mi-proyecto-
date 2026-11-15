@@ -4,9 +4,11 @@ import { C, F, type Datos, type Escena } from './estilo';
 import { Fondo, Glitch, Pelicula, Polvo, Salida } from './efectos';
 import { Mapa } from './escenas/Mapa';
 import { Doc, Fecha, Ficha, Imagen, Texto, Titulo } from './escenas/Escenas';
+import { Evidencia, Linea, Nota } from './escenas/Nuevas';
 
-const ESCENAS: Record<string, React.FC<{ datos: string[]; duracion: number; imagen?: string | null; imagenes?: string[] }>> = {
+const ESCENAS: Record<string, React.FC<any>> = {
   TITULO: Titulo, MAPA: Mapa, FECHA: Fecha, FICHA: Ficha, DOC: Doc, TEXTO: Texto, IMAGEN: Imagen,
+  EVIDENCIA: Evidencia, NOTA: Nota, LINEA: Linea,
 };
 
 // Momento (en frames, dentro de la escena) en que cae un sello, para poner el golpe de sonido.
@@ -57,7 +59,7 @@ export const Video: React.FC<{ datos: Datos; sinSubtitulos?: boolean }> = ({ dat
         const g = golpe(e);
         return (
           <Sequence key={i} from={e.inicio} durationInFrames={dur} name={`${e.tipo} ${e.datos[0] ?? ''}`}>
-            {Comp && <Salida duracion={dur}><Comp datos={e.datos} duracion={dur} imagen={e.imagen} imagenes={e.imagenes} /></Salida>}
+            {Comp && <Salida duracion={dur}><Comp datos={e.datos} duracion={dur} imagen={e.imagen} imagenes={e.imagenes} linea={e.linea} /></Salida>}
             {e.tipo !== 'PAUSA' && !e.auto && <Glitch />}
             {e.tipo !== 'PAUSA' && !e.auto && <Audio src={staticFile(e.tipo === 'TITULO' ? 'sfx/boom.mp3' : 'sfx/whoosh.mp3')} volume={0.5} />}
             {g !== null && g < dur && (

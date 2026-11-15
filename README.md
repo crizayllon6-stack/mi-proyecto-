@@ -60,6 +60,9 @@ Saca 3 Shorts verticales (máx. 58 s) con gancho arriba y subtítulos grandes.
 | `[TEXTO: frase]` | Frase de máquina de escribir |
 | `[IMAGEN: foto.jpg \| pie]` | Foto con movimiento lento |
 | `[PAUSA: segundos]` | Silencio dramático |
+| `[EVIDENCIA: objeto \| título \| detalle]` | El objeto dibujado como reconstrucción (coche, carta, libro…) |
+| `[NOTA: línea / línea \| pie \| real]` | Carta, mensaje o código escrito a mano |
+| `[LINEA: momento \| qué pasó]` | Línea de tiempo que va creciendo |
 
 ## Probar sin grabar voz
 ```

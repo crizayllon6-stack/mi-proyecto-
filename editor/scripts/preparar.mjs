@@ -100,6 +100,7 @@ export function preparar(carpeta, { vozPrueba = false, sinVoz = false, hasta = n
       imagen = imagenes[0] ?? null;
     }
     if (e.tipo === 'FICHA') imagen = buscarImagen(datos[4]);
+    if (e.tipo === 'EVIDENCIA') imagen = buscarImagen(datos[3]);
     return {
       tipo: e.tipo,
       datos,
@@ -110,6 +111,12 @@ export function preparar(carpeta, { vozPrueba = false, sinVoz = false, hasta = n
       fin: Math.round((i === escenas.length - 1 ? duracion : tiempos[i][1]) * FPS),
     };
   });
+
+  // Línea de tiempo: cada [LINEA] recuerda todos los momentos anteriores
+  const puntosLinea = escenasFinal.filter((e) => e.tipo === 'LINEA')
+    .map((e) => ({ momento: e.datos[0] ?? '', evento: e.datos[1] ?? '' }));
+  let iLinea = 0;
+  for (const e of escenasFinal) if (e.tipo === 'LINEA') e.linea = { puntos: puntosLinea, actual: iLinea++ };
 
   // Fotos del caso que no están puestas a mano en el guion: sirven de "relleno" para que
   // la pantalla no se quede quieta cuando una escena dura mucho.

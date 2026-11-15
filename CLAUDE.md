@@ -13,15 +13,16 @@
   usuario pida casos, un video, "sigue", o pegue algo del Panel.
 - Agentes (`.claude/agents`): `cazador-casos` → `analista-viralidad` → (usuario elige) → `empaquetador` (título primero)
   → (usuario elige) → `guionista` → `verificador` → `editor-estilo` → (usuario aprueba) → `empaquetador` (final)
-  → `voz.txt`. El usuario deja `voz.wav` en la carpeta y `panel/vigilar.mjs` arma solo el video y los Shorts.
-  (`buscador-recursos` solo si el usuario pide fotos reales.)
+  → `buscador-recursos` (20–40 fotos reales, automático) → `voz.txt`. El usuario deja `voz.wav` en la carpeta y
+  `panel/vigilar.mjs` arma solo el video, los Shorts y el kit para CapCut (`salida/capcut`).
 - Estado de cada video: `videos/<caso>/ficha.md` (sección Estado con casillas). Marca las casillas al avanzar y
   regenera el Panel con `node panel/generar.mjs`. Barras de avance: `node panel/estado.mjs inicio|fin <tipo> ...`.
 
 ## Carpetas
 - `Ideas/`: listas de casos (`casos_*.md`) y rankings (`ranking_casos_*.md`).
 - `videos/<caso>/`: `ficha.md`, `paquete.md`, `investigacion.md`, `guion.md`, `verificacion.md`, `cambios_estilo.md`,
-  `retencion.md`, `voz.txt`, `voz.wav`, `salida/` (video, miniatura, Shorts, `armado.log`, `error.txt` si falló).
+  `retencion.md`, `recursos.json`, `imagenes/`, `creditos.txt`, `voz.txt`, `voz.wav`, `salida/` (video, miniatura,
+  Shorts, `capcut/` con todo por separado, `armado.log`, `error.txt` si falló).
 - `editor/`: proyecto Remotion que arma el video.
   - `npm run render -- ../videos/<caso>` → `salida/video.mp4` + `miniatura.png` (`--sin-voz`, `--hasta 60` para pruebas).
   - `npm run shorts -- ../videos/<caso>` → `salida/short-1..3.mp4`.

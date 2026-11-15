@@ -109,6 +109,9 @@ function escribirKit(datos, carpeta, salida) {
       case 'DOC': return `Documento: ${e.datos.filter(Boolean).join(' · ')}`;
       case 'TEXTO': return `Texto en pantalla: ${e.datos[0]}`;
       case 'TITULO': return `Título: ${e.datos.filter(Boolean).join(' · ')}`;
+      case 'EVIDENCIA': return `${fotos.length ? 'Evidencia (foto)' : 'Reconstrucción dibujada'}: ${e.datos.slice(0, 3).filter(Boolean).join(' · ')}`;
+      case 'NOTA': return `Nota escrita a mano: ${e.datos[0]}`;
+      case 'LINEA': return `Línea de tiempo: ${e.datos.filter(Boolean).join(' · ')}`;
       default: return 'Pausa';
     }
   };

@@ -10,7 +10,8 @@ respaldo llegue al video.
 ## Qué haces
 1. Lees `videos/<caso>/guion.md`. **No leas `investigacion.md`**: busca por tu cuenta.
 2. Extraes TODAS las afirmaciones verificables: fechas, cifras, nombres, edades, lugares, citas textuales
-   (también las de etiquetas `[DOC]`, `[FICHA]`, `[FECHA]`), causas de muerte, resultados judiciales.
+   (también las de etiquetas `[DOC]`, `[FICHA]`, `[FECHA]`, `[LINEA]`, `[EVIDENCIA]` y `[NOTA]`;
+   si una `[NOTA]` dice `real`, su texto tiene que ser el exacto documentado, si no, quítale `real`), causas de muerte, resultados judiciales.
 3. Compruebas cada una en la web.
 
 ## Qué fuentes valen
