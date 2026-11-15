@@ -58,8 +58,8 @@ export const Video: React.FC<{ datos: Datos; sinSubtitulos?: boolean }> = ({ dat
         return (
           <Sequence key={i} from={e.inicio} durationInFrames={dur} name={`${e.tipo} ${e.datos[0] ?? ''}`}>
             {Comp && <Salida duracion={dur}><Comp datos={e.datos} duracion={dur} imagen={e.imagen} imagenes={e.imagenes} /></Salida>}
-            {e.tipo !== 'PAUSA' && <Glitch />}
-            {e.tipo !== 'PAUSA' && <Audio src={staticFile(e.tipo === 'TITULO' ? 'sfx/boom.mp3' : 'sfx/whoosh.mp3')} volume={0.5} />}
+            {e.tipo !== 'PAUSA' && !e.auto && <Glitch />}
+            {e.tipo !== 'PAUSA' && !e.auto && <Audio src={staticFile(e.tipo === 'TITULO' ? 'sfx/boom.mp3' : 'sfx/whoosh.mp3')} volume={0.5} />}
             {g !== null && g < dur && (
               <Sequence from={g}><Audio src={staticFile('sfx/golpe.mp3')} volume={0.7} /></Sequence>
             )}

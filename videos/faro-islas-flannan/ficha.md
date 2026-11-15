@@ -11,4 +11,5 @@
 - [x] Datos verificados
 - [ ] Estilo revisado
 - [ ] Guion aprobado
+- [ ] Fotos listas
 - [ ] Publicado

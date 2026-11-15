@@ -23,6 +23,8 @@ export type Escena = {
   datos: string[];
   imagen: string | null;
   imagenes?: string[];
+  texto?: string;
+  auto?: boolean;
   inicio: number;
   fin: number;
 };

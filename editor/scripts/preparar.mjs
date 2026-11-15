@@ -105,10 +105,21 @@ export function preparar(carpeta, { vozPrueba = false, sinVoz = false, hasta = n
       datos,
       imagen,
       imagenes,
+      texto: e.narracion,
       inicio: Math.round(tiempos[i][0] * FPS),
       fin: Math.round((i === escenas.length - 1 ? duracion : tiempos[i][1]) * FPS),
     };
   });
+
+  // Fotos del caso que no están puestas a mano en el guion: sirven de "relleno" para que
+  // la pantalla no se quede quieta cuando una escena dura mucho.
+  const usadas = new Set(escenasFinal.flatMap((e) => [e.imagen, ...(e.imagenes ?? [])]).filter(Boolean));
+  const dirImgs = path.join(carpeta, 'imagenes');
+  const todas = fs.existsSync(dirImgs)
+    ? fs.readdirSync(dirImgs).filter((f) => /\.(jpe?g|png|webp)$/i.test(f)).sort().map((f) => buscarImagen(f)).filter(Boolean)
+    : [];
+  const libres = todas.filter((f) => !usadas.has(f));
+  const escenasDinamicas = dinamizar(escenasFinal, libres.length ? libres : todas);
 
   const subtitulos = [];
   escenas.forEach((e, i) => {
@@ -130,7 +141,7 @@ export function preparar(carpeta, { vozPrueba = false, sinVoz = false, hasta = n
     },
     audio: `proyecto/${slug}/voz.wav`,
     musica: `proyecto/${slug}/musica.mp3`,
-    escenas: escenasFinal,
+    escenas: escenasDinamicas,
     subtitulos: subtitulos.map((s) => ({
       texto: s.texto,
       inicio: Math.round(s.inicio * FPS),
@@ -141,6 +152,7 @@ export function preparar(carpeta, { vozPrueba = false, sinVoz = false, hasta = n
   fs.writeFileSync(path.join(EDITOR, 'public', 'proyecto', 'actual.json'), JSON.stringify(datos));
   generarEfectos();
   escribirCapitulos(carpeta, escenasFinal);
+  if (todas.length) console.log(`  ${todas.length} fotos del caso · ${escenasDinamicas.length - escenasFinal.length} cambios de foto automáticos`);
   console.log(`✔ Sincronizado: ${escenasFinal.length} escenas, ${(duracion / 60).toFixed(1)} min`);
   return { datos, carpeta };
 }
@@ -152,6 +164,34 @@ export function opcionesDeArgs(argv) {
     sinVoz: argv.includes('--sin-voz'),
     hasta: i > -1 ? parseFloat(argv[i + 1]) : null,
   };
+}
+
+// Parte las escenas largas: muestra la animación unos segundos y después va pasando fotos del caso
+// cada ~4,5 s (en orden, así siguen más o menos la historia). Sin fotos, no cambia nada.
+function dinamizar(escenas, fotos) {
+  if (!fotos.length) return escenas;
+  const LARGA = 9 * FPS, PRIMERO = 5 * FPS, FOTO = Math.round(4.5 * FPS), MIN = Math.round(2.5 * FPS);
+  const total = escenas.reduce((a, e) => a + Math.max(0, e.fin - e.inicio - PRIMERO), 0) || 1;
+  const out = [];
+  let k = 0, avance = 0;
+  for (const e of escenas) {
+    const dur = e.fin - e.inicio;
+    if (dur <= LARGA || e.tipo === 'PAUSA') { out.push(e); continue; }
+    // si la escena ya es de fotos, se queda con su tiempo y luego entran las demás
+    out.push({ ...e, fin: e.inicio + PRIMERO });
+    let t = e.inicio + PRIMERO;
+    // empieza en la foto que corresponde a este punto de la historia
+    k = Math.max(k, Math.floor((avance / total) * fotos.length));
+    while (e.fin - t > MIN) {
+      let largo = Math.min(FOTO, e.fin - t);
+      if (e.fin - t - largo < MIN) largo = e.fin - t;
+      const foto = fotos[k % fotos.length];
+      out.push({ tipo: 'IMAGEN', datos: ['', ''], imagen: foto, imagenes: [foto], texto: '', inicio: t, fin: t + largo, auto: true });
+      k++; t += largo;
+    }
+    avance += dur - PRIMERO;
+  }
+  return out;
 }
 
 function leerPronunciacion(carpeta) {

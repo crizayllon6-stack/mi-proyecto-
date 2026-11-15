@@ -27,6 +27,8 @@ function accion(v) {
       btn: copiar(`/nuevo-video Sigue con el video ${v.nombre}`, '📋 Copiar "sigue"') };
     case 'aprobado': return { tu: 'Lee el guion (abajo) y apruébalo o pide cambios.',
       btn: copiar(`/nuevo-video Apruebo el guion de ${v.nombre}, sigue.`, '📋 Copiar "apruebo el guion"') };
+    case 'fotos': return { tu: 'Claude está buscando fotos reales del caso. Si se detuvo, pídele que siga.',
+      btn: copiar(`/nuevo-video Busca las fotos de ${v.nombre} y sigue`, '📋 Copiar "busca las fotos"') };
     case 'voz': return { tu: `Copia el texto, pégalo en Voz de Soria y guarda el audio como <code>${esc(v.carpeta)}/voz.wav</code> (o voz.mp3). <b>El video y los Shorts se arman solos</b> en cuanto dejes la voz.`,
       btn: v.vozTxt ? copiar(v.vozTxt, '🎙️ Copiar texto para Loquendo', 'grande') : '' };
     case 'video': case 'shorts': return v.error ? { tu: `⚠️ Falló el armado del video. Pásale el aviso a Claude para que lo arregle.`,
@@ -184,6 +186,7 @@ function pestanaVideos(videos) {
         ${v.miniatura ? `<img class="mini" src="${url(v.carpeta, v.miniatura)}">` : ''}</div>
         <div class="acc">${copiar(titulo, '📋 Copiar título')}${desc ? copiar(desc, '📋 Copiar descripción') : ''}
         ${v.capitulos ? copiar(v.capitulos.trim(), '📋 Copiar capítulos', 'sec') : ''}</div>
+        ${v.capcut ? `<div class="tu"><b>Kit para CapCut:</b> en <code>${esc(v.carpeta)}/salida/capcut</code> tienes ${v.limpio ? 'el video sin subtítulos, ' : ''}la voz, la música, los efectos, las fotos, los subtítulos (.srt) y la hoja de edición con los tiempos.</div>` : ''}
         ${v.shorts.length ? `<h3>Shorts</h3><div class="shorts">${v.shorts.map((s) => `<video controls preload="metadata" src="${url(v.carpeta, 'salida', s)}"></video>`).join('')}</div>` : ''}
       </section>`;
     }).join('');

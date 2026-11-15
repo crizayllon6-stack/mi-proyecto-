@@ -1,6 +1,7 @@
 // Lo arranca "Abrir Fabrica.bat" y queda trabajando en segundo plano:
 //  1. Mira Ideas/ y videos/ cada 3 segundos y regenera Panel.html (el Panel abierto se recarga solo).
-//  2. Cuando dejas la voz (voz.wav / voz.mp3) en la carpeta de un caso, ARMA SOLO el video y los Shorts.
+//  2. Cuando dejas la voz (voz.wav / voz.mp3) en la carpeta de un caso, ARMA SOLO el video, los Shorts
+//     y el kit para CapCut (salida/capcut).
 import fs from 'node:fs';
 import path from 'node:path';
 import { spawn } from 'node:child_process';
@@ -57,9 +58,9 @@ function pendientes() {
   return out;
 }
 
-function correr(script, carpeta, log) {
+function correr(script, carpeta, log, extra = []) {
   return new Promise((ok, no) => {
-    const p = spawn(process.execPath, [path.join('scripts', script), carpeta], { cwd: EDITOR });
+    const p = spawn(process.execPath, [path.join('scripts', script), carpeta, ...extra], { cwd: EDITOR });
     p.stdout.on('data', (b) => fs.appendFileSync(log, b));
     p.stderr.on('data', (b) => fs.appendFileSync(log, b));
     p.on('close', (code) => (code === 0 ? ok() : no(new Error(`${script} terminó con error ${code}`))));
@@ -82,8 +83,12 @@ async function armar({ nombre, carpeta }) {
     generar();
     await correr('shorts.mjs', carpeta, log);
     marcar('fin', 'shorts');
+    marcar('inicio', 'capcut', `Kit para CapCut (video sin subtítulos) de ${nombre}`, 20);
+    generar();
+    await correr('render.mjs', carpeta, log, ['--solo-limpio']);
+    marcar('fin', 'capcut');
   } catch (e) {
-    marcar('fin', 'video'); marcar('fin', 'shorts');
+    marcar('fin', 'video'); marcar('fin', 'shorts'); marcar('fin', 'capcut');
     fs.writeFileSync(path.join(salida, 'error.txt'),
       `${e.message}\nRevisa ${log}\nDile a Claude: "Falló el armado de ${nombre}, revisa salida/armado.log"\n`);
   }

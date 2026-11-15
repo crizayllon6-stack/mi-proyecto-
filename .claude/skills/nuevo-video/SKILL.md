@@ -41,6 +41,7 @@ el primer paso sin marcar.
 - [ ] Datos verificados
 - [ ] Estilo revisado
 - [ ] Guion aprobado
+- [ ] Fotos listas
 - [ ] Publicado
 ```
 Copia en `investigacion.md` lo que el cazador ya encontró del caso (resumen, giro, fuentes).
@@ -64,23 +65,27 @@ Lanza `editor-estilo` con la carpeta. Marca `[x] Estilo revisado`.
 Si pide cambios, hazlos (o relanza el agente que corresponda). Con su visto bueno marca `[x] Guion aprobado`
 y sigue sin parar hasta el paso 8.
 
-## 7. Paquete final y texto para la voz
+## 7. Fotos, paquete final y texto para la voz (sin parar)
+- Lanza `buscador-recursos` con la carpeta: baja 20–40 fotos reales del caso, pone las clave en el guion y deja
+  el resto para que el editor las vaya pasando solas en las escenas largas (así el video no se ve lento).
+  Marca `[x] Fotos listas`. Avísale cuántas fotos hay y que puede verlas en el Panel; NO esperes su respuesta.
 - Lanza `empaquetador` en modo "final".
 - Regenera `voz.txt`: `cd editor && node scripts/preparar.mjs ../videos/<caso>`.
-- (Opcional, solo si el usuario lo pide: `buscador-recursos` para meter fotos reales del caso.)
 
 ## 8. Voz (la hace el usuario)
 Dile: en el Panel, botón **Copiar texto para Loquendo** → pegarlo en Voz de Soria → guardar el audio como
 `videos/<caso>/voz.wav` (o `.mp3`). **No tiene que hacer nada más.**
 
-## 9. Video y Shorts (automático)
+## 9. Video, Shorts y kit para CapCut (automático)
 Con el Panel abierto (`Abrir Fabrica.bat`), el vigilante (`panel/vigilar.mjs`) detecta la voz y arma solo el video,
-la miniatura y los 3 Shorts; en el Panel se ve la barra de avance. Si el usuario no abrió el Panel o te pide
+la miniatura, los 3 Shorts y `salida/capcut/` (video sin subtítulos, voz, música, efectos, fotos, subtítulos .srt
+y hoja de edición con los tiempos, para que el usuario agregue lo suyo en CapCut). En el Panel se ve la barra de avance. Si el usuario no abrió el Panel o te pide
 armarlo, hazlo tú:
 ```
 cd editor
 npm run render -- ../videos/<caso>
 npm run shorts -- ../videos/<caso>
+npm run render -- ../videos/<caso> --solo-limpio
 ```
 Si falló (existe `salida/error.txt`), lee `salida/armado.log`, arréglalo, borra `error.txt` y vuelve a armar.
 

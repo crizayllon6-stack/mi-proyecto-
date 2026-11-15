@@ -80,6 +80,7 @@ export const PASOS = [
   { id: 'verificado', nombre: 'Datos verificados' },
   { id: 'estilo', nombre: 'Estilo revisado' },
   { id: 'aprobado', nombre: 'Guion aprobado' },
+  { id: 'fotos', nombre: 'Fotos del caso' },
   { id: 'voz', nombre: 'Voz grabada' },
   { id: 'video', nombre: 'Video armado' },
   { id: 'shorts', nombre: 'Shorts' },
@@ -124,6 +125,7 @@ function leerVideo(raiz, nombre) {
     verificado: tiene('datos verificados') || fs.existsSync(arch('verificacion.md')),
     estilo: tiene('estilo revisado') || fs.existsSync(arch('cambios_estilo.md')),
     aprobado: tiene('guion aprobado'),
+    fotos: tiene('fotos listas') || imagenes.length > 0,
     voz: !!voz,
     video: enSalida('video.mp4'),
     shorts: shorts.length > 0,
@@ -143,5 +145,7 @@ function leerVideo(raiz, nombre) {
     capitulos: leer(arch('capitulos.txt')), shorts, error: leer(path.join(salida, 'error.txt')),
     video: enSalida('video.mp4') ? 'salida/video.mp4' : null,
     miniatura: enSalida('miniatura.png') ? 'salida/miniatura.png' : null,
+    capcut: fs.existsSync(path.join(salida, 'capcut')),
+    limpio: fs.existsSync(path.join(salida, 'capcut', 'video_sin_subtitulos.mp4')),
   };
 }

@@ -112,7 +112,8 @@ Escenas: `[TITULO: TEXTO | subtítulo]` `[MAPA: Lugar, País | lat, lon]` `[FECH
 `[PAUSA: segundos]`
 (No uses `[IMAGEN]`: las fotos reales las agrega después el buscador de recursos.)
 
-- Cambia de escena cada **40 a 100 palabras**. Nunca dos escenas iguales seguidas.
+- Cambia de escena cada **20 a 50 palabras** (8–20 segundos): el video tiene que moverse todo el tiempo.
+  Nunca dos escenas iguales seguidas. Usa mucho FECHA, FICHA, DOC y MAPA: cada dato concreto merece su escena.
 - 3 a 5 `[TITULO]` como capítulos (incluido el principal).
 - `[TEXTO]` sirve para la pregunta o frase clave de cada bloque: es un gancho visual.
   Como es una pantalla casi quieta, la narración que va debajo de un `[TEXTO]` debe ser **corta (máx. 35 palabras)**.
