@@ -1,0 +1,195 @@
+﻿<#
+  EDICION - Fabrica Iceberg
+  Arma el material de edicion para CapCut a partir de escenas.json y la carpeta recursos.
+  Todo corre en tu PC (usa FFmpeg de la carpeta herramientas). No sube nada a internet.
+
+  Uso:
+    .\edicion.ps1 -Proyecto "Prueba_Nivel1"                 # clips + borrador + hoja
+    .\edicion.ps1 -Proyecto "Prueba_Nivel1" -Alto 720       # mas rapido, para probar
+    .\edicion.ps1 -Proyecto "Nivel 2" -Vertical             # 9:16
+
+  Voz (opcional): pon tu grabacion en  Proyectos\<proyecto>\voz
+    - Un solo audio (cualquier nombre): se reparte entre las escenas segun sus palabras (aproximado).
+    - Un audio por escena, con el nombre del id (ej. 02_Cecil.mp3): duracion exacta de cada escena.
+  Sin voz: las duraciones salen estimadas con palabras_por_minuto.
+
+  Salida en  Proyectos\<proyecto>\exportar :
+    clips\<id>.mp4 (un clip por escena), borrador.mp4, subtitulos.srt, hoja_edicion.html
+#>
+param(
+  [Parameter(Mandatory=$true)][string]$Proyecto,
+  [int]$Alto = 1080,
+  [switch]$Vertical,
+  [switch]$SinSubtitulos
+)
+$ErrorActionPreference = 'Stop'
+$Base = Split-Path -Parent $MyInvocation.MyCommand.Path
+$Dir  = Join-Path $Base ("Proyectos\" + $Proyecto)
+$Exp  = Join-Path $Dir 'exportar'
+$Clips = Join-Path $Exp 'clips'
+$Tmp  = Join-Path $Exp '_tmp'
+$FPS = 30
+
+# ---- localizar ffmpeg ----
+$ff = Get-ChildItem (Join-Path $Base 'herramientas') -Recurse -Filter ffmpeg.exe -ErrorAction SilentlyContinue | Select-Object -First 1
+if(-not $ff){ $c = Get-Command ffmpeg -ErrorAction SilentlyContinue; if($c){ $ffmpeg = $c.Source; $ffprobe = (Get-Command ffprobe).Source } else { throw 'No encuentro FFmpeg. Revisa la carpeta herramientas.' } }
+else { $ffmpeg = $ff.FullName; $ffprobe = Join-Path $ff.DirectoryName 'ffprobe.exe' }
+
+if($Vertical){ $W = [int]([Math]::Round($Alto*9/16/2)*2); $H = $Alto }
+else { $H = $Alto; $W = [int]([Math]::Round($Alto*16/9/2)*2) }
+
+$EscenasPath = Join-Path $Dir 'escenas.json'
+if(-not (Test-Path $EscenasPath)){ throw "No existe $EscenasPath" }
+$cfg = Get-Content $EscenasPath -Raw -Encoding UTF8 | ConvertFrom-Json
+$wpm = 150; if($cfg.palabras_por_minuto){ $wpm = [double]$cfg.palabras_por_minuto }
+
+New-Item -ItemType Directory -Force $Clips, $Tmp | Out-Null
+Get-ChildItem $Clips -Filter *.mp4 -File | Remove-Item -Force
+Get-ChildItem $Tmp -File | Remove-Item -Force
+
+function Palabras([string]$t){ return @(($t -split '\s+') | Where-Object { $_ -match '\w' }).Count }
+function Tiempo([double]$seg){ $ts=[TimeSpan]::FromSeconds($seg); return ('{0}:{1:00}' -f [int][Math]::Floor($ts.TotalMinutes),$ts.Seconds) }
+function TiempoSrt([double]$seg){ $ts=[TimeSpan]::FromSeconds($seg); return ('{0:00}:{1:00}:{2:00},{3:000}' -f [int][Math]::Floor($ts.TotalHours),$ts.Minutes,$ts.Seconds,$ts.Milliseconds) }
+function Dur([string]$f){ $o = & $ffprobe -v error -show_entries format=duration -of csv=p=0 $f; return [double]::Parse(($o | Select-Object -First 1).Trim(), [Globalization.CultureInfo]::InvariantCulture) }
+function Num([double]$x){ return $x.ToString('0.###',[Globalization.CultureInfo]::InvariantCulture) }
+function Ff([string[]]$a){ & $ffmpeg -hide_banner -loglevel error -y @a; if($LASTEXITCODE -ne 0){ throw "FFmpeg fallo: $($a -join ' ')" } }
+
+# ---- voz ----
+$audExt = '.mp3','.wav','.m4a','.aac','.ogg','.flac','.opus'
+$vozDir = Join-Path $Dir 'voz'
+$vozFiles = @(); if(Test-Path $vozDir){ $vozFiles = @(Get-ChildItem $vozDir -File | Where-Object { $audExt -contains $_.Extension.ToLower() }) }
+$vozEscena = @{}; foreach($e in $cfg.escenas){ $m = $vozFiles | Where-Object { $_.BaseName -eq $e.id } | Select-Object -First 1; if($m){ $vozEscena[$e.id] = $m.FullName } }
+$vozTotal = $null
+if($vozEscena.Count -eq 0 -and $vozFiles.Count -ge 1){ $vozTotal = ($vozFiles | Sort-Object Length -Descending | Select-Object -First 1).FullName }
+
+# ---- duraciones por escena ----
+$pal = @{}; $dur = @{}
+foreach($e in $cfg.escenas){ $pal[$e.id] = Palabras $e.texto }
+$sumPal = ($pal.Values | Measure-Object -Sum).Sum
+$modo = 'estimada (sin voz)'
+if($vozEscena.Count -gt 0){
+  $modo = 'exacta por escena (voz por escena)'
+  foreach($e in $cfg.escenas){ if($vozEscena.ContainsKey($e.id)){ $dur[$e.id] = Dur $vozEscena[$e.id] } else { $dur[$e.id] = $pal[$e.id]/$wpm*60.0 } }
+} elseif($vozTotal){
+  $modo = 'repartida segun palabras (una sola voz)'
+  $tot = Dur $vozTotal
+  foreach($e in $cfg.escenas){ $dur[$e.id] = $tot * $pal[$e.id] / $sumPal }
+} else {
+  foreach($e in $cfg.escenas){ $dur[$e.id] = $pal[$e.id]/$wpm*60.0 }
+}
+"Resolucion: ${W}x${H} | Duracion de escenas: $modo"
+
+# ---- segmentos ----
+$fadeD = 0.25
+function SegImagen([string]$img,[double]$d,[int]$idx,[string]$out){
+  $F = [int][Math]::Max(1,[Math]::Round($d*$FPS))
+  $bw = $W*2; $bh = $H*2
+  if($idx % 2 -eq 0){ $z = "1+0.12*on/$F" } else { $z = "1.12-0.12*on/$F" }
+  $fo = [Math]::Max(0,$d-$fadeD)
+  $vf = "scale=${bw}:${bh}:force_original_aspect_ratio=increase,crop=${bw}:${bh},zoompan=z='$z':x='iw/2-(iw/zoom/2)':y='ih/2-(ih/zoom/2)':d=${F}:s=${W}x${H}:fps=$FPS,fade=t=in:st=0:d=$fadeD,fade=t=out:st=$(Num $fo):d=$fadeD,format=yuv420p"
+  Ff @('-i',$img,'-vf',$vf,'-frames:v',"$F",'-r',"$FPS",'-c:v','libx264','-preset','veryfast','-crf','20','-an',$out)
+}
+function SegVideo([string]$vid,[double]$d,[string]$out){
+  $fo = [Math]::Max(0,$d-$fadeD)
+  $vf = "scale=${W}:${H}:force_original_aspect_ratio=decrease,pad=${W}:${H}:(ow-iw)/2:(oh-ih)/2,fps=$FPS,tpad=stop_mode=clone:stop_duration=$(Num $d),fade=t=in:st=0:d=$fadeD,fade=t=out:st=$(Num $fo):d=$fadeD,format=yuv420p"
+  Ff @('-i',$vid,'-t',(Num $d),'-vf',$vf,'-r',"$FPS",'-c:v','libx264','-preset','veryfast','-crf','20','-an',$out)
+}
+function SegNegro([double]$d,[string]$out){
+  Ff @('-f','lavfi','-i',"color=c=black:s=${W}x${H}:r=${FPS}:d=$(Num $d)",'-c:v','libx264','-pix_fmt','yuv420p','-an',$out)
+}
+function ListaConcat([string[]]$files,[string]$listPath){
+  $l = foreach($f in $files){ "file '" + ($f -replace '\\','/' -replace "'","'\\''") + "'" }
+  [IO.File]::WriteAllLines($listPath, $l, (New-Object Text.UTF8Encoding($false)))
+}
+
+$hoja = New-Object Collections.Generic.List[object]
+$clipFiles = @(); $t0 = 0.0; $avisos = @()
+foreach($e in $cfg.escenas){
+  $id = $e.id; $d = $dur[$id]
+  $carp = Join-Path $Dir ("recursos\" + $id)
+  $arch = @(); if(Test-Path $carp){ $arch = @(Get-ChildItem $carp -File | Where-Object { $_.Extension -match '(?i)\.(jpe?g|png|webp|gif|bmp|tiff?|mp4|webm|mov|ogv)$' } | Sort-Object Name) }
+  # los videos van al final de la escena para que no abran con un clip largo
+  $arch = @(($arch | Where-Object { $_.Name -notlike 'VIDEO_*' }) + ($arch | Where-Object { $_.Name -like 'VIDEO_*' }))
+  "== $id  ($(Num $d) s, $($arch.Count) recursos)"
+  $segs = @(); $uso = @()
+  if($arch.Count -eq 0){
+    $avisos += "$id no tiene recursos: se pone pantalla negra."
+    $s = Join-Path $Tmp "$id`_0.mp4"; SegNegro $d $s; $segs += $s
+    $uso += [pscustomobject]@{ Archivo='(pantalla negra)'; Seg=[Math]::Round($d,1) }
+  } else {
+    $por = $d / $arch.Count; $i = 0
+    foreach($a in $arch){
+      $s = Join-Path $Tmp ("$id`_$i.mp4")
+      try{
+        if($a.Name -like 'VIDEO_*' -or $a.Extension -match '(?i)\.(mp4|webm|mov|ogv)$'){ SegVideo $a.FullName $por $s }
+        else { SegImagen $a.FullName $por $i $s }
+        $segs += $s; $uso += [pscustomobject]@{ Archivo=$a.Name; Seg=[Math]::Round($por,1) }
+      }catch{ $avisos += "No pude procesar $($a.Name): $($_.Exception.Message)" }
+      $i++
+    }
+    if($segs.Count -eq 0){ $s = Join-Path $Tmp "$id`_0.mp4"; SegNegro $d $s; $segs += $s }
+  }
+  $lst = Join-Path $Tmp "$id.txt"; ListaConcat $segs $lst
+  $clip = Join-Path $Clips "$id.mp4"
+  if($vozEscena.ContainsKey($id)){ Ff @('-f','concat','-safe','0','-i',$lst,'-i',$vozEscena[$id],'-c:v','copy','-c:a','aac','-b:a','192k','-shortest',$clip) }
+  else { Ff @('-f','concat','-safe','0','-i',$lst,'-c','copy',$clip) }
+  $clipFiles += $clip
+  $hoja.Add([pscustomobject]@{ Id=$id; Titulo=$e.titulo; Inicio=$t0; Dur=$d; Texto=$e.texto; Uso=$uso })
+  $t0 += $d
+}
+
+# ---- subtitulos (trozos de ~10 palabras en el tiempo de cada escena) ----
+$srt = New-Object Text.StringBuilder; $n = 1; $t = 0.0
+foreach($e in $cfg.escenas){
+  $d = $dur[$e.id]; $pw = [Math]::Max(1,$pal[$e.id])
+  $trozos = New-Object Collections.Generic.List[string]; $cur = New-Object Collections.Generic.List[string]
+  foreach($w in ($e.texto -split '\s+' | Where-Object { $_ })){
+    $cur.Add($w)
+    if(($cur.Count -ge 10) -or ($w -match '[\.\?\!:]$' -and $cur.Count -ge 4)){ $trozos.Add(($cur -join ' ')); $cur.Clear() }
+  }
+  if($cur.Count){ $trozos.Add(($cur -join ' ')) }
+  $ts = $t
+  foreach($tr in $trozos){
+    $dd = (Palabras $tr) / $pw * $d
+    [void]$srt.AppendLine("$n"); [void]$srt.AppendLine((TiempoSrt $ts) + ' --> ' + (TiempoSrt ($ts+$dd))); [void]$srt.AppendLine($tr); [void]$srt.AppendLine('')
+    $n++; $ts += $dd
+  }
+  $t += $d
+}
+[IO.File]::WriteAllText((Join-Path $Exp 'subtitulos.srt'), $srt.ToString(), (New-Object Text.UTF8Encoding($false)))
+
+# ---- borrador completo ----
+"== Borrador"
+$lstAll = Join-Path $Tmp '_todo.txt'; ListaConcat $clipFiles $lstAll
+$borr = Join-Path $Exp 'borrador.mp4'
+$args2 = @('-f','concat','-safe','0','-i',$lstAll)
+if($vozTotal){ $args2 += @('-i',$vozTotal) }
+if(-not $SinSubtitulos){
+  $fs = [Math]::Round($H/30)
+  $style = "FontName=Arial,FontSize=$fs,Bold=1,PrimaryColour=&H00FFFFFF,OutlineColour=&H00000000,BorderStyle=1,Outline=3,Shadow=0,Alignment=2,MarginV=$([Math]::Round($H/12))"
+  $args2 += @('-vf',"subtitles=subtitulos.srt:force_style='$style'",'-c:v','libx264','-preset','veryfast','-crf','21','-pix_fmt','yuv420p')
+} else { $args2 += @('-c:v','copy') }
+if($vozTotal -or $vozEscena.Count -gt 0){ $args2 += @('-c:a','aac','-b:a','192k') }
+if($vozTotal){ $args2 += @('-map','0:v:0','-map','1:a:0','-shortest') }
+$args2 += $borr
+Push-Location $Exp
+try{ Ff $args2 } finally { Pop-Location }
+
+# ---- hoja de edicion (se abre bien en el celular) ----
+function Esc([string]$s){ [Net.WebUtility]::HtmlEncode($s) }
+$h = New-Object Text.StringBuilder
+[void]$h.Append('<!doctype html><html lang="es"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Hoja de edicion</title>')
+[void]$h.Append('<style>body{font-family:Segoe UI,system-ui,sans-serif;background:#12101f;color:#eee;margin:0;padding:14px;line-height:1.45}h1{font-size:20px;color:#22d3ee}.e{background:#1c1930;border-radius:12px;padding:12px;margin:12px 0}.e h2{margin:0 0 4px;font-size:17px;color:#a78bfa}.t{color:#22d3ee;font-weight:600}.x{font-size:14px;color:#ddd;margin:8px 0}li{font-size:13px;margin:2px 0}small{color:#9ca3af}</style>')
+[void]$h.Append("<h1>Hoja de edicion - $(Esc $Proyecto)</h1><p><small>Duracion total: $(Tiempo $t0) | Duraciones: $(Esc $modo) | Arrastra a CapCut los clips de la carpeta clips en este orden.</small></p>")
+$k = 1
+foreach($x in $hoja){
+  [void]$h.Append("<div class='e'><h2>$k. $(Esc $x.Titulo)</h2><div><span class='t'>Inicio $(Tiempo $x.Inicio)</span> &middot; dura $([int][Math]::Round($x.Dur)) s &middot; clip <b>$(Esc $x.Id).mp4</b></div><div class='x'>$(Esc $x.Texto)</div><ul>")
+  foreach($u in $x.Uso){ [void]$h.Append("<li>$(Esc $u.Archivo) <small>($($u.Seg) s)</small></li>") }
+  [void]$h.Append('</ul></div>'); $k++
+}
+[IO.File]::WriteAllText((Join-Path $Exp 'hoja_edicion.html'), $h.ToString(), (New-Object Text.UTF8Encoding($true)))
+
+Remove-Item $Tmp -Recurse -Force
+""
+foreach($a in $avisos){ "AVISO: $a" }
+"Listo. Duracion total $(Tiempo $t0). Salida: $Exp"

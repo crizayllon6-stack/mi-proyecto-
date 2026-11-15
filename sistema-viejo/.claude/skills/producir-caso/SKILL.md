@@ -1,0 +1,23 @@
+---
+name: producir-caso
+description: Ejecuta el flujo de producción de un video de CASO ÚNICO (cualquier tema, con título gancho y miniatura llamativa, estilo storytelling) paso a paso con paradas para que el usuario decida. Úsalo cuando el usuario pida un video de un caso, "caso nuevo", "producir caso" o casos virales.
+---
+
+# Producir un video de caso único, paso a paso
+
+Coordina los agentes en orden. En cada PARADA resume al usuario en pocas líneas y espera su respuesta antes de seguir.
+
+1. Lanza `cazador-casos` (con `estado.ps1 -Inicio -Tipo cazador`). Apenas termine, SIN preguntar al usuario, lanza `analista-viralidad` sobre esa lista (con `estado.ps1 -Inicio -Tipo analista`). Casos y ranking van siempre juntos y automáticos; si el usuario pide más ideas, también se rankean. El ranking combina todas las estadísticas disponibles (históricas, demanda permanente, competencia, tendencias actuales).
+2. PARADA: muestra el top 3 con riesgos y con qué datos se apoya cada uno. El usuario elige el caso.
+3. Lanza `empaquetador` en modo "título primero" para que el usuario elija título y miniatura ANTES de escribir. PARADA: muestra los 10 títulos y 3 conceptos de miniatura.
+4. Crea la carpeta: `powershell -ExecutionPolicy Bypass -File .\fabrica.ps1 -Accion Preparar -Proyecto "<nombre interno>"`.
+5. Lanza `guionista-narrador` con el caso y el título elegido (el guion debe cumplir lo que el título promete).
+6. Lanza `verificador` (reutilizado). PARADA: muestra qué se corrigió o quedó sin fuente.
+7. Lanza `editor-estilo` (reutilizado). PARADA: entrega `guion_final.txt` en texto plano en el chat.
+8. Con su visto bueno, lanza `empaquetador` otra vez para ajustar título, miniatura, gancho de apertura y descripción al guion final, y `buscador-recursos` (reutilizado). PARADA: el usuario revisa `revision.html`.
+9. Corre `fabrica.ps1 -Accion Papeleo` y, cuando el usuario tenga su voz, `edicion.ps1`.
+
+Notas:
+- El nombre de la carpeta es interno ("perro_excalibur"); el título público es el que elige el usuario.
+- Para casos recientes puede haber poco material libre en Wikimedia. Avisa al usuario qué escenas quedaron sin recursos para que decida (fotos propias, material con permiso, capturas de documentos públicos).
+- Nunca prometas visitas ni viralidad.

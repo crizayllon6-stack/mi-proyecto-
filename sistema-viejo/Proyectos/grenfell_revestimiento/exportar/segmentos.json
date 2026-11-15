@@ -1,0 +1,342 @@
+{
+    "proyecto":  "grenfell_revestimiento",
+    "ancho":  1920,
+    "alto":  1080,
+    "fps":  30,
+    "modo":  "estimada (sin voz)",
+    "segmentos":  [
+                      {
+                          "archivo":  "C:\\Users\\Cristian\\Documents\\Fabrica Casos\\Proyectos\\grenfell_revestimiento\\exportar\\segmentos\\001_01_Gancho.mp4",
+                          "escena":  "01_Gancho",
+                          "titulo":  "Gancho",
+                          "recurso":  "20170614_grenfell_tower_inferno_smouldering_crop.jpg",
+                          "dur":  16.7
+                      },
+                      {
+                          "archivo":  "C:\\Users\\Cristian\\Documents\\Fabrica Casos\\Proyectos\\grenfell_revestimiento\\exportar\\segmentos\\002_01_Gancho.mp4",
+                          "escena":  "01_Gancho",
+                          "titulo":  "Gancho",
+                          "recurso":  "grafico_01_cifra_72.png",
+                          "dur":  16.7
+                      },
+                      {
+                          "archivo":  "C:\\Users\\Cristian\\Documents\\Fabrica Casos\\Proyectos\\grenfell_revestimiento\\exportar\\segmentos\\003_01_Gancho.mp4",
+                          "escena":  "01_Gancho",
+                          "titulo":  "Gancho",
+                          "recurso":  "grenfell_fire_140617_451am2.jpg",
+                          "dur":  16.7
+                      },
+                      {
+                          "archivo":  "C:\\Users\\Cristian\\Documents\\Fabrica Casos\\Proyectos\\grenfell_revestimiento\\exportar\\segmentos\\004_01_Gancho.mp4",
+                          "escena":  "01_Gancho",
+                          "titulo":  "Gancho",
+                          "recurso":  "grenfell_tower_fire_smoke_plume.jpg",
+                          "dur":  16.7
+                      },
+                      {
+                          "archivo":  "C:\\Users\\Cristian\\Documents\\Fabrica Casos\\Proyectos\\grenfell_revestimiento\\exportar\\segmentos\\005_02_La_reforma.mp4",
+                          "escena":  "02_La_reforma",
+                          "titulo":  "La reforma",
+                          "recurso":  "grafico_02_cifra_293368.png",
+                          "dur":  17.52
+                      },
+                      {
+                          "archivo":  "C:\\Users\\Cristian\\Documents\\Fabrica Casos\\Proyectos\\grenfell_revestimiento\\exportar\\segmentos\\006_02_La_reforma.mp4",
+                          "escena":  "02_La_reforma",
+                          "titulo":  "La reforma",
+                          "recurso":  "grenfell_tower_from_latimer_road_station_8202486.jpg",
+                          "dur":  17.52
+                      },
+                      {
+                          "archivo":  "C:\\Users\\Cristian\\Documents\\Fabrica Casos\\Proyectos\\grenfell_revestimiento\\exportar\\segmentos\\007_02_La_reforma.mp4",
+                          "escena":  "02_La_reforma",
+                          "titulo":  "La reforma",
+                          "recurso":  "kensington_and_chelsea_in_greater_london.png",
+                          "dur":  17.52
+                      },
+                      {
+                          "archivo":  "C:\\Users\\Cristian\\Documents\\Fabrica Casos\\Proyectos\\grenfell_revestimiento\\exportar\\segmentos\\008_02_La_reforma.mp4",
+                          "escena":  "02_La_reforma",
+                          "titulo":  "La reforma",
+                          "recurso":  "lancaster_west_estate_mapa.png",
+                          "dur":  17.52
+                      },
+                      {
+                          "archivo":  "C:\\Users\\Cristian\\Documents\\Fabrica Casos\\Proyectos\\grenfell_revestimiento\\exportar\\segmentos\\009_02_La_reforma.mp4",
+                          "escena":  "02_La_reforma",
+                          "titulo":  "La reforma",
+                          "recurso":  "tower_block_uk_photo_l24_09_grenfell_tower_in_19.jpg",
+                          "dur":  17.52
+                      },
+                      {
+                          "archivo":  "C:\\Users\\Cristian\\Documents\\Fabrica Casos\\Proyectos\\grenfell_revestimiento\\exportar\\segmentos\\010_03_La_noche_y_el_panel.mp4",
+                          "escena":  "03_La_noche_y_el_panel",
+                          "titulo":  "La noche y el panel",
+                          "recurso":  "20170614_grenfell_tower_inferno_smouldering.jpg",
+                          "dur":  9.867
+                      },
+                      {
+                          "archivo":  "C:\\Users\\Cristian\\Documents\\Fabrica Casos\\Proyectos\\grenfell_revestimiento\\exportar\\segmentos\\011_03_La_noche_y_el_panel.mp4",
+                          "escena":  "03_La_noche_y_el_panel",
+                          "titulo":  "La noche y el panel",
+                          "recurso":  "grafico_03_cifra_297.png",
+                          "dur":  9.867
+                      },
+                      {
+                          "archivo":  "C:\\Users\\Cristian\\Documents\\Fabrica Casos\\Proyectos\\grenfell_revestimiento\\exportar\\segmentos\\012_03_La_noche_y_el_panel.mp4",
+                          "escena":  "03_La_noche_y_el_panel",
+                          "titulo":  "La noche y el panel",
+                          "recurso":  "grafico_03_orden_quedarse.png",
+                          "dur":  9.867
+                      },
+                      {
+                          "archivo":  "C:\\Users\\Cristian\\Documents\\Fabrica Casos\\Proyectos\\grenfell_revestimiento\\exportar\\segmentos\\013_03_La_noche_y_el_panel.mp4",
+                          "escena":  "03_La_noche_y_el_panel",
+                          "titulo":  "La noche y el panel",
+                          "recurso":  "grenfell_tower_cladding_capas.png",
+                          "dur":  9.867
+                      },
+                      {
+                          "archivo":  "C:\\Users\\Cristian\\Documents\\Fabrica Casos\\Proyectos\\grenfell_revestimiento\\exportar\\segmentos\\014_03_La_noche_y_el_panel.mp4",
+                          "escena":  "03_La_noche_y_el_panel",
+                          "titulo":  "La noche y el panel",
+                          "recurso":  "grenfell_tower_fire_morning.jpg",
+                          "dur":  9.867
+                      },
+                      {
+                          "archivo":  "C:\\Users\\Cristian\\Documents\\Fabrica Casos\\Proyectos\\grenfell_revestimiento\\exportar\\segmentos\\015_03_La_noche_y_el_panel.mp4",
+                          "escena":  "03_La_noche_y_el_panel",
+                          "titulo":  "La noche y el panel",
+                          "recurso":  "grenfell_tower_fire_spread_east_north_annotated.png",
+                          "dur":  9.867
+                      },
+                      {
+                          "archivo":  "C:\\Users\\Cristian\\Documents\\Fabrica Casos\\Proyectos\\grenfell_revestimiento\\exportar\\segmentos\\016_04_Expediente_1_el_panel.mp4",
+                          "escena":  "04_Expediente_1_el_panel",
+                          "titulo":  "Expediente 1: el panel",
+                          "recurso":  "aluminium_composite_material.png",
+                          "dur":  18.971
+                      },
+                      {
+                          "archivo":  "C:\\Users\\Cristian\\Documents\\Fabrica Casos\\Proyectos\\grenfell_revestimiento\\exportar\\segmentos\\017_04_Expediente_1_el_panel.mp4",
+                          "escena":  "04_Expediente_1_el_panel",
+                          "titulo":  "Expediente 1: el panel",
+                          "recurso":  "grafico_04_cita_estrategia_deliberada.png",
+                          "dur":  18.971
+                      },
+                      {
+                          "archivo":  "C:\\Users\\Cristian\\Documents\\Fabrica Casos\\Proyectos\\grenfell_revestimiento\\exportar\\segmentos\\018_04_Expediente_1_el_panel.mp4",
+                          "escena":  "04_Expediente_1_el_panel",
+                          "titulo":  "Expediente 1: el panel",
+                          "recurso":  "grafico_04_cita_very_confidential.png",
+                          "dur":  18.971
+                      },
+                      {
+                          "archivo":  "C:\\Users\\Cristian\\Documents\\Fabrica Casos\\Proyectos\\grenfell_revestimiento\\exportar\\segmentos\\019_04_Expediente_1_el_panel.mp4",
+                          "escena":  "04_Expediente_1_el_panel",
+                          "titulo":  "Expediente 1: el panel",
+                          "recurso":  "grafico_04_linea_tiempo_arconic.png",
+                          "dur":  18.971
+                      },
+                      {
+                          "archivo":  "C:\\Users\\Cristian\\Documents\\Fabrica Casos\\Proyectos\\grenfell_revestimiento\\exportar\\segmentos\\020_04_Expediente_1_el_panel.mp4",
+                          "escena":  "04_Expediente_1_el_panel",
+                          "titulo":  "Expediente 1: el panel",
+                          "recurso":  "grafico_04_panel_en_corte.png",
+                          "dur":  18.971
+                      },
+                      {
+                          "archivo":  "C:\\Users\\Cristian\\Documents\\Fabrica Casos\\Proyectos\\grenfell_revestimiento\\exportar\\segmentos\\021_04_Expediente_1_el_panel.mp4",
+                          "escena":  "04_Expediente_1_el_panel",
+                          "titulo":  "Expediente 1: el panel",
+                          "recurso":  "grafico_04_plano_vs_casete.png",
+                          "dur":  18.971
+                      },
+                      {
+                          "archivo":  "C:\\Users\\Cristian\\Documents\\Fabrica Casos\\Proyectos\\grenfell_revestimiento\\exportar\\segmentos\\022_04_Expediente_1_el_panel.mp4",
+                          "escena":  "04_Expediente_1_el_panel",
+                          "titulo":  "Expediente 1: el panel",
+                          "recurso":  "grafico_04_tarjeta_expediente1.png",
+                          "dur":  18.971
+                      },
+                      {
+                          "archivo":  "C:\\Users\\Cristian\\Documents\\Fabrica Casos\\Proyectos\\grenfell_revestimiento\\exportar\\segmentos\\023_05_Expediente_2_el_aislante.mp4",
+                          "escena":  "05_Expediente_2_el_aislante",
+                          "titulo":  "Expediente 2: el aislante",
+                          "recurso":  "grafico_05_banco_de_ensayo.png",
+                          "dur":  24.1
+                      },
+                      {
+                          "archivo":  "C:\\Users\\Cristian\\Documents\\Fabrica Casos\\Proyectos\\grenfell_revestimiento\\exportar\\segmentos\\024_05_Expediente_2_el_aislante.mp4",
+                          "escena":  "05_Expediente_2_el_aislante",
+                          "titulo":  "Expediente 2: el aislante",
+                          "recurso":  "grafico_05_cita_plan_deshonesto.png",
+                          "dur":  24.1
+                      },
+                      {
+                          "archivo":  "C:\\Users\\Cristian\\Documents\\Fabrica Casos\\Proyectos\\grenfell_revestimiento\\exportar\\segmentos\\025_05_Expediente_2_el_aislante.mp4",
+                          "escena":  "05_Expediente_2_el_aislante",
+                          "titulo":  "Expediente 2: el aislante",
+                          "recurso":  "grafico_05_linea_tiempo_ensayo.png",
+                          "dur":  24.1
+                      },
+                      {
+                          "archivo":  "C:\\Users\\Cristian\\Documents\\Fabrica Casos\\Proyectos\\grenfell_revestimiento\\exportar\\segmentos\\026_05_Expediente_2_el_aislante.mp4",
+                          "escena":  "05_Expediente_2_el_aislante",
+                          "titulo":  "Expediente 2: el aislante",
+                          "recurso":  "grafico_05_tarjeta_expediente2.png",
+                          "dur":  24.1
+                      },
+                      {
+                          "archivo":  "C:\\Users\\Cristian\\Documents\\Fabrica Casos\\Proyectos\\grenfell_revestimiento\\exportar\\segmentos\\027_06_Expediente_3_el_producto_que_cambio.mp4",
+                          "escena":  "06_Expediente_3_el_producto_que_cambio",
+                          "titulo":  "Expediente 3: el producto que cambió",
+                          "recurso":  "grafico_06_cita_datos_inspector.png",
+                          "dur":  22.6
+                      },
+                      {
+                          "archivo":  "C:\\Users\\Cristian\\Documents\\Fabrica Casos\\Proyectos\\grenfell_revestimiento\\exportar\\segmentos\\028_06_Expediente_3_el_producto_que_cambio.mp4",
+                          "escena":  "06_Expediente_3_el_producto_que_cambio",
+                          "titulo":  "Expediente 3: el producto que cambió",
+                          "recurso":  "grafico_06_cita_mercado_falso.png",
+                          "dur":  22.6
+                      },
+                      {
+                          "archivo":  "C:\\Users\\Cristian\\Documents\\Fabrica Casos\\Proyectos\\grenfell_revestimiento\\exportar\\segmentos\\029_06_Expediente_3_el_producto_que_cambio.mp4",
+                          "escena":  "06_Expediente_3_el_producto_que_cambio",
+                          "titulo":  "Expediente 3: el producto que cambió",
+                          "recurso":  "grafico_06_linea_tiempo_k15.png",
+                          "dur":  22.6
+                      },
+                      {
+                          "archivo":  "C:\\Users\\Cristian\\Documents\\Fabrica Casos\\Proyectos\\grenfell_revestimiento\\exportar\\segmentos\\030_06_Expediente_3_el_producto_que_cambio.mp4",
+                          "escena":  "06_Expediente_3_el_producto_que_cambio",
+                          "titulo":  "Expediente 3: el producto que cambió",
+                          "recurso":  "grafico_06_tarjeta_expediente3.png",
+                          "dur":  22.6
+                      },
+                      {
+                          "archivo":  "C:\\Users\\Cristian\\Documents\\Fabrica Casos\\Proyectos\\grenfell_revestimiento\\exportar\\segmentos\\031_07_El_papel_de_2007.mp4",
+                          "escena":  "07_El_papel_de_2007",
+                          "titulo":  "El giro: el papel de 2007",
+                          "recurso":  "grafico_07_2007_2017.png",
+                          "dur":  19.5
+                      },
+                      {
+                          "archivo":  "C:\\Users\\Cristian\\Documents\\Fabrica Casos\\Proyectos\\grenfell_revestimiento\\exportar\\segmentos\\032_07_El_papel_de_2007.mp4",
+                          "escena":  "07_El_papel_de_2007",
+                          "titulo":  "El giro: el papel de 2007",
+                          "recurso":  "grafico_07_nota_2007.png",
+                          "dur":  19.5
+                      },
+                      {
+                          "archivo":  "C:\\Users\\Cristian\\Documents\\Fabrica Casos\\Proyectos\\grenfell_revestimiento\\exportar\\segmentos\\033_07_El_papel_de_2007.mp4",
+                          "escena":  "07_El_papel_de_2007",
+                          "titulo":  "El giro: el papel de 2007",
+                          "recurso":  "grenfell_tower_geograph_org_uk_5475737.jpg",
+                          "dur":  19.5
+                      },
+                      {
+                          "archivo":  "C:\\Users\\Cristian\\Documents\\Fabrica Casos\\Proyectos\\grenfell_revestimiento\\exportar\\segmentos\\034_07_El_papel_de_2007.mp4",
+                          "escena":  "07_El_papel_de_2007",
+                          "titulo":  "El giro: el papel de 2007",
+                          "recurso":  "the_blackened_remains_of_grenfell_tower_latimer.jpg",
+                          "dur":  19.5
+                      },
+                      {
+                          "archivo":  "C:\\Users\\Cristian\\Documents\\Fabrica Casos\\Proyectos\\grenfell_revestimiento\\exportar\\segmentos\\035_08_El_informe.mp4",
+                          "escena":  "08_El_informe",
+                          "titulo":  "Lo que dijo el informe",
+                          "recurso":  "grafico_08_cita_evitables.png",
+                          "dur":  8.933
+                      },
+                      {
+                          "archivo":  "C:\\Users\\Cristian\\Documents\\Fabrica Casos\\Proyectos\\grenfell_revestimiento\\exportar\\segmentos\\036_08_El_informe.mp4",
+                          "escena":  "08_El_informe",
+                          "titulo":  "Lo que dijo el informe",
+                          "recurso":  "grafico_08_cita_incompetencia.png",
+                          "dur":  8.933
+                      },
+                      {
+                          "archivo":  "C:\\Users\\Cristian\\Documents\\Fabrica Casos\\Proyectos\\grenfell_revestimiento\\exportar\\segmentos\\037_08_El_informe.mp4",
+                          "escena":  "08_El_informe",
+                          "titulo":  "Lo que dijo el informe",
+                          "recurso":  "grafico_08_expedientes_fiscalia.png",
+                          "dur":  8.933
+                      },
+                      {
+                          "archivo":  "C:\\Users\\Cristian\\Documents\\Fabrica Casos\\Proyectos\\grenfell_revestimiento\\exportar\\segmentos\\038_08_El_informe.mp4",
+                          "escena":  "08_El_informe",
+                          "titulo":  "Lo que dijo el informe",
+                          "recurso":  "grafico_08_linea_tiempo_2004_2027.png",
+                          "dur":  8.933
+                      },
+                      {
+                          "archivo":  "C:\\Users\\Cristian\\Documents\\Fabrica Casos\\Proyectos\\grenfell_revestimiento\\exportar\\segmentos\\039_08_El_informe.mp4",
+                          "escena":  "08_El_informe",
+                          "titulo":  "Lo que dijo el informe",
+                          "recurso":  "grenfell_tower_fire_memorials_in_may_2018_01.jpg",
+                          "dur":  8.933
+                      },
+                      {
+                          "archivo":  "C:\\Users\\Cristian\\Documents\\Fabrica Casos\\Proyectos\\grenfell_revestimiento\\exportar\\segmentos\\040_08_El_informe.mp4",
+                          "escena":  "08_El_informe",
+                          "titulo":  "Lo que dijo el informe",
+                          "recurso":  "grenfell_tower_fire_memorials_in_may_2018_03.jpg",
+                          "dur":  8.933
+                      },
+                      {
+                          "archivo":  "C:\\Users\\Cristian\\Documents\\Fabrica Casos\\Proyectos\\grenfell_revestimiento\\exportar\\segmentos\\041_08_El_informe.mp4",
+                          "escena":  "08_El_informe",
+                          "titulo":  "Lo que dijo el informe",
+                          "recurso":  "grenfell_tower_fire_memorials_in_may_2018_04.jpg",
+                          "dur":  8.933
+                      },
+                      {
+                          "archivo":  "C:\\Users\\Cristian\\Documents\\Fabrica Casos\\Proyectos\\grenfell_revestimiento\\exportar\\segmentos\\042_08_El_informe.mp4",
+                          "escena":  "08_El_informe",
+                          "titulo":  "Lo que dijo el informe",
+                          "recurso":  "grenfell_tower_from_latimer_road_station_june_20.jpg",
+                          "dur":  8.933
+                      },
+                      {
+                          "archivo":  "C:\\Users\\Cristian\\Documents\\Fabrica Casos\\Proyectos\\grenfell_revestimiento\\exportar\\segmentos\\043_08_El_informe.mp4",
+                          "escena":  "08_El_informe",
+                          "titulo":  "Lo que dijo el informe",
+                          "recurso":  "informe_final_2024_portada_vol1.png",
+                          "dur":  8.933
+                      },
+                      {
+                          "archivo":  "C:\\Users\\Cristian\\Documents\\Fabrica Casos\\Proyectos\\grenfell_revestimiento\\exportar\\segmentos\\044_09_Cierre.mp4",
+                          "escena":  "09_Cierre",
+                          "titulo":  "Cierre",
+                          "recurso":  "grenfell_tower_in_may_2018_09.jpg",
+                          "dur":  7.9
+                      },
+                      {
+                          "archivo":  "C:\\Users\\Cristian\\Documents\\Fabrica Casos\\Proyectos\\grenfell_revestimiento\\exportar\\segmentos\\045_09_Cierre.mp4",
+                          "escena":  "09_Cierre",
+                          "titulo":  "Cierre",
+                          "recurso":  "grenfell_tower_in_may_2018_13.jpg",
+                          "dur":  7.9
+                      },
+                      {
+                          "archivo":  "C:\\Users\\Cristian\\Documents\\Fabrica Casos\\Proyectos\\grenfell_revestimiento\\exportar\\segmentos\\046_09_Cierre.mp4",
+                          "escena":  "09_Cierre",
+                          "titulo":  "Cierre",
+                          "recurso":  "grenfell_tribute_34505968854.jpg",
+                          "dur":  7.9
+                      },
+                      {
+                          "archivo":  "C:\\Users\\Cristian\\Documents\\Fabrica Casos\\Proyectos\\grenfell_revestimiento\\exportar\\segmentos\\047_09_Cierre.mp4",
+                          "escena":  "09_Cierre",
+                          "titulo":  "Cierre",
+                          "recurso":  "grenfell_tribute_41582558190.jpg",
+                          "dur":  7.9
+                      }
+                  ],
+    "voz":  [
+
+            ],
+    "subtitulos":  "C:\\Users\\Cristian\\Documents\\Fabrica Casos\\Proyectos\\grenfell_revestimiento\\exportar\\subtitulos.srt"
+}

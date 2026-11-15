@@ -1,0 +1,32 @@
+﻿{
+  "titulo_video": "Mataron a su perro por \"precaución\" | Iceberg del Maltrato Animal (Nivel 1)",
+  "palabras_por_minuto": 150,
+  "descripcion_inicio": "Mataron a su perro por \"precaución\", sin haberle hecho una sola prueba. Este es el Nivel 1 del iceberg del maltrato animal: cinco casos que el mundo vio y casi todos olvidaron. ¿Cuál te marcó más? Cuéntamelo en los comentarios.",
+  "escenas": [
+    {
+      "id": "02_Cecil",
+      "titulo": "Cecil",
+      "capitulo": true,
+      "texto": "Cecil era el león más famoso de Zimbabue. Vivía en el Parque Nacional Hwange, los turistas viajaban solo para verlo, y llevaba un collar GPS porque formaba parte de un estudio científico de la Universidad de Oxford. La noche del 1 de julio de 2015, un dentista estadounidense llamado Walter Palmer pagó una cacería de unos 50.000 dólares.",
+      "busquedas": [
+        { "q": "Cecil the lion", "debe": ["cecil", "lion|leon"] },
+        { "q": "Hwange National Park", "debe": ["hwange"] },
+        { "q": "Walter Palmer dentist", "debe": ["walter", "palmer"] }
+      ],
+      "excluir": ["burghley", "tomb", "rhodes", "beaton", "demille", "armorial", "coat of arms", "house", "launt", "painting"],
+      "sin_videos": false
+    },
+    {
+      "id": "05_Harambe",
+      "titulo": "Harambe",
+      "capitulo": true,
+      "texto": "Harambe era un gorila de espalda plateada. Acababa de cumplir 17 años, pesaba cerca de 200 kilos, y pertenecía a una especie en peligro crítico de extinción: el gorila occidental de llanura.",
+      "busquedas": [
+        { "q": "Harambe gorilla", "debe": ["harambe", "gorilla"] },
+        { "q": "Cincinnati Zoo gorilla world", "debe": ["cincinnati"] }
+      ],
+      "excluir": ["kenya", "kenyan", "kerry", "secretary", "disney", "animal kingdom", "market", "train", "station", "port", "derby", "afc", "susie", "postcard"],
+      "sin_videos": false
+    }
+  ]
+}

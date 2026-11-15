@@ -1,0 +1,8 @@
+﻿# Videos exportados (pesados, se regeneran)
+*.mp4
+# Datos privados
+contacto.txt
+.env
+.env.*
+# FFmpeg portatil (se instala aparte)
+herramientas/ffmpeg/

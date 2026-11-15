@@ -1,0 +1,38 @@
+# Fábrica de Casos: reglas del proyecto
+
+Sistema de producción de videos de YouTube (español) de UN SOLO CASO real, de cualquier tema y época, con título gancho (ej. "Mataron a su perro por precaución"), miniatura llamativa y narración tipo historia. El usuario es dueño del canal y graba con su propia voz. El nombre de la carpeta de cada video es interno; el título público lo elige el usuario.
+
+## Flujo (agentes en `.claude/agents`, skill `producir-caso`)
+1. `cazador-casos` -> `Ideas\casos_*.md`
+2. `analista-viralidad` -> `Ideas\ranking_casos_*.md` (mismo sufijo que la lista: `casos_X.md` -> `ranking_casos_X.md`). **AUTOMÁTICO Y OBLIGATORIO**: se lanza apenas termina el cazador, sin preguntar ni esperar al usuario, cada vez que haya una lista nueva. Nunca se salta. Se basa en todas las estadísticas disponibles (rendimiento histórico, demanda permanente, competencia, retención, miniatura, material) y también en lo que se ve actualmente. **PARADA: el usuario elige el caso**, solo cuando el ranking ya está en el Panel de Casos.
+3. `empaquetador` (título primero) -> `Proyectos\<video>\paquete.md`  **PARADA: el usuario elige título y miniatura.**
+4. `guionista-narrador` -> `guion_v1.md`
+5. `verificador` -> `verificacion.md` + `guion_v2_verificado.md`  **PARADA: el usuario revisa lo corregido.**
+6. `editor-estilo` -> `guion_final.txt` (texto plano) + `cambios_estilo.md`  **PARADA: el usuario lee y aprueba.**
+7. `empaquetador` ajusta título, miniatura, gancho y descripción al guion final. `buscador-recursos` -> `escenas.json`, `recursos\`, `revision.html`  **PARADA: el usuario revisa los recursos.**
+8. `fabrica.ps1 -Accion Papeleo` (storyboard, subtítulos estimados, descripción con créditos).
+9. Con la voz grabada en `voz\`, `edicion.ps1` genera clips por escena, borrador con subtítulos y hoja de edición para CapCut.
+
+Yo (Claude principal) coordino, lanzo un agente por paso y no avanzo a la siguiente parada sin el visto bueno del usuario.
+
+**MODO AUTOMÁTICO (autorizado por el usuario el 5/11/2026):** el usuario autorizó que el flujo pase todas las PARADAS solo, de un paso al siguiente sin esperar su visto bueno, hasta el papeleo. Elijo yo lo recomendado (título, miniatura, correcciones del verificador) y lo dejo anotado en `ficha.md` para que pueda cambiarlo. Además de la barra de cada paso, mantengo una barra `estado.ps1 -Tipo total` con el avance del video completo. Sigue sin cubrir: instalar programas, publicar algo o grabar la voz (la edición con `edicion.ps1` espera su voz en `voz\`).
+
+## Herramientas
+- `fabrica.ps1 -Accion Preparar|Revisar|Buscar|Papeleo -Proyecto "<nombre>"`: crea el proyecto, revisa el guion, baja recursos libres de Wikimedia Commons y genera el papeleo.
+- `edicion.ps1 -Proyecto "<nombre>" [-Alto 720] [-Vertical]`: material de edición para CapCut. FFmpeg está en `herramientas\ffmpeg` (enlace a la carpeta de la Fábrica Iceberg).
+- Modelo de `escenas.json`: `Proyectos\_modelo\escenas.json`.
+
+## Qué priorizar al elegir casos
+- Gancho, emoción y giro primero. La antigüedad del caso no importa.
+- Con buen material visual libre (Wikimedia Commons, NASA, Library of Congress, Internet Archive, material anterior a 1930). Solo Wikimedia se baja automático; lo demás se agrega a mano con permiso del usuario.
+- Nunca prometer visitas ni "viralidad": solo estimar probabilidades relativas con datos citados.
+- El título promete solo lo que el video cumple. Nada de acusar sin pruebas ni exponer a personas privadas o menores.
+
+## Reglas generales
+- Todo en español, directo, sin preguntas de más.
+- Cambios mínimos: al editar, hacer solo lo pedido; no reordenar ni reescribir lo demás.
+- El texto no debe sonar a IA; las opiniones y la voz son del usuario.
+- Verificar datos por búsqueda propia con fuentes confiables; decir qué se cambió.
+- Texto para copiar y pegar: texto plano en el chat, sin Markdown.
+- Solo recursos libres y del caso real. Nada de noticieros o YouTube con derechos.
+- No instalar programas sin avisar. No publicar nada en internet sin permiso.
