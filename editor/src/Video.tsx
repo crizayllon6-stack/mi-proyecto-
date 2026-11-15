@@ -5,7 +5,7 @@ import { Fondo, Glitch, Pelicula, Polvo, Salida } from './efectos';
 import { Mapa } from './escenas/Mapa';
 import { Doc, Fecha, Ficha, Imagen, Texto, Titulo } from './escenas/Escenas';
 
-const ESCENAS: Record<string, React.FC<{ datos: string[]; duracion: number; imagen?: string | null }>> = {
+const ESCENAS: Record<string, React.FC<{ datos: string[]; duracion: number; imagen?: string | null; imagenes?: string[] }>> = {
   TITULO: Titulo, MAPA: Mapa, FECHA: Fecha, FICHA: Ficha, DOC: Doc, TEXTO: Texto, IMAGEN: Imagen,
 };
 
@@ -57,7 +57,7 @@ export const Video: React.FC<{ datos: Datos; sinSubtitulos?: boolean }> = ({ dat
         const g = golpe(e);
         return (
           <Sequence key={i} from={e.inicio} durationInFrames={dur} name={`${e.tipo} ${e.datos[0] ?? ''}`}>
-            {Comp && <Salida duracion={dur}><Comp datos={e.datos} duracion={dur} imagen={e.imagen} /></Salida>}
+            {Comp && <Salida duracion={dur}><Comp datos={e.datos} duracion={dur} imagen={e.imagen} imagenes={e.imagenes} /></Salida>}
             {e.tipo !== 'PAUSA' && <Glitch />}
             {e.tipo !== 'PAUSA' && <Audio src={staticFile(e.tipo === 'TITULO' ? 'sfx/boom.mp3' : 'sfx/whoosh.mp3')} volume={0.5} />}
             {g !== null && g < dur && (

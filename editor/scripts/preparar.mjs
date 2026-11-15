@@ -93,12 +93,18 @@ export function preparar(carpeta, { vozPrueba = false, sinVoz = false, hasta = n
   const escenasFinal = escenas.map((e, i) => {
     const datos = e.datos;
     let imagen = null;
-    if (e.tipo === 'IMAGEN') imagen = buscarImagen(datos[0]);
+    let imagenes = [];
+    if (e.tipo === 'IMAGEN') {
+      // [IMAGEN: a.jpg, b.jpg | pie]  → varias fotos que se van alternando
+      imagenes = (datos[0] ?? '').split(',').map((x) => buscarImagen(x.trim())).filter(Boolean);
+      imagen = imagenes[0] ?? null;
+    }
     if (e.tipo === 'FICHA') imagen = buscarImagen(datos[4]);
     return {
       tipo: e.tipo,
       datos,
       imagen,
+      imagenes,
       inicio: Math.round(tiempos[i][0] * FPS),
       fin: Math.round((i === escenas.length - 1 ? duracion : tiempos[i][1]) * FPS),
     };

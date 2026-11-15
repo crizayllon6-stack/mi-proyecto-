@@ -1,58 +1,96 @@
 ---
 name: nuevo-video
-description: Crea un video completo de misterios sin resolver para el canal de YouTube: propone casos para que el usuario elija, investiga, escribe el guion con etiquetas de escena, verifica cada dato y prepara título, miniatura y descripción. Úsalo cuando el usuario pida un video, un guion o un caso nuevo.
+description: Fábrica de casos. Produce un video de crimen o misterio sin resolver REAL paso a paso con paradas para que el usuario decida: buscar casos y ranking, elegir caso, elegir título y miniatura, guion, verificación, estilo, aprobar, fotos, voz, video y Shorts. Úsalo cuando el usuario pida casos, un video nuevo, seguir con un video o lo que copie desde el Panel.
 ---
 
-# Nuevo video de misterio
+# Fábrica de casos: producir un video paso a paso
 
-Canal en español de **misterios sin resolver**. Sin cara, voz de Loquendo (app Voz de Soria).
-Cada video dura ~10 minutos (1 400–1 600 palabras narradas). El usuario tiene poco tiempo:
-sé breve. **El usuario decide el tema**: nunca elijas el caso por él.
+Canal en español de **crímenes y misterios sin resolver reales** (y muy poco de otros casos reales impactantes).
+Voz: Loquendo (app Voz de Soria) a partir de `voz.txt`. Video de ~10 minutos. El usuario trabaja mucho:
+en cada PARADA resume en pocas líneas, en texto simple, y espera su respuesta. Nunca elijas por él salvo
+que pida **modo automático** (entonces eliges lo recomendado y lo anotas en `ficha.md` para que pueda cambiarlo).
 
-Argumento opcional: el caso o tema. Ejemplos: `/nuevo-video el caso de Elisa Lam`,
-`/nuevo-video algo de desapariciones en el mar`, `/nuevo-video` (sin nada).
+Tú coordinas: lanzas un agente por paso (Agent con su `subagent_type`) y no avanzas de una PARADA sin su visto bueno.
+Antes de cada paso largo marca el avance en el Panel:
+`node panel/estado.mjs inicio <tipo> "<tarea>" <minutos estimados>` y al terminar `node panel/estado.mjs fin <tipo>`.
+Al final de cada paso regenera el Panel: `node panel/generar.mjs`.
 
-## 1. Elegir el caso (el usuario elige)
-- **Si el argumento es un caso concreto**: confírmalo en una línea y pasa al paso 2.
-- **Si es un tema general o no hay argumento**:
-  1. **Buscador de ideas**: busca en la web 6–8 misterios sin resolver reales (del tema pedido, si lo hay)
-     con fuentes confiables. Revisa `videos/` para no repetir casos.
-  2. **Analista viral**: para cada uno busca qué tanto se ha contado ya en YouTube en español
-     (videos existentes, si alguno explotó) y si tiene un detalle perturbador fácil de resumir en una frase.
-  3. **Selector**: muéstrale al usuario una tabla con las 5 mejores opciones y **para ahí, espera su respuesta**:
+## Dónde estamos
+Si el usuario pide "seguir" o pega algo del Panel, mira `videos/<caso>/ficha.md` (sección Estado) y sigue desde
+el primer paso sin marcar.
 
-| # | Caso | Gancho en una frase | Competencia en español | Fuentes | Puntaje /10 |
-|---|---|---|---|---|---|
+## 1. Buscar casos + ranking (automático)
+- Lanza `cazador-casos` → `Ideas/casos_AAAA-MM-DD.md` (si el usuario dio un tema, pásaselo).
+- Apenas termine, SIN preguntar, lanza `analista-viralidad` sobre esa lista → `Ideas/ranking_casos_<mismo sufijo>.md`.
+- **PARADA 1: el usuario elige el caso.** Muestra el top 3 (título, puntaje, mayor riesgo) y dile que puede ver
+  todos en el Panel, pestaña Casos/Ranking. Si el usuario ya trae un caso concreto, sáltate este paso.
 
-     Marca tu recomendada con ⭐ y di en una línea por qué. El usuario responde con el número
-     (o pide otras opciones).
+## 2. Crear la carpeta del caso
+`videos/<nombre-interno>/ficha.md` con este formato exacto (el Panel lo lee):
+```
+# <título gancho del caso>
+- Caso: <nombre real del caso>
+- Origen: Ideas/casos_X.md #N
+- Título elegido: (pendiente)
+- Miniatura elegida: (pendiente)
 
-## 2. Investigar
-Reúne fechas, lugares (con coordenadas), personas (nombre, edad, rol, estado), documentos y frases oficiales,
-y las teorías principales. Guarda las URLs.
+## Estado
+- [x] Caso elegido
+- [ ] Título y miniatura elegidos
+- [ ] Guion escrito
+- [ ] Datos verificados
+- [ ] Estilo revisado
+- [ ] Guion aprobado
+- [ ] Fotos listas
+- [ ] Publicado
+```
+Copia en `investigacion.md` lo que el cazador ya encontró del caso (resumen, giro, fuentes).
 
-## 3. Escribir el guion → agente `guionista`
-Lanza el agente **guionista** (Agent, subagent_type "guionista") pasándole: el caso, TODA la investigación
-con sus fuentes, y la ruta `videos/<slug>/guion.md` (`<slug>` en minúsculas con guiones, ej. `paso-dyatlov`).
-Él conoce el formato de escenas y las reglas de retención. Guarda su mapa de retención en
-`videos/<slug>/retencion.md`.
+## 3. Título primero
+Lanza `empaquetador` en modo "título primero" → `paquete.md`.
+**PARADA 2: el usuario elige título y miniatura** (puede elegir por número o escribir el suyo).
+Anótalos en `ficha.md` y marca `[x] Título y miniatura elegidos`.
 
-## 4. Verificar → agente `verificador`
-Lanza el agente **verificador** (Agent, subagent_type "verificador") con la ruta del guion.
-Es independiente a propósito: no le pases tu investigación, que busque por su cuenta.
-Si marca muchos ❌, vuelve a pedirle al guionista que reescriba esa parte.
+## 4. Guion
+Lanza `guionista` con la carpeta. Marca `[x] Guion escrito`.
 
-Si hay nombres extranjeros, crea `videos/<slug>/pronunciacion.txt` con líneas `Dyatlov = Diátlov`.
+## 5. Verificación
+Lanza `verificador` con la carpeta. Marca `[x] Datos verificados`.
 
-## 5. Paquete `videos/<slug>/paquete.md`
-- 5 títulos (máx. 60 caracteres), llamativos pero **verdaderos**. Marca tu favorito.
-- 3 textos de miniatura (máx. 5 palabras).
-- Descripción: 2 líneas gancho + resumen + fuentes.
-- 15 etiquetas.
-- Recordatorio: marcar "contenido alterado o sintético" si aplica.
+## 6. Estilo
+Lanza `editor-estilo` con la carpeta. Marca `[x] Estilo revisado`.
 
-## 6. Preparar
-Ejecuta `cd editor && node scripts/preparar.mjs ../videos/<slug>` para generar `voz.txt`.
-Muestra al usuario: el caso elegido, el título favorito y los pasos siguientes:
-1. Pegar `voz.txt` en Voz de Soria y guardar el audio como `videos/<slug>/voz.wav` (o .mp3).
-2. Ejecutar `cd editor && npm run render -- ../videos/<slug>`.
+**PARADA 3: el usuario aprueba el guion.** Dile en 4–6 líneas: el gancho, cuántos datos se corrigieron
+(lo importante de `verificacion.md`), palabras y minutos. Que lo lea en el Panel (pestaña Avance → Leer guion).
+Si pide cambios, hazlos (o relanza el agente que corresponda). Con su visto bueno marca `[x] Guion aprobado`.
+
+## 7. Fotos y paquete final
+- Lanza `buscador-recursos` con la carpeta (descarga fotos libres reales y las pone en el guion).
+- **PARADA 4 (rápida): el usuario revisa las fotos** en el Panel (Avance → Fotos). Puede borrar las que no le gusten
+  diciéndote cuáles. Con su visto bueno marca `[x] Fotos listas`.
+- Lanza `empaquetador` en modo "final".
+- Regenera `voz.txt`: `cd editor && node scripts/preparar.mjs ../videos/<caso>`.
+
+## 8. Voz (la hace el usuario)
+Dile: en el Panel, botón **Copiar texto para Loquendo** → pegarlo en Voz de Soria → guardar el audio como
+`videos/<caso>/voz.wav` (o `.mp3`) → avisarte.
+
+## 9. Video y Shorts
+Cuando exista la voz:
+```
+cd editor
+npm run render -- ../videos/<caso>
+npm run shorts -- ../videos/<caso>
+```
+(Marca el avance con `panel/estado.mjs`, tipo `edicion`, ~20 min.) Después copia `capitulos.txt` en la descripción
+de `paquete.md` (sección Publicación) y regenera el Panel. Dile que lo vea en el Panel, pestaña Videos.
+
+## 10. Publicado
+Cuando el usuario diga que lo subió, marca `[x] Publicado`.
+
+## Reglas
+- Nunca prometas visitas ni "viralidad".
+- Datos reales y verificados; títulos llamativos pero verdaderos; nadie señalado como culpable sin condena.
+- Sin violencia gráfica (apto para anunciantes).
+- No instales programas ni publiques nada sin permiso.
+- Texto para copiar y pegar: en texto plano, sin Markdown.

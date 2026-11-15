@@ -6,3 +6,7 @@ videos/*/voz.wav
 videos/*/voz.mp3
 videos/*/musica.*
 .DS_Store
+Panel.html
+panel/version.js
+panel/estado.js
+panel/estado.json

@@ -1,4 +1,19 @@
-# Fábrica de videos de misterios
+# Fábrica de Casos — crímenes y misterios sin resolver
+
+## Cómo empezar (cada día)
+**Doble clic en `Abrir Fabrica.bat`.** Se abre el **Panel** en el navegador y Claude Code en una ventana.
+En el Panel ves los casos, el ranking, los títulos, el avance de cada video y los videos terminados.
+Los botones copian un mensaje: lo pegas en Claude Code y él hace el trabajo. El Panel se actualiza solo.
+
+El flujo, con paradas donde **tú decides**:
+1. Claude busca 15 casos y les pone puntaje → **eliges el caso**.
+2. Te propone 10 títulos y 3 miniaturas → **eliges**.
+3. Escribe el guion, lo verifica y lo pule para Loquendo → **lo apruebas**.
+4. Busca fotos reales del caso → **las revisas**.
+5. **Pones la voz** (botón "Copiar texto para Loquendo").
+6. El editor arma el video, la miniatura y 3 Shorts → **lo subes**.
+
+---
 
 Sistema para hacer videos de **misterios sin resolver** para YouTube casi sin editar.
 

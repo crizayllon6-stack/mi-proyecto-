@@ -22,6 +22,7 @@ export type Escena = {
   tipo: 'TITULO' | 'MAPA' | 'FECHA' | 'FICHA' | 'DOC' | 'TEXTO' | 'IMAGEN' | 'PAUSA';
   datos: string[];
   imagen: string | null;
+  imagenes?: string[];
   inicio: number;
   fin: number;
 };

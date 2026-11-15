@@ -3,7 +3,7 @@ import { AbsoluteFill, Img, interpolate, random, spring, staticFile, useCurrentF
 import { C, F, escribir } from '../estilo';
 import { Camara } from '../efectos';
 
-type P = { datos: string[]; duracion: number; imagen?: string | null };
+type P = { datos: string[]; duracion: number; imagen?: string | null; imagenes?: string[] };
 const clamp = { extrapolateLeft: 'clamp', extrapolateRight: 'clamp' } as const;
 
 // ---------- TITULO: título grande con glitch ----------
@@ -207,20 +207,36 @@ export const Texto: React.FC<P> = ({ datos, duracion }) => {
   );
 };
 
-// ---------- IMAGEN: foto con movimiento lento ----------
-export const Imagen: React.FC<P> = ({ datos, duracion, imagen }) => {
+// ---------- IMAGEN: una o varias fotos reales con movimiento lento ----------
+export const Imagen: React.FC<P> = ({ datos, duracion, imagen, imagenes }) => {
   const f = useCurrentFrame();
-  const dir = random(datos[0] ?? 'x') > 0.5 ? 1 : -1;
-  const s = interpolate(f, [0, duracion], [1.05, 1.22]);
-  const x = interpolate(f, [0, duracion], [0, 40 * dir]);
+  const fotos = imagenes && imagenes.length ? imagenes : imagen ? [imagen] : [];
+  const tramo = duracion / Math.max(1, fotos.length);
+  const cruce = 12;
   return (
     <AbsoluteFill style={{ justifyContent: 'center', alignItems: 'center' }}>
-      <div style={{ width: 1500, height: 860, overflow: 'hidden', border: '14px solid #e8e2d4',
+      {/* fondo: la misma foto, borrosa y oscura, para llenar la pantalla */}
+      {fotos.map((src, i) => (
+        <Img key={`b${i}`} src={staticFile(src)} style={{ position: 'absolute', width: '100%', height: '100%',
+          objectFit: 'cover', filter: 'blur(40px) brightness(0.35) grayscale(0.5)', transform: 'scale(1.2)',
+          opacity: interpolate(f, [i * tramo - cruce, i * tramo, (i + 1) * tramo - cruce, (i + 1) * tramo],
+            [0, 1, 1, i === fotos.length - 1 ? 1 : 0], clamp) }} />
+      ))}
+      <div style={{ width: 1500, height: 860, overflow: 'hidden', border: '14px solid #e8e2d4', position: 'relative',
         boxShadow: '0 30px 90px rgba(0,0,0,0.9)', transform: 'rotate(-1deg)', background: '#222' }}>
-        {imagen ? (
-          <Img src={staticFile(imagen)} style={{ width: '100%', height: '100%', objectFit: 'cover',
-            transform: `scale(${s}) translateX(${x}px)`, filter: 'sepia(0.35) contrast(1.15) brightness(0.9)' }} />
-        ) : (
+        {fotos.length ? fotos.map((src, i) => {
+          const local = f - i * tramo;
+          const dir = random(src) > 0.5 ? 1 : -1;
+          const s = interpolate(local, [0, tramo], [1.05, 1.2], clamp);
+          const x = interpolate(local, [0, tramo], [0, 40 * dir], clamp);
+          const o = i === 0 ? 1 : interpolate(local, [-cruce, 0], [0, 1], clamp);
+          if (local < -cruce || local > tramo + cruce) return null;
+          return (
+            <Img key={i} src={staticFile(src)} style={{ position: 'absolute', inset: 0, width: '100%', height: '100%',
+              objectFit: 'cover', opacity: o, transform: `scale(${s}) translateX(${x}px)`,
+              filter: 'sepia(0.3) contrast(1.12) brightness(0.92)' }} />
+          );
+        }) : (
           <AbsoluteFill style={{ justifyContent: 'center', alignItems: 'center', fontFamily: F.maquina,
             color: '#777', fontSize: 40 }}>[ imagen: {datos[0]} ]</AbsoluteFill>
         )}
