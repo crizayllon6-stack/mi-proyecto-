@@ -1,6 +1,6 @@
 ---
 name: nuevo-video
-description: Fábrica de casos. Produce un video de crimen o misterio sin resolver REAL paso a paso con paradas para que el usuario decida: buscar casos y ranking, elegir caso, elegir título y miniatura, guion, verificación, estilo, aprobar, fotos, voz, video y Shorts. Úsalo cuando el usuario pida casos, un video nuevo, seguir con un video o lo que copie desde el Panel.
+description: Fábrica de casos. Produce un video de crimen o misterio sin resolver REAL paso a paso con paradas para que el usuario decida: buscar casos y ranking, elegir caso, elegir título y miniatura, guion, verificación, estilo, aprobar; luego el usuario pone la voz y el video y los Shorts se arman solos. Úsalo cuando el usuario pida casos, un video nuevo, seguir con un video o lo que copie desde el Panel.
 ---
 
 # Fábrica de casos: producir un video paso a paso
@@ -41,7 +41,6 @@ el primer paso sin marcar.
 - [ ] Datos verificados
 - [ ] Estilo revisado
 - [ ] Guion aprobado
-- [ ] Fotos listas
 - [ ] Publicado
 ```
 Copia en `investigacion.md` lo que el cazador ya encontró del caso (resumen, giro, fuentes).
@@ -62,28 +61,28 @@ Lanza `editor-estilo` con la carpeta. Marca `[x] Estilo revisado`.
 
 **PARADA 3: el usuario aprueba el guion.** Dile en 4–6 líneas: el gancho, cuántos datos se corrigieron
 (lo importante de `verificacion.md`), palabras y minutos. Que lo lea en el Panel (pestaña Avance → Leer guion).
-Si pide cambios, hazlos (o relanza el agente que corresponda). Con su visto bueno marca `[x] Guion aprobado`.
+Si pide cambios, hazlos (o relanza el agente que corresponda). Con su visto bueno marca `[x] Guion aprobado`
+y sigue sin parar hasta el paso 8.
 
-## 7. Fotos y paquete final
-- Lanza `buscador-recursos` con la carpeta (descarga fotos libres reales y las pone en el guion).
-- **PARADA 4 (rápida): el usuario revisa las fotos** en el Panel (Avance → Fotos). Puede borrar las que no le gusten
-  diciéndote cuáles. Con su visto bueno marca `[x] Fotos listas`.
+## 7. Paquete final y texto para la voz
 - Lanza `empaquetador` en modo "final".
 - Regenera `voz.txt`: `cd editor && node scripts/preparar.mjs ../videos/<caso>`.
+- (Opcional, solo si el usuario lo pide: `buscador-recursos` para meter fotos reales del caso.)
 
 ## 8. Voz (la hace el usuario)
 Dile: en el Panel, botón **Copiar texto para Loquendo** → pegarlo en Voz de Soria → guardar el audio como
-`videos/<caso>/voz.wav` (o `.mp3`) → avisarte.
+`videos/<caso>/voz.wav` (o `.mp3`). **No tiene que hacer nada más.**
 
-## 9. Video y Shorts
-Cuando exista la voz:
+## 9. Video y Shorts (automático)
+Con el Panel abierto (`Abrir Fabrica.bat`), el vigilante (`panel/vigilar.mjs`) detecta la voz y arma solo el video,
+la miniatura y los 3 Shorts; en el Panel se ve la barra de avance. Si el usuario no abrió el Panel o te pide
+armarlo, hazlo tú:
 ```
 cd editor
 npm run render -- ../videos/<caso>
 npm run shorts -- ../videos/<caso>
 ```
-(Marca el avance con `panel/estado.mjs`, tipo `edicion`, ~20 min.) Después copia `capitulos.txt` en la descripción
-de `paquete.md` (sección Publicación) y regenera el Panel. Dile que lo vea en el Panel, pestaña Videos.
+Si falló (existe `salida/error.txt`), lee `salida/armado.log`, arréglalo, borra `error.txt` y vuelve a armar.
 
 ## 10. Publicado
 Cuando el usuario diga que lo subió, marca `[x] Publicado`.

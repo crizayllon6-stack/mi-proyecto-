@@ -26,14 +26,12 @@ function accion(v) {
     case 'guion': case 'verificado': case 'estilo': return { tu: 'Claude está escribiendo y revisando el guion. Si se detuvo, pídele que siga.',
       btn: copiar(`/nuevo-video Sigue con el video ${v.nombre}`, '📋 Copiar "sigue"') };
     case 'aprobado': return { tu: 'Lee el guion (abajo) y apruébalo o pide cambios.',
-      btn: copiar(`/nuevo-video Apruebo el guion de ${v.nombre}, sigue con las fotos.`, '📋 Copiar "apruebo el guion"') };
-    case 'fotos': return { tu: v.imagenes.length ? 'Revisa las fotos (abajo). Si alguna no es del caso, dile a Claude cuál borrar.'
-      : 'Claude tiene que buscar las fotos reales del caso.',
-      btn: copiar(v.imagenes.length ? `/nuevo-video Las fotos de ${v.nombre} están bien, sigue.` : `/nuevo-video Busca las fotos de ${v.nombre}`,
-        v.imagenes.length ? '📋 Copiar "fotos bien"' : '📋 Copiar "busca fotos"') };
-    case 'voz': return { tu: `Copia el texto, pégalo en Voz de Soria y guarda el audio como <code>${esc(v.carpeta)}/voz.wav</code>.`,
+      btn: copiar(`/nuevo-video Apruebo el guion de ${v.nombre}, sigue.`, '📋 Copiar "apruebo el guion"') };
+    case 'voz': return { tu: `Copia el texto, pégalo en Voz de Soria y guarda el audio como <code>${esc(v.carpeta)}/voz.wav</code> (o voz.mp3). <b>El video y los Shorts se arman solos</b> en cuanto dejes la voz.`,
       btn: v.vozTxt ? copiar(v.vozTxt, '🎙️ Copiar texto para Loquendo', 'grande') : '' };
-    case 'video': case 'shorts': return { tu: 'Ya tienes la voz. Pide que arme el video y los Shorts (tarda unos minutos).',
+    case 'video': case 'shorts': return v.error ? { tu: `⚠️ Falló el armado del video. Pásale el aviso a Claude para que lo arregle.`,
+      btn: copiar(`/nuevo-video Falló el armado de ${v.nombre}, revisa videos/${v.nombre}/salida/armado.log y arréglalo`, '📋 Copiar "falló el armado"') }
+      : { tu: 'Ya está la voz: el video y los Shorts se están armando solos (mira la barra en Inicio). Si no avanza, abre el Panel con Abrir Fabrica.bat o pídeselo a Claude.',
       btn: copiar(`/nuevo-video Ya dejé la voz de ${v.nombre}. Arma el video y los Shorts.`, '📋 Copiar "arma el video"') };
     case 'publicado': return { tu: 'Súbelo a YouTube (pestaña Videos: título y descripción listos para copiar).',
       btn: copiar(`/nuevo-video Ya publiqué ${v.nombre}`, '📋 Copiar "ya lo publiqué"') };
