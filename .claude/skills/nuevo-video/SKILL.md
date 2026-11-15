@@ -1,21 +1,31 @@
 ---
 name: nuevo-video
-description: Crea un video completo de misterios sin resolver para el canal de YouTube: elige el caso, investiga, escribe el guion con etiquetas de escena, verifica cada dato y prepara título, miniatura y descripción. Úsalo cuando el usuario pida un video, un guion o un caso nuevo.
+description: Crea un video completo de misterios sin resolver para el canal de YouTube: propone casos para que el usuario elija, investiga, escribe el guion con etiquetas de escena, verifica cada dato y prepara título, miniatura y descripción. Úsalo cuando el usuario pida un video, un guion o un caso nuevo.
 ---
 
 # Nuevo video de misterio
 
 Canal en español de **misterios sin resolver**. Sin cara, voz de Loquendo (app Voz de Soria).
 Cada video dura ~10 minutos (1 400–1 600 palabras narradas). El usuario tiene poco tiempo:
-entrégale todo listo, no le hagas preguntas salvo que sea imprescindible.
+sé breve. **El usuario decide el tema**: nunca elijas el caso por él.
 
-Argumento opcional: el caso a tratar. Si no hay, elige tú.
+Argumento opcional: el caso o tema. Ejemplos: `/nuevo-video el caso de Elisa Lam`,
+`/nuevo-video algo de desapariciones en el mar`, `/nuevo-video` (sin nada).
 
-## 1. Elegir el caso
-- Busca en la web misterios sin resolver reales con fuentes confiables (prensa, archivos, documentos oficiales).
-- Revisa `videos/` para no repetir casos.
-- Prefiere casos poco contados en español, con un detalle visual o perturbador fácil de resumir en una frase.
-- Escoge 1 y anota en una línea por qué.
+## 1. Elegir el caso (el usuario elige)
+- **Si el argumento es un caso concreto**: confírmalo en una línea y pasa al paso 2.
+- **Si es un tema general o no hay argumento**:
+  1. **Buscador de ideas**: busca en la web 6–8 misterios sin resolver reales (del tema pedido, si lo hay)
+     con fuentes confiables. Revisa `videos/` para no repetir casos.
+  2. **Analista viral**: para cada uno busca qué tanto se ha contado ya en YouTube en español
+     (videos existentes, si alguno explotó) y si tiene un detalle perturbador fácil de resumir en una frase.
+  3. **Selector**: muéstrale al usuario una tabla con las 5 mejores opciones y **para ahí, espera su respuesta**:
+
+| # | Caso | Gancho en una frase | Competencia en español | Fuentes | Puntaje /10 |
+|---|---|---|---|---|---|
+
+     Marca tu recomendada con ⭐ y di en una línea por qué. El usuario responde con el número
+     (o pide otras opciones).
 
 ## 2. Investigar
 Reúne fechas, lugares (con coordenadas), personas (nombre, edad, rol, estado), documentos y frases oficiales,
