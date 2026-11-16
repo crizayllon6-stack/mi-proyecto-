@@ -5,7 +5,7 @@ description: Fábrica de casos. Produce un video de crimen o misterio sin resolv
 
 # Fábrica de casos: producir un video paso a paso
 
-Canal en español de **crímenes y misterios sin resolver reales** (y muy poco de otros casos reales impactantes).
+Canal en español de **casos reales muy llamativos y poco contados**: misterios, crímenes y casos nacidos en internet (Reddit, 4chan, Telegram, foros). Nada de casos ya "quemados" en YouTube en español.
 Voz: Loquendo (app Voz de Soria) a partir de `voz.txt`. Video de ~10 minutos. El usuario trabaja mucho:
 en cada PARADA resume en pocas líneas, en texto simple, y espera su respuesta. Nunca elijas por él salvo
 que pida **modo automático** (entonces eliges lo recomendado y lo anotas en `ficha.md` para que pueda cambiarlo).
