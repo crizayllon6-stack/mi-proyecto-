@@ -1,0 +1,20 @@
+{
+  "modelo_whisper": "small",
+  "idioma": "es",
+  "sensibilidad_cortes": 0.3,
+  "zoom_en_cortes": true,
+  "zoom_lento": true,
+  "transiciones": true,
+  "palabras_con_zoom": [
+    "nuevo", "nueva", "nuevos", "nuevas", "llegó", "llegaron", "oferta", "ofertas", "descuento",
+    "original", "originales", "exclusivo", "exclusiva", "limitada", "limitado", "último", "últimos",
+    "mira", "miren", "top", "brutal", "increíble", "edición", "hoy", "gratis", "colores", "tallas", "ya"
+  ],
+  "subtitulos": {
+    "color_activa": "#FFE600",
+    "color": "#FFFFFF",
+    "palabras_por_bloque": 3,
+    "tamano": 84,
+    "altura": 0.66
+  }
+}

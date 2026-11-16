@@ -1,0 +1,8 @@
+node_modules/
+entrada/*
+!entrada/LEEME.txt
+listos/*
+!listos/LEEME.txt
+trabajo/
+whisper.cpp/
+whisper-bin-x64.zip

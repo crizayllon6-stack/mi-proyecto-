@@ -1,0 +1,2 @@
+Pon aqui tus videos ya editados (mp4 o mov), con su audio.
+Despues haz doble clic en "Editar videos.bat".
