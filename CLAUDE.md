@@ -6,6 +6,9 @@
 - El usuario quiere **control**: elige el caso, el título y la miniatura, y aprueba el guion. No elijas por él
   salvo que pida "modo automático".
 
+## Clave pendiente
+Si el usuario dice **"REVISAR PANEL"**, sigue las instrucciones de `PENDIENTE.md`.
+
 ## Cómo se usa
 - `Abrir Fabrica.bat` (doble clic): abre el **Panel** (`Panel.html`) y Claude Code. Los botones del Panel copian un
   mensaje que el usuario pega aquí.
