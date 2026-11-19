@@ -74,6 +74,13 @@ input[type=file] { position: absolute; width: 1px; height: 1px; opacity: 0; over
 dialog { border: 0; padding: 0; width: min(560px, 100vw); max-height: 92vh; border-radius: 18px; background: var(--chat); color: var(--fg) }
 dialog::backdrop { background: rgba(0,0,0,.55) }
 #recorte { background: #05090f; color: #fff; padding: 0; overflow: hidden }
+#recorte[open] { animation: subir .26s cubic-bezier(.2,.8,.2,1) }
+#recorte.saliendo { animation: bajar .18s ease-in forwards }
+@keyframes subir { from { opacity: 0; transform: translateY(30px) scale(.97) } to { opacity: 1; transform: none } }
+@keyframes bajar { to { opacity: 0; transform: translateY(20px) scale(.97) } }
+.rc-zona.cargando { min-width: 260px; min-height: 260px; background: linear-gradient(100deg, #101a2b 30%, #1b2a44 50%, #101a2b 70%) 0 0 / 200% 100%; animation: brillo 1s linear infinite; border-radius: 12px }
+@keyframes brillo { to { background-position: -200% 0 } }
+#rc-buscar.apretado { opacity: .7; transform: scale(.98) }
 .rc-top { padding: 14px 16px; display: flex; flex-direction: column; gap: 2px } .rc-top small { color: #aab6c8 }
 .rc-zona { position: relative; margin: 0 auto; width: fit-content; max-width: 100%; touch-action: none; user-select: none }
 .rc-zona img { display: block; max-width: 100%; max-height: 62vh }
@@ -102,17 +109,22 @@ dialog::backdrop { background: rgba(0,0,0,.55) }
 .escaner { align-items: center }
 .visor { position: relative; width: min(280px, 80%); aspect-ratio: 1; border-radius: 14px; overflow: hidden; background: var(--line) }
 .visor img { width: 100%; height: 100%; object-fit: cover; display: block; filter: saturate(.85) contrast(1.05) }
-.laser { position: absolute; left: 0; right: 0; height: 3px; background: var(--accent2); box-shadow: 0 0 16px 5px color-mix(in srgb, var(--accent2) 75%, transparent); top: 0; animation: barrido .8s ease-in-out infinite alternate }
+.barrido { position: absolute; left: 0; right: 0; top: 2%; height: 94%; animation: barrido .9s ease-in-out infinite alternate; will-change: transform; z-index: 1 }
+.laser { position: absolute; left: 0; right: 0; top: 0; height: 3px; background: var(--accent2); box-shadow: 0 0 16px 5px color-mix(in srgb, var(--accent2) 75%, transparent) }
 .visor::after { content: ""; position: absolute; inset: 0; background: repeating-linear-gradient(0deg, transparent 0 6px, color-mix(in srgb, var(--accent) 10%, transparent) 6px 7px) }
 .esq { position: absolute; width: 26px; height: 26px; border: 4px solid var(--accent2); z-index: 1 }
 .esq.a { top: 10px; left: 10px; border-right: 0; border-bottom: 0; border-top-left-radius: 8px }
 .esq.b { top: 10px; right: 10px; border-left: 0; border-bottom: 0; border-top-right-radius: 8px }
 .esq.c { bottom: 10px; left: 10px; border-right: 0; border-top: 0; border-bottom-left-radius: 8px }
 .esq.d { bottom: 10px; right: 10px; border-left: 0; border-top: 0; border-bottom-right-radius: 8px }
-@keyframes barrido { from { top: 4% } to { top: 94% } }
+@keyframes barrido { from { transform: translateY(0) } to { transform: translateY(100%) } }
 .pasando { display: flex; align-items: center; gap: 12px }
-.pasando img { width: 52px; height: 52px; border-radius: 8px; object-fit: cover; border: 2px solid var(--accent) }
-.pasando b { font: 900 1.6rem var(--f-display); font-variant-numeric: tabular-nums; display: block; line-height: 1 }
+.radar { width: 52px; height: 52px; border-radius: 50%; flex: none; will-change: transform;
+  background: conic-gradient(from 0deg, transparent 0 70%, var(--accent2)); animation: girar 1s linear infinite;
+  -webkit-mask: radial-gradient(circle, transparent 42%, #000 44%); mask: radial-gradient(circle, transparent 42%, #000 44%) }
+@keyframes girar { to { transform: rotate(360deg) } }
+.pasando .radar + div b { font: 700 1.1rem var(--f-display) }
+.pasando b { display: block; line-height: 1.2 }
 .pasando small { color: var(--mut) }
 /* resultado */
 .resultado.entra { animation: aparecer .45s ease-out }
@@ -135,7 +147,7 @@ dialog::backdrop { background: rgba(0,0,0,.55) }
 .duo figcaption { font-size: .8rem; color: var(--mut); overflow: hidden; text-overflow: ellipsis; white-space: nowrap }
 .duo figure:first-child figcaption { color: var(--accent); font-weight: 700 }
 
-@media (prefers-reduced-motion: reduce) { * { transition: none !important } }
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important } }
 </style>
 
 <main>
@@ -187,7 +199,7 @@ dialog::backdrop { background: rgba(0,0,0,.55) }
 <dialog id="recorte" aria-labelledby="rc-t">
   <div class="rc-top"><b id="rc-t">Marca el tenis</b><small>Arrastra el recuadro y sus esquinas para que quede sólo el tenis.</small></div>
   <div class="rc-zona" id="rc-zona"><img id="rc-img" alt="Tu foto">
-    <div class="rc-caja" id="rc-caja"><span data-esq="ia"></span><span data-esq="da"></span><span data-esq="ib"></span><span data-esq="db"></span><i class="laser"></i></div></div>
+    <div class="rc-caja" id="rc-caja"><span data-esq="ia"></span><span data-esq="da"></span><span data-esq="ib"></span><span data-esq="db"></span><div class="barrido"><i class="laser"></i></div></div></div>
   <div class="rc-btns"><button class="btn grande" id="rc-buscar">🔍 Buscar este tenis</button>
     <div class="btns"><button class="btn sec" id="rc-toda">Usar la foto entera</button><button class="btn sec" id="rc-cancelar">Cancelar</button></div></div>
 </dialog>
@@ -416,9 +428,12 @@ async function cargarArchivos(files, sueltas) {
 // ---------- Marcar el tenis con un recuadro (como en Google Lens) ----------
 function marcarTenis(file) {
   return new Promise(async (listo) => {
-    const foto = await cargarImagen(file, 900);
     const dlg = $('recorte'), zona = $('rc-zona'), caja = $('rc-caja'), img = $('rc-img');
-    img.src = foto.toDataURL('image/jpeg', 0.9);
+    const url = URL.createObjectURL(file);
+    zona.classList.add('cargando'); img.src = url;
+    dlg.showModal();                                   // se abre al instante
+    img.onload = () => zona.classList.remove('cargando');
+    const fotoLista = cargarImagen(file, 900);         // se prepara mientras marcas el recuadro
     let b = { x: 0.1, y: 0.1, w: 0.8, h: 0.8 };   // recuadro en proporción de la foto
     const pintar = () => Object.assign(caja.style, { left: `${b.x * 100}%`, top: `${b.y * 100}%`, width: `${b.w * 100}%`, height: `${b.h * 100}%` });
     pintar();
@@ -442,16 +457,21 @@ function marcarTenis(file) {
       b = { x, y, w, h }; pintar();
     };
     caja.onpointerdown = abajo; caja.onpointermove = mueve; caja.onpointerup = caja.onpointercancel = () => { arrastre = null; };
-    const cerrar = (resultado) => { dlg.close(); listo(resultado); };
-    $('rc-buscar').onclick = () => {
+    const cerrar = (resultado) => {
+      dlg.classList.add('saliendo');
+      setTimeout(() => { dlg.close(); dlg.classList.remove('saliendo'); URL.revokeObjectURL(url); listo(resultado); }, reducido ? 0 : 180);
+    };
+    $('rc-buscar').onclick = async () => {
+      $('rc-buscar').classList.add('apretado');
+      const foto = await fotoLista;
+      $('rc-buscar').classList.remove('apretado');
       const c = document.createElement('canvas');
       c.width = Math.max(1, Math.round(foto.width * b.w)); c.height = Math.max(1, Math.round(foto.height * b.h));
       c.getContext('2d').drawImage(foto, foto.width * b.x, foto.height * b.y, c.width, c.height, 0, 0, c.width, c.height);
       cerrar(c);
     };
-    $('rc-toda').onclick = () => cerrar(foto);
+    $('rc-toda').onclick = async () => cerrar(await fotoLista);
     $('rc-cancelar').onclick = () => cerrar(null);
-    dlg.showModal();
   });
 }
 
@@ -500,17 +520,16 @@ function calibrar(lista) {
   }
 }
 async function animarEscaneo(thumbQuery, total) {
-  const fotos = estado.chats.flatMap((c) => c.fotos.map((f) => f.thumb));
   $('resultados').innerHTML = `<div class="card escaner">
-    <div class="visor"><img src="${thumbQuery}" alt="Tu foto"><i class="laser"></i>
+    <div class="visor"><img src="${thumbQuery}" alt="Tu foto"><div class="barrido"><i class="laser"></i></div>
       <span class="esq a"></span><span class="esq b"></span><span class="esq c"></span><span class="esq d"></span></div>
-    <div class="pasando"><img id="pasa" src="${fotos[0] || ''}" alt=""><div><b id="pasa-n">0</b><small>de ${total} fotos comparadas</small></div></div>
+    <div class="pasando"><div class="radar" aria-hidden="true"></div>
+      <div><b>Analizando con la IA…</b><small>Comparando con ${total} fotos de tus chats</small></div></div>
   </div>`;
-  if (reducido) return () => {};
-  let i = 0, vivo = true, cuenta = 0;
-  (async () => { while (vivo) { i = (i + 1) % fotos.length; const el = $('pasa'); if (el) el.src = fotos[i];
-    cuenta = Math.min(total, cuenta + total / 22); const n = $('pasa-n'); if (n) n.textContent = Math.round(cuenta); await esperar(70); } })();
-  return () => { vivo = false; };
+  $('resultados').scrollIntoView({ behavior: 'auto', block: 'start' });
+  // deja que la pantalla se dibuje antes de que la IA empiece a trabajar
+  await new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(() => setTimeout(r, 60))));
+  return () => {};
 }
 // Varias fotos del mismo tenis (distintos ángulos): cada foto del chat se queda con su mejor coincidencia.
 async function buscar(files, agregar = false) {
