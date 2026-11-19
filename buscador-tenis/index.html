@@ -147,6 +147,17 @@ dialog::backdrop { background: rgba(0,0,0,.55) }
 .chip-modelo { display: inline-block; font-size: .74rem; font-weight: 700; color: var(--accent); background: color-mix(in srgb, var(--accent) 12%, var(--card)); border-radius: 99px; padding: 2px 8px; max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap }
 .res { transition: transform .15s, box-shadow .15s } .res:active { transform: scale(.97) }
 .res:hover { box-shadow: 0 8px 22px -14px rgba(20,60,140,.5) }
+.precio { display: flex; gap: 14px; align-items: flex-start; border-radius: 16px; padding: 14px 16px; color: #fff;
+  background: linear-gradient(135deg, #0f9d58, #12b886); box-shadow: 0 10px 24px -14px rgba(15,157,88,.8) }
+.precio > span { font-size: 1.8rem; line-height: 1 } .precio > div { display: flex; flex-direction: column; gap: 4px; min-width: 0 }
+.precio .monto { font: 900 2.2rem/1 var(--f-display); letter-spacing: -.01em; font-variant-numeric: tabular-nums }
+.precio small { color: rgba(255,255,255,.9) } .precio .aviso { font-weight: 700 }
+.precio.duda { background: linear-gradient(135deg, #b7791f, #d69e2e) }
+.precio.sin { background: var(--card); color: var(--fg); border: 1.5px dashed var(--line); box-shadow: none } .precio.sin small { color: var(--mut) }
+.historial { display: flex; flex-wrap: wrap; gap: 6px }
+.hist { border: 0; border-radius: 99px; padding: 4px 10px; background: rgba(255,255,255,.22); color: #fff; font: 700 .85rem var(--f-body); cursor: pointer }
+.hist small { opacity: .85; font-weight: 500 }
+.chip-precio { display: inline-block; font-size: .8rem; font-weight: 800; color: #fff; background: #0f9d58; border-radius: 99px; padding: 2px 9px; margin-bottom: 2px }
 .otro-color { font-size: .72rem; font-weight: 700; color: var(--warn) }
 .aviso-parcial { background: color-mix(in srgb, var(--accent) 10%, var(--card)); border: 1px solid var(--line); border-radius: 12px; padding: 10px 12px; margin: 0 }
 .duo { display: grid; grid-template-columns: 1fr 1fr; gap: 10px }
@@ -469,6 +480,7 @@ async function cargarArchivos(files, sueltas) {
       if (i % 8 === 7) await new Promise((r) => setTimeout(r, 0));
     }
     const chat = { id: `${Date.now()}`, nombre, mensajes, fotos, creado: Date.now() };
+    calcularPrecios(chat);
     estado.chats.push(chat);
     await guardarChat(chat);
     $('cargando').hidden = true;
@@ -660,23 +672,42 @@ function pintarResultados(animar = false) {
     : ['v-bad', 'No aparece', 'Ninguna foto se destaca. Este tenis no parece estar en tus chats.'];
   $('resultados').innerHTML = `<div class="card resultado ${animar ? 'entra' : ''}">
     <div class="veredicto ${v[0]}"><div class="v-txt"><b>${v[1]}</b><span>${v[2]}</span></div>${anillo(mejor, c)}</div>
-    <div class="angulos"><div class="mini-fotos">${estado.consulta.map((q) => `<img src="${q.thumb}" alt="">`).join('')}</div>
-      <span class="nota">${estado.consulta.length === 1 ? '1 foto de este tenis' : `${estado.consulta.length} fotos de este tenis`}${c !== 'ok' ? ' · Sácale otra desde otro ángulo para ayudar' : ''}</span>
-      <div class="btns"><label class="btn sec" for="in-angulo">➕ Otro ángulo</label><label class="btn sec" for="in-angulo-gal">🖼️ Desde galería</label></div></div>
+    ${(() => {
+      if (!best || c === 'bad') return '';
+      const ps = preciosDelTenis(u.lista, best);
+      if (!ps.length) {
+        const resp = [best, ...u.lista.filter((r) => r.p >= Math.max(0.45, best.p * 0.6) && r.color >= 0.25)].find((r) => r.foto.respuesta)?.foto.respuesta;
+        return resp ? `<div class="precio sin"><span>💬</span><div><b>${esc(resp.autor)} dijo: “${esc(resp.texto)}”</b><small>El ${esc(resp.fecha)} a las ${esc(resp.hora)} · no dio precio</small></div></div>`
+          : `<div class="precio sin"><span>💰</span><div><b>Sin precio</b><small>No encontré una respuesta con precio después de esta foto. Mira el chat.</small></div></div>`;
+      }
+      const a = ps[0].foto.precio;
+      const valores = [...new Set(ps.map((r) => r.foto.precio.valor))];
+      return `<div class="precio ${a.dudoso ? 'duda' : ''}"><span>💰</span><div>
+        <b class="monto">${bs(a.valor)}</b>
+        <small>Te lo dijo ${esc(a.autor)} el ${esc(a.fecha)} a las ${esc(a.hora)}${ps.length > 1 ? ` · preguntaste ${ps.length} veces` : ''}</small>
+        ${a.dudoso ? '<small class="aviso">⚠ Verifica en el chat: mandaste varias fotos seguidas y el precio podría ser de otra.</small>' : ''}
+        ${ps.length > 1 ? `<div class="historial">${ps.slice(1, 5).map((r) => `<button class="hist" data-h="${u.lista.indexOf(r)}">${bs(r.foto.precio.valor)} <small>${esc(r.foto.precio.fecha)}</small></button>`).join('')}</div>` : ''}
+        ${valores.length > 1 ? '<small class="aviso">El precio cambió con el tiempo: te muestro el más reciente.</small>' : ''}
+      </div></div>`;
+    })()}
     ${best ? `<div class="duo">
       <figure><img src="${estado.consulta[best.cual]?.thumb || ''}" alt="Tu foto"><figcaption>Tu foto</figcaption></figure>
       <figure><img src="${best.foto.thumb}" alt="Foto del chat"><figcaption>${best.foto.modelo?.tenis ? `<span class="chip-modelo">${esc(nombreModelo(best.foto.modelo))}</span><br>` : ''}${esc(best.chat.nombre)} · ${esc([best.foto.fecha, best.foto.hora].filter(Boolean).join(' '))}</figcaption></figure>
     </div>
     <button class="btn grande" id="ver-mejor">💬 Ver en el chat</button>` : ''}
     ${estado.ultimoArchivo ? `<button class="btn sec" id="re-marcar" style="justify-content:center">✂️ Marcar el tenis y volver a buscar</button>` : ''}
+    <div class="angulos"><div class="mini-fotos">${estado.consulta.map((q) => `<img src="${q.thumb}" alt="">`).join('')}</div>
+      <span class="nota">${estado.consulta.length === 1 ? '1 foto de este tenis' : `${estado.consulta.length} fotos de este tenis`}${c !== 'ok' ? ' · Sácale otra desde otro ángulo para ayudar' : ''}</span>
+      <div class="btns"><label class="btn sec" for="in-angulo">➕ Otro ángulo</label><label class="btn sec" for="in-angulo-gal">🖼️ Desde galería</label></div></div>
     ${u.pendientes ? `<p class="nota aviso-parcial">🔄 Busqué en <b>${u.total - u.pendientes} de ${u.total}</b> fotos. Las otras ${u.pendientes} se siguen preparando arriba; vuelve a buscar en un rato para incluirlas.</p>` : ''}
     ${top.length > 1 ? `<h2>Otras parecidas</h2><div class="grid">${top.slice(1).map((r, i) => {
       const p = pct(r.p);
       return `<button class="res" data-i="${i + 1}"><img src="${r.foto.thumb}" alt=""><div><span class="pct ${clase(p)}">${p}%</span>
-        ${r.foto.modelo?.tenis ? `<span class="chip-modelo">${esc(nombreModelo(r.foto.modelo))}</span>` : ''}${r.color < 0.25 ? '<span class="otro-color">⚠ otro color</span>' : ''}<small>${esc(r.chat.nombre)}</small><small>${esc([r.foto.fecha, r.foto.hora].filter(Boolean).join(' · '))}${r.foto.autor ? ' · ' + esc(r.foto.autor) : ''}</small></div></button>`;
+        ${r.foto.precio ? `<span class="chip-precio">${bs(r.foto.precio.valor)}${r.foto.precio.dudoso ? ' ⚠' : ''}</span>` : ''}${r.foto.modelo?.tenis ? `<span class="chip-modelo">${esc(nombreModelo(r.foto.modelo))}</span>` : ''}${r.color < 0.25 ? '<span class="otro-color">⚠ otro color</span>' : ''}<small>${esc(r.chat.nombre)}</small><small>${esc([r.foto.fecha, r.foto.hora].filter(Boolean).join(' · '))}${r.foto.autor ? ' · ' + esc(r.foto.autor) : ''}</small></div></button>`;
     }).join('')}</div>` : ''}
   </div>`;
   $('ver-mejor')?.addEventListener('click', () => abrirChat(best));
+  $('resultados').querySelectorAll('.hist').forEach((b) => b.addEventListener('click', () => abrirChat(u.lista[+b.dataset.h])));
   $('re-marcar')?.addEventListener('click', async () => {
     const recortada = await marcarTenis(estado.ultimoArchivo);
     if (!recortada) return;
@@ -727,6 +758,75 @@ function abrirChat(r) {
 }
 $('vc-cerrar').addEventListener('click', () => $('vista-chat').close());
 $('vista-chat').addEventListener('click', (e) => { if (e.target === $('vista-chat')) $('vista-chat').close(); });
+
+// ---------- Precios: lo que te respondió tu jefa después de cada foto ----------
+// El chat exportado NO guarda a qué foto respondió (si citó el mensaje), así que:
+// 1 foto + 1 número = seguro; varias fotos seguidas + varios números = en orden y "verifica".
+function aFecha(f, h) {
+  const m = (f || '').match(/(\d{1,2})\/(\d{1,2})\/(\d{2,4})/); if (!m) return 0;
+  const y = +m[3] < 100 ? 2000 + +m[3] : +m[3];
+  let [hh, mm] = (h || '0:0').match(/\d+/g)?.map(Number) ?? [0, 0];
+  if (/p\.?\s?m/i.test(h || '') && hh < 12) hh += 12;
+  return new Date(y, +m[2] - 1, +m[1], hh || 0, mm || 0).getTime();
+}
+function numerosPrecio(texto = '') {
+  if (/https?:|\d{1,2}\/\d{1,2}|\d{1,2}:\d{2}/.test(texto) && !/^\s*\d/.test(texto)) return [];
+  const t = texto.replace(/(\d)[.,](\d{3})(?!\d)/g, '$1$2');            // 1.200 → 1200
+  const out = [];
+  for (const m of t.matchAll(/(?<![\d/:])(\d{2,5})(?![\d/:])/g)) {
+    const n = +m[1];
+    const antes = t.slice(Math.max(0, m.index - 8), m.index).toLowerCase();
+    if (/talla|t\.?\s*$|n[uú]mero|#/.test(antes)) continue;          // "talla 42"
+    if (n >= 80 && n <= 20000) out.push(n);
+  }
+  return out;
+}
+function quienDaPrecios(c) {
+  const cuenta = new Map();
+  for (const m of c.mensajes) if (m.autor && !m.archivo && numerosPrecio(m.texto).length) cuenta.set(m.autor, (cuenta.get(m.autor) || 0) + 1);
+  return [...cuenta.entries()].sort((a, b) => b[1] - a[1])[0]?.[0] || null;
+}
+function calcularPrecios(c) {
+  if (!c.mensajes?.length) return;
+  const jefa = c.jefa || quienDaPrecios(c); c.jefaAuto = jefa;
+  if (!jefa) return;
+  const porArchivo = new Map(c.fotos.map((f) => [f.archivo, f]));
+  for (const f of c.fotos) delete f.precio;
+  for (const f of c.fotos) delete f.respuesta;
+  const VENCE = 12 * 36e5;                       // una foto espera su precio hasta 12 h
+  let pend = [];
+  c.mensajes.forEach((m, i) => {
+    const t = aFecha(m.fecha, m.hora);
+    pend = pend.filter((f) => t - aFecha(f.fecha, f.hora) <= VENCE);
+    if (m.archivo && m.autor !== jefa) { const f = porArchivo.get(m.archivo); if (f) pend.push(f); return; }
+    if (m.autor !== jefa || m.archivo || !pend.length) return;
+    const nums = numerosPrecio(m.texto);
+    if (!nums.length) {
+      // respondió sin número ("ya no hay", "agotado"): si había una sola foto esperando, es su respuesta
+      const txt = (m.texto || '').trim();
+      if (pend.length === 1 && txt.length > 1 && !/^(ok|oki|okey|ya|si|sí|dale|gracias|👍)\W*$/i.test(txt)) {
+        pend[0].respuesta = { texto: txt.slice(0, 120), fecha: m.fecha, hora: m.hora, autor: m.autor, idx: i };
+        pend = [];
+      }
+      return;
+    }
+    const varios = pend.length > 1 || nums.length > 1;
+    for (const n of nums) {
+      const f = pend.shift(); if (!f) break;
+      f.precio = { valor: n, fecha: m.fecha, hora: m.hora, autor: m.autor, idx: i, dudoso: varios };
+    }
+  });
+}
+// Junta las veces que preguntaste por el mismo tenis: el precio más nuevo primero.
+function preciosDelTenis(lista, best) {
+  if (!best) return [];
+  // el mismo tenis = las fotos que el escáner también reconoce (porcentaje alto) y no son de otro color
+  const corte = Math.max(0.45, best.p * 0.6);
+  const mismos = lista.filter((r) => r === best || (r.p >= corte && r.color >= 0.25));
+  return mismos.filter((r) => r.foto.precio)
+    .sort((a, b) => aFecha(b.foto.precio.fecha, b.foto.precio.hora) - aFecha(a.foto.precio.fecha, a.foto.precio.hora));
+}
+const bs = (n) => `Bs ${Number(n).toLocaleString('es-BO')}`;
 
 // ---------- Reconocer modelos con Claude y buscar por texto ----------
 let claudeSample = null, ctlModelos = null;
@@ -806,6 +906,7 @@ function buscarPorTexto(q) {
   estado.porTexto = hits;
   cont.innerHTML = hits.length ? `<p class="nota">${hits.length} foto${hits.length === 1 ? '' : 's'} encontrada${hits.length === 1 ? '' : 's'}</p>
     <div class="grid">${hits.slice(0, 40).map((r, i) => `<button class="res" data-t="${i}"><img src="${r.foto.thumb}" alt=""><div>
+      ${r.foto.precio ? `<span class="chip-precio">${bs(r.foto.precio.valor)}${r.foto.precio.dudoso ? ' ⚠' : ''}</span>` : ''}
       ${r.foto.modelo?.tenis ? `<span class="chip-modelo">${esc(nombreModelo(r.foto.modelo))}</span>` : '<small>Por el mensaje del chat</small>'}
       <small>${esc(r.chat.nombre)}</small><small>${esc([r.foto.fecha, r.foto.hora].filter(Boolean).join(' · '))}</small></div></button>`).join('')}</div>`
     : '<div class="vacio">No encontré fotos con eso. Prueba con menos palabras, por ejemplo sólo la marca o el color.</div>';
@@ -823,7 +924,7 @@ function pintarChats() {
   if (!estado.chats.length) { l.innerHTML = '<div class="vacio">Todavía no cargaste ningún chat.</div>'; return; }
   try { pintarModelos(); } catch {}
   l.innerHTML = estado.chats.map((c) => `<div class="chat-item"><div class="avatar">${esc((c.nombre[0] || 'C').toUpperCase())}</div>
-    <div><b>${esc(c.nombre)}</b><small>${c.fotos.length} fotos${c.mensajes.length ? ` · ${c.mensajes.length} mensajes` : ''}</small></div>
+    <div><b>${esc(c.nombre)}</b><small>${c.fotos.length} fotos${c.mensajes.length ? ` · ${c.mensajes.length} mensajes` : ''}${c.fotos.some((f) => f.precio) ? ` · ${c.fotos.filter((f) => f.precio).length} con precio (de ${esc(c.jefa || c.jefaAuto)})` : ''}</small></div>
     <button class="x" data-id="${c.id}" aria-label="Quitar ${esc(c.nombre)}">✕</button></div>`).join('');
   l.querySelectorAll('.x').forEach((b) => b.addEventListener('click', async () => {
     estado.chats = estado.chats.filter((c) => c.id !== b.dataset.id);
@@ -852,6 +953,7 @@ try { const u = +localStorage.getItem('umbral2'); if (u >= 40 && u <= 95) { esta
 
 await abrirDB();
 estado.chats = (await leerChats()) || [];
+for (const c of estado.chats) calcularPrecios(c);
 estado.chats.sort((a, b) => a.creado - b.creado);
 pintarChats();
 // en cuanto la IA está lista, pasa a la IA nueva las fotos de chats cargados antes (una sola vez)
