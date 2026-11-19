@@ -456,16 +456,19 @@ function marcarTenis(file) {
 async function actualizarChats() {
   const faltan = estado.chats.flatMap((c) => c.fotos.filter((f) => !f.s1).map((f) => ({ c, f })));
   if (!faltan.length) return;
+  let candado = null;  // que la pantalla no se apague mientras trabaja
+  try { candado = await navigator.wakeLock?.request('screen'); } catch {}
   const t0 = performance.now();
   for (let i = 0; i < faltan.length; i++) {
     const { c, f } = faltan[i];
     f.s1 = await vector(await deMiniatura(f.thumb)); delete f.v; delete f.vc;
     const seg = ((performance.now() - t0) / (i + 1)) * (faltan.length - i - 1) / 1000;
     const resta = seg > 90 ? `${Math.ceil(seg / 60)} min` : `${Math.ceil(seg)} s`;
-    avisoIA(`Pasando tus fotos a la IA nueva (una sola vez): ${i + 1} de ${faltan.length} · faltan ~${resta}`, (i + 1) / faltan.length);
+    avisoIA(`Pasando tus fotos a la IA nueva (una sola vez): ${i + 1} de ${faltan.length} · faltan ~${resta}. Deja la página abierta; si la cierras, sigue donde quedó.`, (i + 1) / faltan.length);
     if (i % 10 === 9 || i === faltan.length - 1) await guardarChat(c);
   }
   for (const c of estado.chats) await guardarChat(c);
+  try { await candado?.release(); } catch {}
   avisoIA('✓ Listo para buscar', 1, true);
 }
 
