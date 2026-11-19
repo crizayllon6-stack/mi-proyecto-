@@ -128,6 +128,7 @@ dialog::backdrop { background: rgba(0,0,0,.55) }
 .angulos { display: flex; flex-direction: column; gap: 8px; border: 1px dashed var(--line); border-radius: 14px; padding: 12px }
 .mini-fotos { display: flex; gap: 6px; flex-wrap: wrap }
 .mini-fotos img { width: 48px; height: 48px; object-fit: cover; border-radius: 8px; border: 2px solid var(--accent) }
+.aviso-parcial { background: color-mix(in srgb, var(--accent) 10%, var(--card)); border: 1px solid var(--line); border-radius: 12px; padding: 10px 12px; margin: 0 }
 .duo { display: grid; grid-template-columns: 1fr 1fr; gap: 10px }
 .duo figure { margin: 0; display: flex; flex-direction: column; gap: 6px; min-width: 0 }
 .duo img { width: 100%; aspect-ratio: 1; object-fit: cover; border-radius: 12px; background: var(--line) }
@@ -316,6 +317,8 @@ function miniatura(canvas, lado = 320) {
   c.getContext('2d').drawImage(canvas, 0, 0, c.width, c.height);
   return c.toDataURL('image/jpeg', 0.8);
 }
+let cola = Promise.resolve();
+function enCola(fn) { const r = cola.then(fn); cola = r.catch(() => {}); return r; }
 // SigLIP: foto a 224x224, colores entre -1 y 1; devuelve un vector de 768 números (normalizado)
 async function vector(canvas) {
   const s = await modelo();
@@ -325,7 +328,7 @@ async function vector(canvas) {
   const px = g.getImageData(0, 0, 224, 224).data;
   const x = new Float32Array(3 * 224 * 224); const N = 224 * 224;
   for (let i = 0; i < N; i++) { x[i] = px[i * 4] / 127.5 - 1; x[N + i] = px[i * 4 + 1] / 127.5 - 1; x[2 * N + i] = px[i * 4 + 2] / 127.5 - 1; }
-  const r = await s.run({ pixel_values: new ort.Tensor('float32', x, [1, 3, 224, 224]) });
+  const r = await enCola(() => s.run({ pixel_values: new ort.Tensor('float32', x, [1, 3, 224, 224]) }));
   const v = r.embedding.data; let n = 0; for (let i = 0; i < v.length; i++) n += v[i] * v[i]; n = Math.sqrt(n) || 1;
   return Array.from(v, (a) => a / n);
 }
@@ -518,10 +521,10 @@ async function buscar(files, agregar = false) {
     if (!agregar) estado.consulta = [];
     const nuevas = [];
     for (const f of files) { const canvas = f instanceof HTMLCanvasElement ? f : await cargarImagen(f); nuevas.push({ canvas, thumb: miniatura(canvas, 400) }); }
-    if (estado.actualizando) {
-      res.innerHTML = '<div class="card"><h2>Un momento</h2><p class="nota">Estoy preparando la IA y tus fotos (mira el avance arriba). Tu búsqueda empieza sola apenas termine.</p><div class="prog"><i style="width:35%"></i></div></div>';
+    if (!sesion) {
+      res.innerHTML = '<div class="card"><h2>Un momento</h2><p class="nota">La IA todavía se está descargando (mira el avance arriba). Tu búsqueda empieza sola apenas esté.</p><div class="prog"><i style="width:35%"></i></div></div>';
       $('ia').scrollIntoView({ behavior: 'smooth', block: 'center' });
-      await estado.actualizando;
+      await modelo();
     }
     const parar = await animarEscaneo(nuevas.at(-1).thumb, total);
     const t0 = performance.now();
@@ -530,13 +533,9 @@ async function buscar(files, agregar = false) {
       estado.consulta.push({ thumb: n.thumb,
         qs: [await vector(n.canvas), await vector(recorteCentro(n.canvas, 0.75))] });
     }
-    const lista = []; const cambiados = new Set(); let recalc = 0;
+    const lista = []; const cambiados = new Set(); let pendientes = 0;
     for (const c of estado.chats) for (const f of c.fotos) {
-      if (!f.s1) {  // chat cargado con la IA anterior: se recalcula una sola vez desde la miniatura
-        const mc = await deMiniatura(f.thumb);
-        f.s1 = await vector(mc); delete f.v; delete f.vc; cambiados.add(c);
-        const n = $('pasa-n'); if (n) n.textContent = `${++recalc}`;
-      }
+      if (!f.s1) { pendientes++; continue; }  // todavía se está pasando a la IA nueva: se incluye en otra búsqueda
       let s = -1, cual = 0;
       estado.consulta.forEach((q, k) => {
         for (const v of q.qs) { const x = f.s2 ? Math.max(coseno(v, f.s1), coseno(v, f.s2)) : coseno(v, f.s1); if (x > s) { s = x; cual = k; } }
@@ -544,12 +543,17 @@ async function buscar(files, agregar = false) {
       lista.push({ chat: c, foto: f, s, cual });
     }
     for (const c of cambiados) guardarChat(c);
+    if (!lista.length) {
+      parar();
+      res.innerHTML = '<div class="vacio">Tus fotos se están preparando para la IA nueva (mira el avance arriba). En un par de minutos ya puedes buscar entre las primeras.</div>';
+      return;
+    }
     calibrar(lista);
     lista.sort((a, b) => b.p - a.p || b.s - a.s);
     const resta = 600 - (performance.now() - t0);
     if (!reducido && resta > 0) await esperar(resta);
     parar();
-    estado.ultima = { lista };
+    estado.ultima = { lista, pendientes, total };
     pintarResultados(true);
   } catch (e) {
     res.innerHTML = `<div class="vacio error">${esc(e.message || 'No se pudo leer la foto.')}</div>`;
@@ -585,6 +589,7 @@ function pintarResultados(animar = false) {
       <figure><img src="${best.foto.thumb}" alt="Foto del chat"><figcaption>${esc(best.chat.nombre)} · ${esc([best.foto.fecha, best.foto.hora].filter(Boolean).join(' '))}</figcaption></figure>
     </div>
     <button class="btn grande" id="ver-mejor">💬 Ver en el chat</button>` : ''}
+    ${u.pendientes ? `<p class="nota aviso-parcial">🔄 Busqué en <b>${u.total - u.pendientes} de ${u.total}</b> fotos. Las otras ${u.pendientes} se siguen preparando arriba; vuelve a buscar en un rato para incluirlas.</p>` : ''}
     ${top.length > 1 ? `<h2>Otras parecidas</h2><div class="grid">${top.slice(1).map((r, i) => {
       const p = pct(r.p);
       return `<button class="res" data-i="${i + 1}"><img src="${r.foto.thumb}" alt=""><div><span class="pct ${clase(p)}">${p}%</span>
