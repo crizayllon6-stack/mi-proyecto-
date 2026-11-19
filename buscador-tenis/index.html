@@ -53,7 +53,10 @@ input[type=file] { position: absolute; width: 1px; height: 1px; opacity: 0; over
 .chats { display: flex; flex-direction: column; gap: 8px }
 .chat-item { display: flex; align-items: center; gap: 12px; border: 1px solid var(--line); border-radius: 12px; padding: 10px 12px }
 .chat-item b { display: block } .chat-item small { color: var(--mut) }
-.chat-item .x { margin-left: auto; background: none; border: 0; color: var(--mut); font-size: 1.3rem; cursor: pointer; padding: 4px 8px }
+.tipo-chat { margin-left: auto; flex: none; border: 1.5px solid var(--line); background: var(--bg); color: var(--fg); border-radius: 99px; padding: 5px 10px; font: 700 .78rem var(--f-body); cursor: pointer }
+.tipo-chat.precios { border-color: #0f9d58; color: #0f9d58 }
+.chat-item > div:nth-child(2) { min-width: 0; flex: 1 }
+.chat-item .x { background: none; border: 0; color: var(--mut); font-size: 1.3rem; cursor: pointer; padding: 4px 8px }
 .avatar { width: 38px; height: 38px; border-radius: 50%; background: linear-gradient(135deg, var(--accent), var(--accent2)); color: var(--accent-fg); display: grid; place-items: center; font: 900 1rem var(--f-display); flex: none }
 .prog { height: 8px; border-radius: 99px; background: var(--line); overflow: hidden } .prog i { display: block; height: 100%; background: linear-gradient(90deg, var(--accent), var(--accent2)); width: 0; transition: width .2s }
 .veredicto { border-radius: 14px; padding: 16px; display: flex; gap: 14px; align-items: center }
@@ -154,6 +157,7 @@ dialog::backdrop { background: rgba(0,0,0,.55) }
 .precio small { color: rgba(255,255,255,.9) } .precio .aviso { font-weight: 700 }
 .precio.duda { background: linear-gradient(135deg, #b7791f, #d69e2e) }
 .precio.sin { background: var(--card); color: var(--fg); border: 1.5px dashed var(--line); box-shadow: none } .precio.sin small { color: var(--mut) }
+.ver-precio { align-self: flex-start; border: 0; background: rgba(255,255,255,.22); color: #fff; font: 700 .85rem var(--f-body); border-radius: 99px; padding: 5px 12px; cursor: pointer; margin-top: 2px }
 .historial { display: flex; flex-wrap: wrap; gap: 6px }
 .hist { border: 0; border-radius: 99px; padding: 4px 10px; background: rgba(255,255,255,.22); color: #fff; font: 700 .85rem var(--f-body); cursor: pointer }
 .hist small { opacity: .85; font-weight: 500 }
@@ -639,12 +643,14 @@ async function buscar(files, agregar = false) {
       res.innerHTML = '<div class="vacio">Tus fotos se están preparando para la IA nueva (mira el avance arriba). En un par de minutos ya puedes buscar entre las primeras.</div>';
       return;
     }
-    calibrar(lista);
-    lista.sort((a, b) => b.p - a.p || b.s - a.s);
+    // catálogo (fotos buenas de modelos) y chats de precios se comparan por separado: no se mezclan
+    const cat = lista.filter((r) => tipoChat(r.chat) === 'catalogo');
+    const pre = lista.filter((r) => tipoChat(r.chat) === 'precios');
+    for (const g of [cat, pre]) { calibrar(g); g.sort((a, b) => b.p - a.p || b.s - a.s); }
     const resta = 600 - (performance.now() - t0);
     if (!reducido && resta > 0) await esperar(resta);
     parar();
-    estado.ultima = { lista, pendientes, total };
+    estado.ultima = { cat, pre, pendientes, total };
     pintarResultados(true);
   } catch (e) {
     res.innerHTML = `<div class="vacio error">${esc(e.message || 'No se pudo leer la foto.')}</div>`;
@@ -662,37 +668,49 @@ function anillo(p, cls) {
 function pintarResultados(animar = false) {
   const u = estado.ultima; if (!u) return;
   const umbral = estado.umbral;
-  const top = u.lista.slice(0, 13);
-  const best = top[0];
-  const mejor = best ? pct(best.p) : 0;
   const clase = (p) => (p >= umbral ? 'ok' : p >= umbral - 25 ? 'warn' : 'bad');
+  const principal = u.cat.length ? u.cat : u.pre;          // el catálogo manda; si no hay, los chats de precios
+  const best = principal[0];
+  const mejor = best ? pct(best.p) : 0;
   const c = clase(mejor);
-  const v = c === 'ok' ? ['v-ok', 'Aparece', 'Este tenis está en tus chats. Confirma mirando las dos fotos.']
+  const dondeV = u.cat.length ? 'en tu catálogo' : 'en tus chats';
+  const v = c === 'ok' ? ['v-ok', 'Aparece', `Este tenis está ${dondeV}. Confirma mirando las dos fotos.`]
     : c === 'warn' ? ['v-warn', 'Puede ser', 'Hay uno parecido, pero puede ser otro modelo o color. Míralo bien.']
-    : ['v-bad', 'No aparece', 'Ninguna foto se destaca. Este tenis no parece estar en tus chats.'];
+    : ['v-bad', 'No aparece', `Ninguna foto se destaca. Este tenis no parece estar ${dondeV}.`];
+  const bp = u.pre[0];
+  const tarjeta = (r, lista, k) => {
+    const p = pct(r.p);
+    return `<button class="res" data-l="${lista}" data-i="${k}"><img src="${r.foto.thumb}" alt=""><div><span class="pct ${clase(p)}">${p}%</span>
+      ${r.foto.precio ? `<span class="chip-precio">${bs(r.foto.precio.valor)}${r.foto.precio.dudoso ? ' ⚠' : ''}</span>` : ''}${r.foto.modelo?.tenis ? `<span class="chip-modelo">${esc(nombreModelo(r.foto.modelo))}</span>` : ''}${r.color < 0.25 ? '<span class="otro-color">⚠ otro color</span>' : ''}<small>${esc(r.chat.nombre)}</small><small>${esc([r.foto.fecha, r.foto.hora].filter(Boolean).join(' · '))}</small></div></button>`;
+  };
+  const cajaPrecio = (() => {
+    if (!u.pre.length) return '';
+    if (!bp || clase(pct(bp.p)) === 'bad') return `<div class="precio sin"><span>💰</span><div><b>No está en tus chats de precios</b><small>No encontré este tenis en los chats donde te pasaron precios.</small></div></div>`;
+    const ps = preciosDelTenis(u.pre, bp);
+    if (!ps.length) {
+      const resp = [bp, ...u.pre.filter((r) => r.p >= Math.max(0.45, bp.p * 0.6) && r.color >= 0.25)].find((r) => r.foto.respuesta)?.foto.respuesta;
+      return resp ? `<div class="precio sin"><span>💬</span><div><b>${esc(resp.autor)} dijo: “${esc(resp.texto)}”</b><small>El ${esc(resp.fecha)} a las ${esc(resp.hora)} · no dio precio</small></div></div>`
+        : `<div class="precio sin"><span>💰</span><div><b>Sin precio</b><small>Lo encontré en el chat pero no vi un número después de la foto. Mira el chat.</small></div></div>`;
+    }
+    const a = ps[0].foto.precio;
+    const valores = [...new Set(ps.map((r) => r.foto.precio.valor))];
+    return `<div class="precio ${a.dudoso ? 'duda' : ''}"><span>💰</span><div>
+      <b class="monto">${bs(a.valor)}</b>
+      <small>Te lo dijo ${esc(a.autor)} el ${esc(a.fecha)} a las ${esc(a.hora)}${ps.length > 1 ? ` · preguntaste ${ps.length} veces` : ''}</small>
+      ${a.dudoso ? '<small class="aviso">⚠ Verifica en el chat: mandaste varias fotos seguidas y el precio podría ser de otra.</small>' : ''}
+      ${ps.length > 1 ? `<div class="historial">${ps.slice(1, 5).map((r) => `<button class="hist" data-h="${u.pre.indexOf(r)}">${bs(r.foto.precio.valor)} <small>${esc(r.foto.precio.fecha)}</small></button>`).join('')}</div>` : ''}
+      ${valores.length > 1 ? '<small class="aviso">El precio cambió con el tiempo: te muestro el más reciente.</small>' : ''}
+      <button class="ver-precio" id="ver-precio">Ver dónde lo dijo →</button>
+    </div></div>`;
+  })();
+  const otrasCat = u.cat.slice(u.cat.length ? 1 : 0, 9);
+  const otrasPre = u.pre.slice(u.cat.length ? 0 : 1, u.cat.length ? 6 : 9);
   $('resultados').innerHTML = `<div class="card resultado ${animar ? 'entra' : ''}">
     <div class="veredicto ${v[0]}"><div class="v-txt"><b>${v[1]}</b><span>${v[2]}</span></div>${anillo(mejor, c)}</div>
-    ${(() => {
-      if (!best || c === 'bad') return '';
-      const ps = preciosDelTenis(u.lista, best);
-      if (!ps.length) {
-        const resp = [best, ...u.lista.filter((r) => r.p >= Math.max(0.45, best.p * 0.6) && r.color >= 0.25)].find((r) => r.foto.respuesta)?.foto.respuesta;
-        return resp ? `<div class="precio sin"><span>💬</span><div><b>${esc(resp.autor)} dijo: “${esc(resp.texto)}”</b><small>El ${esc(resp.fecha)} a las ${esc(resp.hora)} · no dio precio</small></div></div>`
-          : `<div class="precio sin"><span>💰</span><div><b>Sin precio</b><small>No encontré una respuesta con precio después de esta foto. Mira el chat.</small></div></div>`;
-      }
-      const a = ps[0].foto.precio;
-      const valores = [...new Set(ps.map((r) => r.foto.precio.valor))];
-      return `<div class="precio ${a.dudoso ? 'duda' : ''}"><span>💰</span><div>
-        <b class="monto">${bs(a.valor)}</b>
-        <small>Te lo dijo ${esc(a.autor)} el ${esc(a.fecha)} a las ${esc(a.hora)}${ps.length > 1 ? ` · preguntaste ${ps.length} veces` : ''}</small>
-        ${a.dudoso ? '<small class="aviso">⚠ Verifica en el chat: mandaste varias fotos seguidas y el precio podría ser de otra.</small>' : ''}
-        ${ps.length > 1 ? `<div class="historial">${ps.slice(1, 5).map((r) => `<button class="hist" data-h="${u.lista.indexOf(r)}">${bs(r.foto.precio.valor)} <small>${esc(r.foto.precio.fecha)}</small></button>`).join('')}</div>` : ''}
-        ${valores.length > 1 ? '<small class="aviso">El precio cambió con el tiempo: te muestro el más reciente.</small>' : ''}
-      </div></div>`;
-    })()}
+    ${cajaPrecio}
     ${best ? `<div class="duo">
       <figure><img src="${estado.consulta[best.cual]?.thumb || ''}" alt="Tu foto"><figcaption>Tu foto</figcaption></figure>
-      <figure><img src="${best.foto.thumb}" alt="Foto del chat"><figcaption>${best.foto.modelo?.tenis ? `<span class="chip-modelo">${esc(nombreModelo(best.foto.modelo))}</span><br>` : ''}${esc(best.chat.nombre)} · ${esc([best.foto.fecha, best.foto.hora].filter(Boolean).join(' '))}</figcaption></figure>
+      <figure><img src="${best.foto.thumb}" alt="Foto del chat"><figcaption>${best.foto.modelo?.tenis ? `<span class="chip-modelo">${esc(nombreModelo(best.foto.modelo))}</span><br>` : ''}${u.cat.length ? '📒 ' : ''}${esc(best.chat.nombre)} · ${esc([best.foto.fecha, best.foto.hora].filter(Boolean).join(' '))}</figcaption></figure>
     </div>
     <button class="btn grande" id="ver-mejor">💬 Ver en el chat</button>` : ''}
     ${estado.ultimoArchivo ? `<button class="btn sec" id="re-marcar" style="justify-content:center">✂️ Marcar el tenis y volver a buscar</button>` : ''}
@@ -700,21 +718,19 @@ function pintarResultados(animar = false) {
       <span class="nota">${estado.consulta.length === 1 ? '1 foto de este tenis' : `${estado.consulta.length} fotos de este tenis`}${c !== 'ok' ? ' · Sácale otra desde otro ángulo para ayudar' : ''}</span>
       <div class="btns"><label class="btn sec" for="in-angulo">➕ Otro ángulo</label><label class="btn sec" for="in-angulo-gal">🖼️ Desde galería</label></div></div>
     ${u.pendientes ? `<p class="nota aviso-parcial">🔄 Busqué en <b>${u.total - u.pendientes} de ${u.total}</b> fotos. Las otras ${u.pendientes} se siguen preparando arriba; vuelve a buscar en un rato para incluirlas.</p>` : ''}
-    ${top.length > 1 ? `<h2>Otras parecidas</h2><div class="grid">${top.slice(1).map((r, i) => {
-      const p = pct(r.p);
-      return `<button class="res" data-i="${i + 1}"><img src="${r.foto.thumb}" alt=""><div><span class="pct ${clase(p)}">${p}%</span>
-        ${r.foto.precio ? `<span class="chip-precio">${bs(r.foto.precio.valor)}${r.foto.precio.dudoso ? ' ⚠' : ''}</span>` : ''}${r.foto.modelo?.tenis ? `<span class="chip-modelo">${esc(nombreModelo(r.foto.modelo))}</span>` : ''}${r.color < 0.25 ? '<span class="otro-color">⚠ otro color</span>' : ''}<small>${esc(r.chat.nombre)}</small><small>${esc([r.foto.fecha, r.foto.hora].filter(Boolean).join(' · '))}${r.foto.autor ? ' · ' + esc(r.foto.autor) : ''}</small></div></button>`;
-    }).join('')}</div>` : ''}
+    ${otrasCat.length && u.cat.length ? `<h2>📒 Otras del catálogo</h2><div class="grid">${otrasCat.map((r) => tarjeta(r, 'cat', u.cat.indexOf(r))).join('')}</div>` : ''}
+    ${otrasPre.length ? `<h2>💰 En los chats de precios</h2><div class="grid">${otrasPre.map((r) => tarjeta(r, 'pre', u.pre.indexOf(r))).join('')}</div>` : ''}
   </div>`;
+  $('ver-precio')?.addEventListener('click', () => { const ps = preciosDelTenis(u.pre, bp); if (ps[0]) abrirChat(ps[0]); });
   $('ver-mejor')?.addEventListener('click', () => abrirChat(best));
-  $('resultados').querySelectorAll('.hist').forEach((b) => b.addEventListener('click', () => abrirChat(u.lista[+b.dataset.h])));
+  $('resultados').querySelectorAll('.hist').forEach((b) => b.addEventListener('click', () => abrirChat(u.pre[+b.dataset.h])));
   $('re-marcar')?.addEventListener('click', async () => {
     const recortada = await marcarTenis(estado.ultimoArchivo);
     if (!recortada) return;
     estado.consulta.pop();               // reemplaza la última foto por la versión recortada
     buscar([recortada], estado.consulta.length > 0);
   });
-  $('resultados').querySelectorAll('.res').forEach((b) => b.addEventListener('click', () => abrirChat(top[+b.dataset.i])));
+  $('resultados').querySelectorAll('.res').forEach((b) => b.addEventListener('click', () => abrirChat(u[b.dataset.l][+b.dataset.i])));
   const num = $('resultados').querySelector('.anillo .num');
   if (animar && num && !reducido) {
     const fin = +num.dataset.fin; const t0 = performance.now();
@@ -827,6 +843,8 @@ function preciosDelTenis(lista, best) {
     .sort((a, b) => aFecha(b.foto.precio.fecha, b.foto.precio.hora) - aFecha(a.foto.precio.fecha, a.foto.precio.hora));
 }
 const bs = (n) => `Bs ${Number(n).toLocaleString('es-BO')}`;
+// Tipo de chat: "precios" (tu jefa te responde precios) o "catalogo" (fotos de los modelos). Se puede cambiar.
+const tipoChat = (c) => c.tipo || (c.fotos.some((f) => f.precio) ? 'precios' : 'catalogo');
 
 // ---------- Reconocer modelos con Claude y buscar por texto ----------
 let claudeSample = null, ctlModelos = null;
@@ -925,7 +943,13 @@ function pintarChats() {
   try { pintarModelos(); } catch {}
   l.innerHTML = estado.chats.map((c) => `<div class="chat-item"><div class="avatar">${esc((c.nombre[0] || 'C').toUpperCase())}</div>
     <div><b>${esc(c.nombre)}</b><small>${c.fotos.length} fotos${c.mensajes.length ? ` · ${c.mensajes.length} mensajes` : ''}${c.fotos.some((f) => f.precio) ? ` · ${c.fotos.filter((f) => f.precio).length} con precio (de ${esc(c.jefa || c.jefaAuto)})` : ''}</small></div>
+    <button class="tipo-chat ${tipoChat(c)}" data-tipo="${c.id}" title="Toca para cambiar">${tipoChat(c) === 'precios' ? '💰 Precios' : '📒 Catálogo'}</button>
     <button class="x" data-id="${c.id}" aria-label="Quitar ${esc(c.nombre)}">✕</button></div>`).join('');
+  l.querySelectorAll('.tipo-chat').forEach((b) => b.addEventListener('click', async () => {
+    const c = estado.chats.find((x) => x.id === b.dataset.tipo); if (!c) return;
+    c.tipo = tipoChat(c) === 'precios' ? 'catalogo' : 'precios';
+    await guardarChat(c); pintarChats(); pintarResultados();
+  }));
   l.querySelectorAll('.x').forEach((b) => b.addEventListener('click', async () => {
     estado.chats = estado.chats.filter((c) => c.id !== b.dataset.id);
     await borrarChat(b.dataset.id); pintarChats();
