@@ -45,8 +45,9 @@ h2 { font: 700 1.25rem var(--f-display); margin: 0 }
 .btn:focus-visible, button:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px }
 .btn[disabled] { opacity: .5; cursor: default }
 input[type=file] { position: absolute; width: 1px; height: 1px; opacity: 0; overflow: hidden; pointer-events: none }
-.ia { display: flex; align-items: center; gap: 10px; font-size: .9rem; color: var(--mut) }
-.ia .prog { flex: 1 } .ia.listo { color: var(--ok); font-weight: 600 }
+.ia { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 10px; font-size: .9rem; color: var(--fg); font-weight: 600; background: var(--card); border: 1px solid var(--line); border-radius: 14px; padding: 12px 14px }
+.ia .prog { flex-basis: 100% }
+.ia.listo { color: var(--ok); font-weight: 600 }
 .nota { font-size: .88rem; color: var(--mut) }
 .chats { display: flex; flex-direction: column; gap: 8px }
 .chat-item { display: flex; align-items: center; gap: 12px; border: 1px solid var(--line); border-radius: 12px; padding: 10px 12px }
@@ -264,7 +265,7 @@ function modelo() {
       guardarArchivo(CLAVE_IA, buf);
       tx('readwrite', (st) => st.delete('modelo-v1'), 'archivos'); // la IA vieja ya no hace falta
     }
-    avisoIA('Encendiendo la IA…', 0.92);
+    avisoIA('Encendiendo la IA… (unos segundos)', 0.92);
     sesion = await ort.InferenceSession.create(buf, { executionProviders: ['wasm'], graphOptimizationLevel: 'all' });
     avisoIA('✓ Listo para buscar', 1, true);
     return sesion;
@@ -388,6 +389,23 @@ async function cargarArchivos(files, sueltas) {
   }
 }
 
+// ---------- Pasar a la IA nueva las fotos de chats ya cargados ----------
+async function actualizarChats() {
+  const faltan = estado.chats.flatMap((c) => c.fotos.filter((f) => !f.s1).map((f) => ({ c, f })));
+  if (!faltan.length) return;
+  const t0 = performance.now();
+  for (let i = 0; i < faltan.length; i++) {
+    const { c, f } = faltan[i];
+    f.s1 = await vector(await deMiniatura(f.thumb)); delete f.v; delete f.vc;
+    const seg = ((performance.now() - t0) / (i + 1)) * (faltan.length - i - 1) / 1000;
+    const resta = seg > 90 ? `${Math.ceil(seg / 60)} min` : `${Math.ceil(seg)} s`;
+    avisoIA(`Pasando tus fotos a la IA nueva (una sola vez): ${i + 1} de ${faltan.length} · faltan ~${resta}`, (i + 1) / faltan.length);
+    if (i % 10 === 9 || i === faltan.length - 1) await guardarChat(c);
+  }
+  for (const c of estado.chats) await guardarChat(c);
+  avisoIA('✓ Listo para buscar', 1, true);
+}
+
 // ---------- Buscar ----------
 const esperar = (ms) => new Promise((r) => setTimeout(r, ms));
 const reducido = matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -434,6 +452,11 @@ async function buscar(files, agregar = false) {
     if (!agregar) estado.consulta = [];
     const nuevas = [];
     for (const f of files) { const canvas = await cargarImagen(f); nuevas.push({ canvas, thumb: miniatura(canvas, 400) }); }
+    if (estado.actualizando) {
+      res.innerHTML = '<div class="card"><h2>Un momento</h2><p class="nota">Estoy preparando la IA y tus fotos (mira el avance arriba). Tu búsqueda empieza sola apenas termine.</p><div class="prog"><i style="width:35%"></i></div></div>';
+      $('ia').scrollIntoView({ behavior: 'smooth', block: 'center' });
+      await estado.actualizando;
+    }
     const parar = await animarEscaneo(nuevas.at(-1).thumb, total);
     const t0 = performance.now();
     await modelo();
@@ -549,7 +572,7 @@ $('vc-cerrar').addEventListener('click', () => $('vista-chat').close());
 $('vista-chat').addEventListener('click', (e) => { if (e.target === $('vista-chat')) $('vista-chat').close(); });
 
 // ---------- Lista de chats cargados ----------
-const estado = { chats: [], umbral: 70, ultima: null, consulta: [] };
+const estado = { chats: [], umbral: 70, ultima: null, consulta: [], actualizando: null };
 function pintarChats() {
   const l = $('lista-chats');
   if (!estado.chats.length) { l.innerHTML = '<div class="vacio">Todavía no cargaste ningún chat.</div>'; return; }
@@ -575,9 +598,10 @@ $('umbral').addEventListener('input', (e) => {
 try { const u = +localStorage.getItem('umbral2'); if (u >= 40 && u <= 95) { estado.umbral = u; $('umbral').value = u; $('umbral-v').textContent = `${u}%`; } } catch {}
 
 await abrirDB();
-modelo().catch(() => {});
 estado.chats = (await leerChats()) || [];
 estado.chats.sort((a, b) => a.creado - b.creado);
 pintarChats();
+// en cuanto la IA está lista, pasa a la IA nueva las fotos de chats cargados antes (una sola vez)
+estado.actualizando = modelo().then(actualizarChats).catch(() => {});
 window.__listo = true;
 </script>
