@@ -47,7 +47,6 @@ input[type=file] { position: absolute; width: 1px; height: 1px; opacity: 0; over
 .avatar { width: 38px; height: 38px; border-radius: 50%; background: var(--accent); color: var(--accent-fg); display: grid; place-items: center; font: 900 1rem var(--f-display); flex: none }
 .prog { height: 8px; border-radius: 99px; background: var(--line); overflow: hidden } .prog i { display: block; height: 100%; background: var(--accent); width: 0; transition: width .2s }
 .veredicto { border-radius: 14px; padding: 16px; display: flex; gap: 14px; align-items: center }
-.veredicto img { width: 76px; height: 76px; object-fit: cover; border-radius: 10px; flex: none }
 .veredicto b { font: 900 1.4rem var(--f-display); display: block }
 .v-ok { background: color-mix(in srgb, var(--ok) 16%, var(--card)); border: 1.5px solid var(--ok) } .v-ok b { color: var(--ok) }
 .v-warn { background: color-mix(in srgb, var(--warn) 16%, var(--card)); border: 1.5px solid var(--warn) } .v-warn b { color: var(--warn) }
@@ -60,7 +59,7 @@ input[type=file] { position: absolute; width: 1px; height: 1px; opacity: 0; over
 .pct { font: 900 1.15rem var(--f-display); font-variant-numeric: tabular-nums }
 .pct.ok { color: var(--ok) } .pct.warn { color: var(--warn) } .pct.bad { color: var(--mut) }
 .ajuste { display: flex; align-items: center; gap: 10px; font-size: .9rem; color: var(--mut) }
-.ajuste input { flex: 1 } .ajuste output { font-weight: 700; color: var(--fg); font-variant-numeric: tabular-nums; min-width: 3ch }
+.ajuste input { flex: 1; accent-color: var(--accent) } .ajuste output { font-weight: 700; color: var(--fg); font-variant-numeric: tabular-nums; min-width: 3ch }
 .vacio { text-align: center; color: var(--mut); padding: 20px 10px; border: 1.5px dashed var(--line); border-radius: 12px }
 /* vista de chat */
 dialog { border: 0; padding: 0; width: min(560px, 100vw); max-height: 92vh; border-radius: 18px; background: var(--chat); color: var(--fg) }
@@ -77,6 +76,39 @@ dialog::backdrop { background: rgba(0,0,0,.55) }
 .burbuja img { border-radius: 8px; display: block; max-width: 100%; margin: 4px 0 }
 .burbuja.esta { outline: 3px solid var(--accent); outline-offset: 2px }
 .error { color: var(--bad); font-weight: 600 }
+/* escáner */
+.escaner { align-items: center }
+.visor { position: relative; width: min(280px, 80%); aspect-ratio: 1; border-radius: 14px; overflow: hidden; background: var(--line) }
+.visor img { width: 100%; height: 100%; object-fit: cover; display: block; filter: saturate(.85) contrast(1.05) }
+.laser { position: absolute; left: 0; right: 0; height: 3px; background: var(--accent); box-shadow: 0 0 14px 4px color-mix(in srgb, var(--accent) 70%, transparent); top: 0; animation: barrido 1.2s ease-in-out infinite alternate }
+.visor::after { content: ""; position: absolute; inset: 0; background: repeating-linear-gradient(0deg, transparent 0 6px, color-mix(in srgb, var(--accent) 10%, transparent) 6px 7px) }
+.esq { position: absolute; width: 26px; height: 26px; border: 4px solid var(--accent); z-index: 1 }
+.esq.a { top: 10px; left: 10px; border-right: 0; border-bottom: 0; border-top-left-radius: 8px }
+.esq.b { top: 10px; right: 10px; border-left: 0; border-bottom: 0; border-top-right-radius: 8px }
+.esq.c { bottom: 10px; left: 10px; border-right: 0; border-top: 0; border-bottom-left-radius: 8px }
+.esq.d { bottom: 10px; right: 10px; border-left: 0; border-top: 0; border-bottom-right-radius: 8px }
+@keyframes barrido { from { top: 4% } to { top: 94% } }
+.pasando { display: flex; align-items: center; gap: 12px }
+.pasando img { width: 52px; height: 52px; border-radius: 8px; object-fit: cover; border: 2px solid var(--accent) }
+.pasando b { font: 900 1.6rem var(--f-display); font-variant-numeric: tabular-nums; display: block; line-height: 1 }
+.pasando small { color: var(--mut) }
+/* resultado */
+.resultado.entra { animation: aparecer .45s ease-out }
+@keyframes aparecer { from { opacity: 0; transform: translateY(12px) } to { opacity: 1; transform: none } }
+.veredicto { justify-content: space-between }
+.v-txt { display: flex; flex-direction: column; gap: 4px; min-width: 0 }
+.v-txt span { font-size: .92rem }
+.anillo { width: 104px; height: 104px; flex: none }
+.anillo.ok { color: var(--ok) } .anillo.warn { color: var(--warn) } .anillo.bad { color: var(--bad) }
+.anillo .num { font: 900 26px var(--f-display) }
+.resultado.entra .arco { animation: llenar .9s ease-out both }
+@keyframes llenar { from { stroke-dashoffset: var(--L) } }
+.duo { display: grid; grid-template-columns: 1fr 1fr; gap: 10px }
+.duo figure { margin: 0; display: flex; flex-direction: column; gap: 6px; min-width: 0 }
+.duo img { width: 100%; aspect-ratio: 1; object-fit: cover; border-radius: 12px; background: var(--line) }
+.duo figcaption { font-size: .8rem; color: var(--mut); overflow: hidden; text-overflow: ellipsis; white-space: nowrap }
+.duo figure:first-child figcaption { color: var(--accent); font-weight: 700 }
+
 @media (prefers-reduced-motion: reduce) { * { transition: none !important } }
 </style>
 
@@ -114,10 +146,10 @@ dialog::backdrop { background: rgba(0,0,0,.55) }
     <input id="in-galeria" type="file" accept="image/*">
     <div class="ajuste">
       <label for="umbral">Exigencia</label>
-      <input id="umbral" type="range" min="60" max="95" step="1" value="80">
-      <output id="umbral-v" for="umbral">80%</output>
+      <input id="umbral" type="range" min="40" max="95" step="1" value="70">
+      <output id="umbral-v" for="umbral">70%</output>
     </div>
-    <p class="nota">Con más exigencia solo dice "Aparece" si la foto es muy parecida. Si te da falsos "Aparece", súbela; si no encuentra uno que sí está, bájala.</p>
+    <p class="nota">El porcentaje mide cuánto se destaca la foto frente a todas las demás del chat. Si te da falsos "Aparece", sube la exigencia; si no encuentra uno que sí está, bájala.</p>
   </section>
 
   <section id="resultados" aria-live="polite"></section>
@@ -221,12 +253,12 @@ function recorteCentro(canvas, f = 0.75) {
   c.getContext('2d').drawImage(canvas, (canvas.width - c.width) / 2, (canvas.height - c.height) / 2, c.width, c.height, 0, 0, c.width, c.height);
   return c;
 }
-function miniatura(canvas, lado = 220) {
+function miniatura(canvas, lado = 320) {
   const c = document.createElement('canvas');
   const k = lado / Math.max(canvas.width, canvas.height);
   c.width = Math.round(canvas.width * k); c.height = Math.round(canvas.height * k);
   c.getContext('2d').drawImage(canvas, 0, 0, c.width, c.height);
-  return c.toDataURL('image/jpeg', 0.72);
+  return c.toDataURL('image/jpeg', 0.8);
 }
 async function vector(canvas) {
   const e = await modelo();
@@ -298,7 +330,7 @@ async function cargarArchivos(files, sueltas) {
         const idx = porArchivo.get(imagenes[i].nombre);
         const msg = idx !== undefined ? mensajes[idx] : null;
         fotos.push({ archivo: imagenes[i].nombre, idx: idx ?? -1, fecha: msg?.fecha || fechaDeArchivo(imagenes[i].nombre),
-          hora: msg?.hora || '', autor: msg?.autor || '', thumb: miniatura(canvas), v: await vector(canvas) });
+          hora: msg?.hora || '', autor: msg?.autor || '', thumb: miniatura(canvas), v: await vector(canvas), vc: await vector(recorteCentro(canvas)) });
       } catch { /* foto dañada o formato raro: se salta */ }
       if (i % 8 === 7) await new Promise((r) => setTimeout(r, 0));
     }
@@ -314,45 +346,114 @@ async function cargarArchivos(files, sueltas) {
 }
 
 // ---------- Buscar ----------
+const esperar = (ms) => new Promise((r) => setTimeout(r, ms));
+const reducido = matchMedia('(prefers-reduced-motion: reduce)').matches;
+async function deMiniatura(src) {
+  const img = new Image(); img.src = src; await img.decode();
+  const c = document.createElement('canvas'); c.width = img.naturalWidth; c.height = img.naturalHeight;
+  c.getContext('2d').drawImage(img, 0, 0); return c;
+}
+// Puntaje justo: cuánto se destaca cada foto frente a todas las demás del chat.
+function calibrar(lista) {
+  const n = lista.length;
+  if (n < 6) { for (const r of lista) r.p = Math.max(0, Math.min(1, (r.s - 0.3) / 0.55)); return; }
+  const ord = lista.map((r) => r.s).sort((x, y) => x - y);
+  const med = ord[Math.floor(n / 2)];
+  const desv = ord.map((x) => Math.abs(x - med)).sort((x, y) => x - y);
+  const mad = Math.max(0.02, desv[Math.floor(n / 2)] * 1.4826);
+  const azar = Math.sqrt(2 * Math.log(n)); // lo que se destaca una foto sólo por casualidad
+  for (const r of lista) {
+    const z = (r.s - med) / mad - azar;
+    let p = 1 / (1 + Math.exp(-(z - 0.6) * 1.5));
+    if (r.s >= 0.8) p = Math.max(p, Math.min(1, (r.s - 0.5) / 0.4));
+    r.p = p;
+  }
+}
+async function animarEscaneo(thumbQuery, total) {
+  const fotos = estado.chats.flatMap((c) => c.fotos.map((f) => f.thumb));
+  $('resultados').innerHTML = `<div class="card escaner">
+    <div class="visor"><img src="${thumbQuery}" alt="Tu foto"><i class="laser"></i>
+      <span class="esq a"></span><span class="esq b"></span><span class="esq c"></span><span class="esq d"></span></div>
+    <div class="pasando"><img id="pasa" src="${fotos[0] || ''}" alt=""><div><b id="pasa-n">0</b><small>de ${total} fotos comparadas</small></div></div>
+  </div>`;
+  if (reducido) return () => {};
+  let i = 0, vivo = true, cuenta = 0;
+  (async () => { while (vivo) { i = (i + 1) % fotos.length; const el = $('pasa'); if (el) el.src = fotos[i];
+    cuenta = Math.min(total, cuenta + total / 22); const n = $('pasa-n'); if (n) n.textContent = Math.round(cuenta); await esperar(70); } })();
+  return () => { vivo = false; };
+}
 async function buscar(file) {
   const res = $('resultados');
   const total = estado.chats.reduce((a, c) => a + c.fotos.length, 0);
   if (!total) { res.innerHTML = '<div class="vacio">Primero carga un chat en el Paso 1.</div>'; return; }
-  res.innerHTML = '<div class="card"><p class="nota">Comparando con ' + total + ' fotos…</p><div class="prog"><i style="width:60%"></i></div></div>';
   try {
     const canvas = await cargarImagen(file);
-    const qs = [await vector(canvas), await vector(recorteCentro(canvas))];
-    const lista = [];
+    const thumb = miniatura(canvas, 400);
+    const parar = await animarEscaneo(thumb, total);
+    const t0 = performance.now();
+    await modelo();
+    const qs = [await vector(canvas), await vector(recorteCentro(canvas, 0.8)), await vector(recorteCentro(canvas, 0.6))];
+    const lista = []; let cambiados = new Set();
     for (const c of estado.chats) for (const f of c.fotos) {
-      const s = Math.max(...qs.map((q) => coseno(q, f.v)));
+      if (!f.vc) { f.vc = await vector(recorteCentro(await deMiniatura(f.thumb), 0.8)); cambiados.add(c); }
+      let s = -1;
+      for (const q of qs) s = Math.max(s, coseno(q, f.v), coseno(q, f.vc));
       lista.push({ chat: c, foto: f, s });
     }
-    lista.sort((a, b) => b.s - a.s);
-    estado.ultima = { thumb: miniatura(canvas, 200), lista };
-    pintarResultados();
+    for (const c of cambiados) guardarChat(c);
+    calibrar(lista);
+    lista.sort((a, b) => b.p - a.p || b.s - a.s);
+    const resta = 1700 - (performance.now() - t0);
+    if (!reducido && resta > 0) await esperar(resta);
+    parar();
+    estado.ultima = { thumb, lista };
+    pintarResultados(true);
   } catch (e) {
     res.innerHTML = `<div class="vacio error">${esc(e.message || 'No se pudo leer la foto.')}</div>`;
   }
 }
-const pct = (s) => Math.max(0, Math.min(100, Math.round(s * 100)));
-function pintarResultados() {
+const pct = (p) => Math.max(0, Math.min(100, Math.round(p * 100)));
+function anillo(p, cls) {
+  const r = 52, L = 2 * Math.PI * r;
+  return `<svg class="anillo ${cls}" viewBox="0 0 120 120" role="img" aria-label="${p}% de coincidencia">
+    <circle cx="60" cy="60" r="${r}" fill="none" stroke="var(--line)" stroke-width="10"/>
+    <circle class="arco" cx="60" cy="60" r="${r}" fill="none" stroke="currentColor" stroke-width="10" stroke-linecap="round"
+      stroke-dasharray="${L}" stroke-dashoffset="${L * (1 - p / 100)}" transform="rotate(-90 60 60)" style="--L:${L}"/>
+    <text x="60" y="68" text-anchor="middle" fill="currentColor" class="num" data-fin="${p}">${p}%</text></svg>`;
+}
+function pintarResultados(animar = false) {
   const u = estado.ultima; if (!u) return;
   const umbral = estado.umbral;
-  const top = u.lista.slice(0, 12);
-  const mejor = top[0] ? pct(top[0].s) : 0;
-  const v = mejor >= umbral ? ['v-ok', 'Aparece', `La más parecida coincide en un ${mejor}%. Revisa las fotos para confirmar.`]
-    : mejor >= umbral - 8 ? ['v-warn', 'Puede ser', `La más parecida coincide en un ${mejor}%. Mira las fotos: puede ser otro modelo o color.`]
-    : ['v-bad', 'No aparece', `Ninguna foto pasa del ${mejor}%. Este tenis no parece estar en tus chats.`];
-  $('resultados').innerHTML = `<div class="card">
-    <div class="veredicto ${v[0]}"><img src="${u.thumb}" alt="Tu foto"><div><b>${v[1]}</b><span class="nota">${v[2]}</span></div></div>
-    <h2>Las más parecidas</h2>
-    <div class="grid">${top.map((r, i) => {
-      const p = pct(r.s); const cls = p >= umbral ? 'ok' : p >= umbral - 8 ? 'warn' : 'bad';
-      return `<button class="res" data-i="${i}"><img src="${r.foto.thumb}" alt=""><div><span class="pct ${cls}">${p}%</span>
+  const top = u.lista.slice(0, 13);
+  const best = top[0];
+  const mejor = best ? pct(best.p) : 0;
+  const clase = (p) => (p >= umbral ? 'ok' : p >= umbral - 25 ? 'warn' : 'bad');
+  const c = clase(mejor);
+  const v = c === 'ok' ? ['v-ok', 'Aparece', 'Este tenis está en tus chats. Confirma mirando las dos fotos.']
+    : c === 'warn' ? ['v-warn', 'Puede ser', 'Hay uno parecido, pero puede ser otro modelo o color. Míralo bien.']
+    : ['v-bad', 'No aparece', 'Ninguna foto se destaca. Este tenis no parece estar en tus chats.'];
+  $('resultados').innerHTML = `<div class="card resultado ${animar ? 'entra' : ''}">
+    <div class="veredicto ${v[0]}"><div class="v-txt"><b>${v[1]}</b><span>${v[2]}</span></div>${anillo(mejor, c)}</div>
+    ${best ? `<div class="duo">
+      <figure><img src="${u.thumb}" alt="Tu foto"><figcaption>Tu foto</figcaption></figure>
+      <figure><img src="${best.foto.thumb}" alt="Foto del chat"><figcaption>${esc(best.chat.nombre)} · ${esc([best.foto.fecha, best.foto.hora].filter(Boolean).join(' '))}</figcaption></figure>
+    </div>
+    <button class="btn grande" id="ver-mejor">💬 Ver en el chat</button>` : ''}
+    ${top.length > 1 ? `<h2>Otras parecidas</h2><div class="grid">${top.slice(1).map((r, i) => {
+      const p = pct(r.p);
+      return `<button class="res" data-i="${i + 1}"><img src="${r.foto.thumb}" alt=""><div><span class="pct ${clase(p)}">${p}%</span>
         <small>${esc(r.chat.nombre)}</small><small>${esc([r.foto.fecha, r.foto.hora].filter(Boolean).join(' · '))}${r.foto.autor ? ' · ' + esc(r.foto.autor) : ''}</small></div></button>`;
-    }).join('')}</div>
-    <p class="nota">Toca una foto para ver el chat.</p></div>`;
+    }).join('')}</div>` : ''}
+  </div>`;
+  $('ver-mejor')?.addEventListener('click', () => abrirChat(best));
   $('resultados').querySelectorAll('.res').forEach((b) => b.addEventListener('click', () => abrirChat(top[+b.dataset.i])));
+  const num = $('resultados').querySelector('.anillo .num');
+  if (animar && num && !reducido) {
+    const fin = +num.dataset.fin; const t0 = performance.now();
+    const paso = (t) => { const k = Math.min(1, (t - t0) / 900); num.textContent = `${Math.round(fin * (1 - Math.pow(1 - k, 3)))}%`; if (k < 1) requestAnimationFrame(paso); };
+    requestAnimationFrame(paso);
+  }
+  $('resultados').scrollIntoView({ behavior: reducido ? 'auto' : 'smooth', block: 'start' });
 }
 
 // ---------- Ver el chat alrededor de la foto ----------
@@ -391,7 +492,7 @@ $('vc-cerrar').addEventListener('click', () => $('vista-chat').close());
 $('vista-chat').addEventListener('click', (e) => { if (e.target === $('vista-chat')) $('vista-chat').close(); });
 
 // ---------- Lista de chats cargados ----------
-const estado = { chats: [], umbral: 80, ultima: null };
+const estado = { chats: [], umbral: 70, ultima: null };
 function pintarChats() {
   const l = $('lista-chats');
   if (!estado.chats.length) { l.innerHTML = '<div class="vacio">Todavía no cargaste ningún chat.</div>'; return; }
@@ -409,10 +510,10 @@ $('in-fotos').addEventListener('change', (e) => { if (e.target.files.length) car
 for (const id of ['in-camara', 'in-galeria']) $(id).addEventListener('change', (e) => { if (e.target.files[0]) buscar(e.target.files[0]); e.target.value = ''; });
 $('umbral').addEventListener('input', (e) => {
   estado.umbral = +e.target.value; $('umbral-v').textContent = `${estado.umbral}%`;
-  try { localStorage.setItem('umbral', estado.umbral); } catch {}
+  try { localStorage.setItem('umbral2', estado.umbral); } catch {}
   pintarResultados();
 });
-try { const u = +localStorage.getItem('umbral'); if (u >= 60 && u <= 95) { estado.umbral = u; $('umbral').value = u; $('umbral-v').textContent = `${u}%`; } } catch {}
+try { const u = +localStorage.getItem('umbral2'); if (u >= 40 && u <= 95) { estado.umbral = u; $('umbral').value = u; $('umbral-v').textContent = `${u}%`; } } catch {}
 
 modelo().catch(() => {});
 await abrirDB();
