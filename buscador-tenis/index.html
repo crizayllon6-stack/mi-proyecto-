@@ -73,6 +73,19 @@ input[type=file] { position: absolute; width: 1px; height: 1px; opacity: 0; over
 /* vista de chat */
 dialog { border: 0; padding: 0; width: min(560px, 100vw); max-height: 92vh; border-radius: 18px; background: var(--chat); color: var(--fg) }
 dialog::backdrop { background: rgba(0,0,0,.55) }
+#recorte { background: #05090f; color: #fff; padding: 0; overflow: hidden }
+.rc-top { padding: 14px 16px; display: flex; flex-direction: column; gap: 2px } .rc-top small { color: #aab6c8 }
+.rc-zona { position: relative; margin: 0 auto; width: fit-content; max-width: 100%; touch-action: none; user-select: none }
+.rc-zona img { display: block; max-width: 100%; max-height: 62vh }
+.rc-caja { position: absolute; border: 3px solid var(--accent2); border-radius: 10px; box-shadow: 0 0 0 4000px rgba(0,0,0,.45); cursor: move; overflow: hidden;
+  touch-action: none }
+.rc-caja span { position: absolute; width: 34px; height: 34px; border: 5px solid #fff; touch-action: none }
+.rc-caja span[data-esq="ia"] { left: -3px; top: -3px; border-right: 0; border-bottom: 0; border-top-left-radius: 10px; cursor: nwse-resize }
+.rc-caja span[data-esq="da"] { right: -3px; top: -3px; border-left: 0; border-bottom: 0; border-top-right-radius: 10px; cursor: nesw-resize }
+.rc-caja span[data-esq="ib"] { left: -3px; bottom: -3px; border-right: 0; border-top: 0; border-bottom-left-radius: 10px; cursor: nesw-resize }
+.rc-caja span[data-esq="db"] { right: -3px; bottom: -3px; border-left: 0; border-top: 0; border-bottom-right-radius: 10px; cursor: nwse-resize }
+.rc-btns { padding: 14px 16px 18px; display: flex; flex-direction: column; gap: 10px }
+#recorte .btn.sec { background: transparent; color: #fff; border-color: #2c3a52 }
 .chat-top { position: sticky; top: 0; display: flex; align-items: center; gap: 12px; padding: 12px 14px; background: var(--card); border-bottom: 1px solid var(--line); z-index: 1 }
 .chat-top b { display: block } .chat-top small { color: var(--mut) }
 .chat-top button { margin-left: auto; background: none; border: 0; font-size: 1.5rem; color: var(--fg); cursor: pointer; padding: 4px 10px }
@@ -169,6 +182,14 @@ dialog::backdrop { background: rgba(0,0,0,.55) }
 
   <section id="resultados" aria-live="polite"></section>
 </main>
+
+<dialog id="recorte" aria-labelledby="rc-t">
+  <div class="rc-top"><b id="rc-t">Marca el tenis</b><small>Arrastra el recuadro y sus esquinas para que quede sólo el tenis.</small></div>
+  <div class="rc-zona" id="rc-zona"><img id="rc-img" alt="Tu foto">
+    <div class="rc-caja" id="rc-caja"><span data-esq="ia"></span><span data-esq="da"></span><span data-esq="ib"></span><span data-esq="db"></span><i class="laser"></i></div></div>
+  <div class="rc-btns"><button class="btn grande" id="rc-buscar">🔍 Buscar este tenis</button>
+    <div class="btns"><button class="btn sec" id="rc-toda">Usar la foto entera</button><button class="btn sec" id="rc-cancelar">Cancelar</button></div></div>
+</dialog>
 
 <dialog id="vista-chat">
   <div class="chat-top"><div class="avatar" id="vc-av">C</div><div><b id="vc-nombre">Chat</b><small id="vc-sub"></small></div>
@@ -389,6 +410,48 @@ async function cargarArchivos(files, sueltas) {
   }
 }
 
+// ---------- Marcar el tenis con un recuadro (como en Google Lens) ----------
+function marcarTenis(file) {
+  return new Promise(async (listo) => {
+    const foto = await cargarImagen(file, 900);
+    const dlg = $('recorte'), zona = $('rc-zona'), caja = $('rc-caja'), img = $('rc-img');
+    img.src = foto.toDataURL('image/jpeg', 0.9);
+    let b = { x: 0.1, y: 0.1, w: 0.8, h: 0.8 };   // recuadro en proporción de la foto
+    const pintar = () => Object.assign(caja.style, { left: `${b.x * 100}%`, top: `${b.y * 100}%`, width: `${b.w * 100}%`, height: `${b.h * 100}%` });
+    pintar();
+    let arrastre = null;
+    const abajo = (ev) => {
+      const r = zona.getBoundingClientRect();
+      arrastre = { modo: ev.target.dataset.esq || 'mover', x0: ev.clientX, y0: ev.clientY, b0: { ...b }, W: r.width, H: r.height };
+      caja.setPointerCapture(ev.pointerId); ev.preventDefault();
+    };
+    const mueve = (ev) => {
+      if (!arrastre) return;
+      const dx = (ev.clientX - arrastre.x0) / arrastre.W, dy = (ev.clientY - arrastre.y0) / arrastre.H, o = arrastre.b0, m = 0.12;
+      let { x, y, w, h } = o;
+      if (arrastre.modo === 'mover') { x = Math.min(1 - w, Math.max(0, o.x + dx)); y = Math.min(1 - h, Math.max(0, o.y + dy)); }
+      else {
+        if (arrastre.modo.includes('i')) { x = Math.min(o.x + o.w - m, Math.max(0, o.x + dx)); w = o.x + o.w - x; }
+        if (arrastre.modo.includes('d')) { w = Math.min(1 - o.x, Math.max(m, o.w + dx)); }
+        if (arrastre.modo.includes('a')) { y = Math.min(o.y + o.h - m, Math.max(0, o.y + dy)); h = o.y + o.h - y; }
+        if (arrastre.modo.includes('b')) { h = Math.min(1 - o.y, Math.max(m, o.h + dy)); }
+      }
+      b = { x, y, w, h }; pintar();
+    };
+    caja.onpointerdown = abajo; caja.onpointermove = mueve; caja.onpointerup = caja.onpointercancel = () => { arrastre = null; };
+    const cerrar = (resultado) => { dlg.close(); listo(resultado); };
+    $('rc-buscar').onclick = () => {
+      const c = document.createElement('canvas');
+      c.width = Math.max(1, Math.round(foto.width * b.w)); c.height = Math.max(1, Math.round(foto.height * b.h));
+      c.getContext('2d').drawImage(foto, foto.width * b.x, foto.height * b.y, c.width, c.height, 0, 0, c.width, c.height);
+      cerrar(c);
+    };
+    $('rc-toda').onclick = () => cerrar(foto);
+    $('rc-cancelar').onclick = () => cerrar(null);
+    dlg.showModal();
+  });
+}
+
 // ---------- Pasar a la IA nueva las fotos de chats ya cargados ----------
 async function actualizarChats() {
   const faltan = estado.chats.flatMap((c) => c.fotos.filter((f) => !f.s1).map((f) => ({ c, f })));
@@ -451,7 +514,7 @@ async function buscar(files, agregar = false) {
   try {
     if (!agregar) estado.consulta = [];
     const nuevas = [];
-    for (const f of files) { const canvas = await cargarImagen(f); nuevas.push({ canvas, thumb: miniatura(canvas, 400) }); }
+    for (const f of files) { const canvas = f instanceof HTMLCanvasElement ? f : await cargarImagen(f); nuevas.push({ canvas, thumb: miniatura(canvas, 400) }); }
     if (estado.actualizando) {
       res.innerHTML = '<div class="card"><h2>Un momento</h2><p class="nota">Estoy preparando la IA y tus fotos (mira el avance arriba). Tu búsqueda empieza sola apenas termine.</p><div class="prog"><i style="width:35%"></i></div></div>';
       $('ia').scrollIntoView({ behavior: 'smooth', block: 'center' });
@@ -588,7 +651,14 @@ function pintarChats() {
 $('in-chat').addEventListener('change', (e) => { if (e.target.files.length) cargarArchivos([...e.target.files], false); e.target.value = ''; });
 $('in-fotos').addEventListener('change', (e) => { if (e.target.files.length) cargarArchivos([...e.target.files], true); e.target.value = ''; });
 for (const [id, agregar] of [['in-camara', false], ['in-galeria', false], ['in-angulo', true], ['in-angulo-gal', true]]) {
-  $(id).addEventListener('change', (e) => { const fs = [...e.target.files]; e.target.value = ''; if (fs.length) buscar(fs, agregar && estado.consulta.length > 0); });
+  $(id).addEventListener('change', async (e) => {
+    const fs = [...e.target.files]; e.target.value = '';
+    if (!fs.length) return;
+    const sumar = agregar && estado.consulta.length > 0;
+    if (fs.length > 1) return buscar(fs, sumar);
+    const recortada = await marcarTenis(fs[0]);
+    if (recortada) buscar([recortada], sumar);
+  });
 }
 $('umbral').addEventListener('input', (e) => {
   estado.umbral = +e.target.value; $('umbral-v').textContent = `${estado.umbral}%`;
