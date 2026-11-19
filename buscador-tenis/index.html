@@ -608,6 +608,7 @@ function pintarResultados(animar = false) {
       <figure><img src="${best.foto.thumb}" alt="Foto del chat"><figcaption>${esc(best.chat.nombre)} · ${esc([best.foto.fecha, best.foto.hora].filter(Boolean).join(' '))}</figcaption></figure>
     </div>
     <button class="btn grande" id="ver-mejor">💬 Ver en el chat</button>` : ''}
+    ${estado.ultimoArchivo ? `<button class="btn sec" id="re-marcar" style="justify-content:center">✂️ Marcar el tenis y volver a buscar</button>` : ''}
     ${u.pendientes ? `<p class="nota aviso-parcial">🔄 Busqué en <b>${u.total - u.pendientes} de ${u.total}</b> fotos. Las otras ${u.pendientes} se siguen preparando arriba; vuelve a buscar en un rato para incluirlas.</p>` : ''}
     ${top.length > 1 ? `<h2>Otras parecidas</h2><div class="grid">${top.slice(1).map((r, i) => {
       const p = pct(r.p);
@@ -616,6 +617,12 @@ function pintarResultados(animar = false) {
     }).join('')}</div>` : ''}
   </div>`;
   $('ver-mejor')?.addEventListener('click', () => abrirChat(best));
+  $('re-marcar')?.addEventListener('click', async () => {
+    const recortada = await marcarTenis(estado.ultimoArchivo);
+    if (!recortada) return;
+    estado.consulta.pop();               // reemplaza la última foto por la versión recortada
+    buscar([recortada], estado.consulta.length > 0);
+  });
   $('resultados').querySelectorAll('.res').forEach((b) => b.addEventListener('click', () => abrirChat(top[+b.dataset.i])));
   const num = $('resultados').querySelector('.anillo .num');
   if (animar && num && !reducido) {
@@ -662,7 +669,7 @@ $('vc-cerrar').addEventListener('click', () => $('vista-chat').close());
 $('vista-chat').addEventListener('click', (e) => { if (e.target === $('vista-chat')) $('vista-chat').close(); });
 
 // ---------- Lista de chats cargados ----------
-const estado = { chats: [], umbral: 70, ultima: null, consulta: [], actualizando: null };
+const estado = { chats: [], umbral: 70, ultima: null, consulta: [], actualizando: null, ultimoArchivo: null };
 function pintarChats() {
   const l = $('lista-chats');
   if (!estado.chats.length) { l.innerHTML = '<div class="vacio">Todavía no cargaste ningún chat.</div>'; return; }
@@ -682,9 +689,9 @@ for (const [id, agregar] of [['in-camara', false], ['in-galeria', false], ['in-a
     const fs = [...e.target.files]; e.target.value = '';
     if (!fs.length) return;
     const sumar = agregar && estado.consulta.length > 0;
-    if (fs.length > 1) return buscar(fs, sumar);
-    const recortada = await marcarTenis(fs[0]);
-    if (recortada) buscar([recortada], sumar);
+    if (fs.length > 1) { estado.ultimoArchivo = null; return buscar(fs, sumar); }
+    estado.ultimoArchivo = fs[0];        // sacas la foto y escanea directo; el recuadro queda para después
+    buscar([fs[0]], sumar);
   });
 }
 $('umbral').addEventListener('input', (e) => {
