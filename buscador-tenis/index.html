@@ -111,6 +111,9 @@ dialog::backdrop { background: rgba(0,0,0,.55) }
 .anillo .num { font: 900 26px var(--f-display) }
 .resultado.entra .arco { animation: llenar .9s ease-out both }
 @keyframes llenar { from { stroke-dashoffset: var(--L) } }
+.angulos { display: flex; flex-direction: column; gap: 8px; border: 1px dashed var(--line); border-radius: 14px; padding: 12px }
+.mini-fotos { display: flex; gap: 6px; flex-wrap: wrap }
+.mini-fotos img { width: 48px; height: 48px; object-fit: cover; border-radius: 8px; border: 2px solid var(--accent) }
 .duo { display: grid; grid-template-columns: 1fr 1fr; gap: 10px }
 .duo figure { margin: 0; display: flex; flex-direction: column; gap: 6px; min-width: 0 }
 .duo img { width: 100%; aspect-ratio: 1; object-fit: cover; border-radius: 12px; background: var(--line) }
@@ -151,7 +154,10 @@ dialog::backdrop { background: rgba(0,0,0,.55) }
     <label class="btn grande" for="in-camara" id="btn-camara">📷 Sacar foto al tenis</label>
     <label class="btn sec" for="in-galeria" style="justify-content:center">o elegir una foto de la galería</label>
     <input id="in-camara" type="file" accept="image/*" capture="environment">
-    <input id="in-galeria" type="file" accept="image/*">
+    <input id="in-galeria" type="file" accept="image/*" multiple>
+    <input id="in-angulo" type="file" accept="image/*" capture="environment">
+    <input id="in-angulo-gal" type="file" accept="image/*" multiple>
+    <p class="nota">Puedes elegir varias fotos del mismo tenis a la vez (de distintos ángulos): se queda con la que mejor coincida.</p>
     <div class="ajuste">
       <label for="umbral">Exigencia</label>
       <input id="umbral" type="range" min="40" max="95" step="1" value="70">
@@ -401,23 +407,30 @@ async function animarEscaneo(thumbQuery, total) {
     cuenta = Math.min(total, cuenta + total / 22); const n = $('pasa-n'); if (n) n.textContent = Math.round(cuenta); await esperar(70); } })();
   return () => { vivo = false; };
 }
-async function buscar(file) {
+// Varias fotos del mismo tenis (distintos ángulos): cada foto del chat se queda con su mejor coincidencia.
+async function buscar(files, agregar = false) {
   const res = $('resultados');
   const total = estado.chats.reduce((a, c) => a + c.fotos.length, 0);
   if (!total) { res.innerHTML = '<div class="vacio">Primero carga un chat en el Paso 1.</div>'; return; }
   try {
-    const canvas = await cargarImagen(file);
-    const thumb = miniatura(canvas, 400);
-    const parar = await animarEscaneo(thumb, total);
+    if (!agregar) estado.consulta = [];
+    const nuevas = [];
+    for (const f of files) { const canvas = await cargarImagen(f); nuevas.push({ canvas, thumb: miniatura(canvas, 400) }); }
+    const parar = await animarEscaneo(nuevas.at(-1).thumb, total);
     const t0 = performance.now();
     await modelo();
-    const qs = [await vector(canvas), await vector(recorteCentro(canvas, 0.8)), await vector(recorteCentro(canvas, 0.6))];
-    const lista = []; let cambiados = new Set();
+    for (const n of nuevas) {
+      estado.consulta.push({ thumb: n.thumb,
+        qs: [await vector(n.canvas), await vector(recorteCentro(n.canvas, 0.8)), await vector(recorteCentro(n.canvas, 0.6))] });
+    }
+    const lista = []; const cambiados = new Set();
     for (const c of estado.chats) for (const f of c.fotos) {
       if (!f.vc) { f.vc = await vector(recorteCentro(await deMiniatura(f.thumb), 0.8)); cambiados.add(c); }
-      let s = -1;
-      for (const q of qs) s = Math.max(s, coseno(q, f.v), coseno(q, f.vc));
-      lista.push({ chat: c, foto: f, s });
+      let s = -1, cual = 0;
+      estado.consulta.forEach((q, k) => {
+        for (const v of q.qs) { const x = Math.max(coseno(v, f.v), coseno(v, f.vc)); if (x > s) { s = x; cual = k; } }
+      });
+      lista.push({ chat: c, foto: f, s, cual });
     }
     for (const c of cambiados) guardarChat(c);
     calibrar(lista);
@@ -425,7 +438,7 @@ async function buscar(file) {
     const resta = 800 - (performance.now() - t0);
     if (!reducido && resta > 0) await esperar(resta);
     parar();
-    estado.ultima = { thumb, lista };
+    estado.ultima = { lista };
     pintarResultados(true);
   } catch (e) {
     res.innerHTML = `<div class="vacio error">${esc(e.message || 'No se pudo leer la foto.')}</div>`;
@@ -453,8 +466,11 @@ function pintarResultados(animar = false) {
     : ['v-bad', 'No aparece', 'Ninguna foto se destaca. Este tenis no parece estar en tus chats.'];
   $('resultados').innerHTML = `<div class="card resultado ${animar ? 'entra' : ''}">
     <div class="veredicto ${v[0]}"><div class="v-txt"><b>${v[1]}</b><span>${v[2]}</span></div>${anillo(mejor, c)}</div>
+    <div class="angulos"><div class="mini-fotos">${estado.consulta.map((q) => `<img src="${q.thumb}" alt="">`).join('')}</div>
+      <span class="nota">${estado.consulta.length === 1 ? '1 foto de este tenis' : `${estado.consulta.length} fotos de este tenis`}${c !== 'ok' ? ' · Sácale otra desde otro ángulo para ayudar' : ''}</span>
+      <div class="btns"><label class="btn sec" for="in-angulo">➕ Otro ángulo</label><label class="btn sec" for="in-angulo-gal">🖼️ Desde galería</label></div></div>
     ${best ? `<div class="duo">
-      <figure><img src="${u.thumb}" alt="Tu foto"><figcaption>Tu foto</figcaption></figure>
+      <figure><img src="${estado.consulta[best.cual]?.thumb || ''}" alt="Tu foto"><figcaption>Tu foto</figcaption></figure>
       <figure><img src="${best.foto.thumb}" alt="Foto del chat"><figcaption>${esc(best.chat.nombre)} · ${esc([best.foto.fecha, best.foto.hora].filter(Boolean).join(' '))}</figcaption></figure>
     </div>
     <button class="btn grande" id="ver-mejor">💬 Ver en el chat</button>` : ''}
@@ -511,7 +527,7 @@ $('vc-cerrar').addEventListener('click', () => $('vista-chat').close());
 $('vista-chat').addEventListener('click', (e) => { if (e.target === $('vista-chat')) $('vista-chat').close(); });
 
 // ---------- Lista de chats cargados ----------
-const estado = { chats: [], umbral: 70, ultima: null };
+const estado = { chats: [], umbral: 70, ultima: null, consulta: [] };
 function pintarChats() {
   const l = $('lista-chats');
   if (!estado.chats.length) { l.innerHTML = '<div class="vacio">Todavía no cargaste ningún chat.</div>'; return; }
@@ -526,7 +542,9 @@ function pintarChats() {
 
 $('in-chat').addEventListener('change', (e) => { if (e.target.files.length) cargarArchivos([...e.target.files], false); e.target.value = ''; });
 $('in-fotos').addEventListener('change', (e) => { if (e.target.files.length) cargarArchivos([...e.target.files], true); e.target.value = ''; });
-for (const id of ['in-camara', 'in-galeria']) $(id).addEventListener('change', (e) => { if (e.target.files[0]) buscar(e.target.files[0]); e.target.value = ''; });
+for (const [id, agregar] of [['in-camara', false], ['in-galeria', false], ['in-angulo', true], ['in-angulo-gal', true]]) {
+  $(id).addEventListener('change', (e) => { const fs = [...e.target.files]; e.target.value = ''; if (fs.length) buscar(fs, agregar && estado.consulta.length > 0); });
+}
 $('umbral').addEventListener('input', (e) => {
   estado.umbral = +e.target.value; $('umbral-v').textContent = `${estado.umbral}%`;
   try { localStorage.setItem('umbral2', estado.umbral); } catch {}

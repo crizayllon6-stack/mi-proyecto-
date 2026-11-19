@@ -7,7 +7,7 @@
   salvo que pida "modo automático".
 
 ## Clave pendiente
-Si el usuario dice **"REVISAR PANEL"**, sigue las instrucciones de `PENDIENTE.md`.
+Si el usuario dice **"REVISAR PANEL"** o **"YA SUBÍ CLIP"**, sigue las instrucciones de `PENDIENTE.md`.
 
 ## Cómo se usa
 - `Abrir Fabrica.bat` (doble clic): abre el **Panel** (`Panel.html`) y Claude Code. Los botones del Panel copian un
