@@ -36,7 +36,9 @@ h2 { font: 700 1.25rem var(--f-display); margin: 0 }
 .btn.grande { width: 100%; justify-content: center; font-size: 1.15rem; padding: 18px }
 .btn:focus-visible, button:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px }
 .btn[disabled] { opacity: .5; cursor: default }
-input[type=file] { display: none }
+input[type=file] { position: absolute; width: 1px; height: 1px; opacity: 0; overflow: hidden; pointer-events: none }
+.ia { display: flex; align-items: center; gap: 10px; font-size: .9rem; color: var(--mut) }
+.ia .prog { flex: 1 } .ia.listo { color: var(--ok); font-weight: 600 }
 .nota { font-size: .88rem; color: var(--mut) }
 .chats { display: flex; flex-direction: column; gap: 8px }
 .chat-item { display: flex; align-items: center; gap: 12px; border: 1px solid var(--line); border-radius: 12px; padding: 10px 12px }
@@ -83,6 +85,7 @@ dialog::backdrop { background: rgba(0,0,0,.55) }
     <h1>Buscador de <span>Tenis</span></h1>
     <p class="lead">Sácale foto a un tenis y mira si aparece en tus chats de WhatsApp. Todo se procesa en tu celular: tus chats no se suben a ningún lado.</p>
   </header>
+  <div class="ia" id="ia" role="status"><span id="ia-txt">Preparando el reconocimiento de imágenes…</span><div class="prog"><i id="ia-bar"></i></div></div>
 
   <section class="card" aria-labelledby="t-chats">
     <span class="paso">Paso 1</span>
@@ -92,6 +95,7 @@ dialog::backdrop { background: rgba(0,0,0,.55) }
       <label class="btn" for="in-chat">📂 Elegir chat exportado</label>
       <label class="btn sec" for="in-fotos">🖼️ Elegir fotos sueltas</label>
     </div>
+    <p class="nota">Si al tocar el botón no se abre nada, abre esta página en <b>Chrome</b> (menú ⋮ → Abrir en el navegador) y prueba de nuevo.</p>
     <input id="in-chat" type="file" accept=".zip,.txt,image/*,application/zip" multiple>
     <input id="in-fotos" type="file" accept="image/*" multiple>
     <div id="cargando" hidden>
@@ -160,22 +164,46 @@ const leerChats = () => tx('readonly', (s) => s.getAll());
 
 // ---------- Modelo que compara fotos ----------
 let embedder = null;
-async function modelo() {
-  if (embedder) return embedder;
-  const fileset = {
-    wasmLoaderPath: 'https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@1.2.2/wasm/vision_wasm_internal.js',
-    wasmBinaryPath: new URL('vision_wasm_internal.wasm', location.href).href,
-  };
-  // el modelo viene como texto (base64) porque así se puede publicar junto a la página
-  const b64 = (await (await fetch(new URL('modelo-embedder.b64.txt', location.href).href)).text()).trim();
-  const bin = atob(b64);
-  const buf = new Uint8Array(bin.length);
-  for (let i = 0; i < bin.length; i++) buf[i] = bin.charCodeAt(i);
-  embedder = await ImageEmbedder.createFromOptions(fileset, {
-    baseOptions: { modelAssetBuffer: buf },
-    l2Normalize: true, quantize: false, runningMode: 'IMAGE',
-  });
-  return embedder;
+let preparando = null;
+function avisoIA(txt, p, listo = false) {
+  $('ia-txt').textContent = txt;
+  $('ia-bar').style.width = `${Math.round(p * 100)}%`;
+  $('ia').classList.toggle('listo', listo);
+  $('ia').querySelector('.prog').hidden = listo;
+}
+async function bajarTexto(url, alAvanzar) {
+  const r = await fetch(url);
+  if (!r.ok) throw new Error('No se pudo descargar el reconocimiento de imágenes. Revisa tu internet.');
+  const total = +r.headers.get('content-length') || 14500000;
+  if (!r.body?.getReader) return r.text();
+  const lector = r.body.getReader(); const partes = []; let n = 0;
+  for (;;) { const { done, value } = await lector.read(); if (done) break; partes.push(value); n += value.length; alAvanzar(Math.min(1, n / total)); }
+  return new TextDecoder().decode(await new Blob(partes).arrayBuffer());
+}
+function modelo() {
+  if (embedder) return Promise.resolve(embedder);
+  if (preparando) return preparando;
+  preparando = (async () => {
+    avisoIA('Descargando el reconocimiento de imágenes (sólo la primera vez, ~30 MB)… 0%', 0.02);
+    const fileset = {
+      wasmLoaderPath: 'https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@1.2.2/wasm/vision_wasm_internal.js',
+      wasmBinaryPath: new URL('vision_wasm_internal.wasm', location.href).href,
+    };
+    // el modelo viene como texto (base64) porque así se puede publicar junto a la página
+    const b64 = (await bajarTexto(new URL('modelo-embedder.b64.txt', location.href).href, (p) =>
+      avisoIA(`Descargando el reconocimiento de imágenes (sólo la primera vez, ~30 MB)… ${Math.round(p * 100)}%`, 0.05 + p * 0.75))).trim();
+    avisoIA('Preparando…', 0.85);
+    const bin = atob(b64);
+    const buf = new Uint8Array(bin.length);
+    for (let i = 0; i < bin.length; i++) buf[i] = bin.charCodeAt(i);
+    embedder = await ImageEmbedder.createFromOptions(fileset, {
+      baseOptions: { modelAssetBuffer: buf },
+      l2Normalize: true, quantize: false, runningMode: 'IMAGE',
+    });
+    avisoIA('✓ Listo para buscar', 1, true);
+    return embedder;
+  })().catch((e) => { preparando = null; avisoIA(`⚠ ${e.message || 'No se pudo preparar el reconocimiento.'} Recarga la página.`, 0); throw e; });
+  return preparando;
 }
 
 async function cargarImagen(blob, max = 448) {
@@ -386,6 +414,7 @@ $('umbral').addEventListener('input', (e) => {
 });
 try { const u = +localStorage.getItem('umbral'); if (u >= 60 && u <= 95) { estado.umbral = u; $('umbral').value = u; $('umbral-v').textContent = `${u}%`; } } catch {}
 
+modelo().catch(() => {});
 await abrirDB();
 estado.chats = (await leerChats()) || [];
 estado.chats.sort((a, b) => a.creado - b.creado);
