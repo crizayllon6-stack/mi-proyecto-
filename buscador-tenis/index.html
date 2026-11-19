@@ -20,6 +20,7 @@
   --accent: #4b9bff; --accent2: #38d0ff; --accent-fg: #03122b; --ok: #3ddc84; --warn: #f0c050; --bad: #ff6b5e;
   --chat: #0d1625; --bubble: #18243a; --bubble-me: #17345f; color-scheme: dark }
 * { box-sizing: border-box }
+[hidden] { display: none !important }
 body { background: var(--bg); color: var(--fg); font: 16px/1.5 var(--f-body);
   padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
 main { max-width: 640px; margin: 0 auto; padding-block: 20px 60px; display: flex; flex-direction: column; gap: 18px }
@@ -140,6 +141,12 @@ dialog::backdrop { background: rgba(0,0,0,.55) }
 .angulos { display: flex; flex-direction: column; gap: 8px; border: 1px dashed var(--line); border-radius: 14px; padding: 12px }
 .mini-fotos { display: flex; gap: 6px; flex-wrap: wrap }
 .mini-fotos img { width: 48px; height: 48px; object-fit: cover; border-radius: 8px; border: 2px solid var(--accent) }
+.buscador-texto { display: flex; align-items: center; gap: 8px; border: 1.5px solid var(--line); border-radius: 14px; padding: 4px 12px; background: var(--bg) }
+.buscador-texto:focus-within { border-color: var(--accent); box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 22%, transparent) }
+.buscador-texto input { flex: 1; min-width: 0; border: 0; background: transparent; color: var(--fg); font: 500 1rem var(--f-body); padding: 10px 0; outline: none }
+.chip-modelo { display: inline-block; font-size: .74rem; font-weight: 700; color: var(--accent); background: color-mix(in srgb, var(--accent) 12%, var(--card)); border-radius: 99px; padding: 2px 8px; max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap }
+.res { transition: transform .15s, box-shadow .15s } .res:active { transform: scale(.97) }
+.res:hover { box-shadow: 0 8px 22px -14px rgba(20,60,140,.5) }
 .otro-color { font-size: .72rem; font-weight: 700; color: var(--warn) }
 .aviso-parcial { background: color-mix(in srgb, var(--accent) 10%, var(--card)); border: 1px solid var(--line); border-radius: 12px; padding: 10px 12px; margin: 0 }
 .duo { display: grid; grid-template-columns: 1fr 1fr; gap: 10px }
@@ -195,6 +202,20 @@ dialog::backdrop { background: rgba(0,0,0,.55) }
   </section>
 
   <section id="resultados" aria-live="polite"></section>
+
+  <section class="card" aria-labelledby="t-modelo">
+    <span class="paso">Paso 3 · opcional</span>
+    <h2 id="t-modelo">Busca por modelo</h2>
+    <p class="nota" id="mod-estado">Claude mira las fotos de tus chats y anota la marca, el modelo y el color de cada tenis. Se hace una sola vez por chat y queda guardado.</p>
+    <div class="prog" id="mod-prog" hidden><i id="mod-bar"></i></div>
+    <div class="btns">
+      <button class="btn" id="mod-reconocer" hidden>🏷️ Reconocer modelos con Claude</button>
+      <button class="btn sec" id="mod-parar" hidden>Parar</button>
+    </div>
+    <div class="buscador-texto"><span aria-hidden="true">🔎</span>
+      <input id="mod-q" type="search" placeholder="Ej: air force blanco, jordan 1, puma rojo" autocomplete="off" aria-label="Buscar por modelo, marca o color"></div>
+    <div id="mod-res"></div>
+  </section>
 </main>
 
 <dialog id="recorte" aria-labelledby="rc-t">
@@ -594,7 +615,7 @@ async function buscar(files, agregar = false) {
         const pc = parecidoColor(q.color, f.color);
         for (const v of q.qs) {
           const sf = f.s2 ? Math.max(coseno(v, f.s1), coseno(v, f.s2)) : coseno(v, f.s1);
-          const x = sf + 0.05 * (pc - 0.5);  // el color sólo desempata: entre formas casi iguales gana el color parecido
+          const x = sf + 0.08 * (pc - 0.5);  // el color desempata: entre formas casi iguales gana el color parecido
           if (x > s) { s = x; cual = k; forma = sf; color = pc; }
         }
       });
@@ -644,7 +665,7 @@ function pintarResultados(animar = false) {
       <div class="btns"><label class="btn sec" for="in-angulo">➕ Otro ángulo</label><label class="btn sec" for="in-angulo-gal">🖼️ Desde galería</label></div></div>
     ${best ? `<div class="duo">
       <figure><img src="${estado.consulta[best.cual]?.thumb || ''}" alt="Tu foto"><figcaption>Tu foto</figcaption></figure>
-      <figure><img src="${best.foto.thumb}" alt="Foto del chat"><figcaption>${esc(best.chat.nombre)} · ${esc([best.foto.fecha, best.foto.hora].filter(Boolean).join(' '))}</figcaption></figure>
+      <figure><img src="${best.foto.thumb}" alt="Foto del chat"><figcaption>${best.foto.modelo?.tenis ? `<span class="chip-modelo">${esc(nombreModelo(best.foto.modelo))}</span><br>` : ''}${esc(best.chat.nombre)} · ${esc([best.foto.fecha, best.foto.hora].filter(Boolean).join(' '))}</figcaption></figure>
     </div>
     <button class="btn grande" id="ver-mejor">💬 Ver en el chat</button>` : ''}
     ${estado.ultimoArchivo ? `<button class="btn sec" id="re-marcar" style="justify-content:center">✂️ Marcar el tenis y volver a buscar</button>` : ''}
@@ -652,7 +673,7 @@ function pintarResultados(animar = false) {
     ${top.length > 1 ? `<h2>Otras parecidas</h2><div class="grid">${top.slice(1).map((r, i) => {
       const p = pct(r.p);
       return `<button class="res" data-i="${i + 1}"><img src="${r.foto.thumb}" alt=""><div><span class="pct ${clase(p)}">${p}%</span>
-        ${r.color < 0.25 ? '<span class="otro-color">⚠ otro color</span>' : ''}<small>${esc(r.chat.nombre)}</small><small>${esc([r.foto.fecha, r.foto.hora].filter(Boolean).join(' · '))}${r.foto.autor ? ' · ' + esc(r.foto.autor) : ''}</small></div></button>`;
+        ${r.foto.modelo?.tenis ? `<span class="chip-modelo">${esc(nombreModelo(r.foto.modelo))}</span>` : ''}${r.color < 0.25 ? '<span class="otro-color">⚠ otro color</span>' : ''}<small>${esc(r.chat.nombre)}</small><small>${esc([r.foto.fecha, r.foto.hora].filter(Boolean).join(' · '))}${r.foto.autor ? ' · ' + esc(r.foto.autor) : ''}</small></div></button>`;
     }).join('')}</div>` : ''}
   </div>`;
   $('ver-mejor')?.addEventListener('click', () => abrirChat(best));
@@ -707,11 +728,100 @@ function abrirChat(r) {
 $('vc-cerrar').addEventListener('click', () => $('vista-chat').close());
 $('vista-chat').addEventListener('click', (e) => { if (e.target === $('vista-chat')) $('vista-chat').close(); });
 
+// ---------- Reconocer modelos con Claude y buscar por texto ----------
+let claudeSample = null, ctlModelos = null;
+const normalTxt = (t = '') => t.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+const nombreModelo = (m) => [m.marca, m.modelo, m.color].filter(Boolean).join(' · ');
+function blobDe(dataUrl) {
+  const [cab, b64] = dataUrl.split(','); const bin = atob(b64); const u = new Uint8Array(bin.length);
+  for (let i = 0; i < bin.length; i++) u[i] = bin.charCodeAt(i);
+  return new Blob([u], { type: cab.match(/:(.*?);/)?.[1] || 'image/jpeg' });
+}
+function contextoFoto(c, f) {
+  if (f.idx < 0) return '';
+  const cerca = c.mensajes.slice(Math.max(0, f.idx - 2), f.idx + 3).map((m) => m.texto).filter(Boolean).join(' / ');
+  return cerca.replace(/\s+/g, ' ').slice(0, 160);
+}
+function pintarModelos(msg) {
+  const todas = estado.chats.flatMap((c) => c.fotos);
+  const hechas = todas.filter((f) => f.modelo).length;
+  const btn = $('mod-reconocer');
+  btn.hidden = !claudeSample || !todas.length || hechas === todas.length;
+  btn.textContent = hechas ? `🏷️ Seguir reconociendo (${todas.length - hechas} faltan)` : '🏷️ Reconocer modelos con Claude';
+  if (msg) $('mod-estado').textContent = msg;
+  else if (todas.length && hechas) $('mod-estado').textContent = `${hechas} de ${todas.length} fotos con modelo reconocido. Escribe abajo para buscar.`;
+  else if (!claudeSample && todas.length) $('mod-estado').textContent = 'Puedes buscar por lo que dicen los mensajes del chat. Para reconocer los modelos de las fotos, abre la página dentro de Claude.';
+}
+async function reconocerModelos() {
+  const lim = await claudeSample.limits().catch(() => null);
+  const porTanda = Math.min(8, lim?.images?.maxCount || 0);
+  if (!porTanda) { pintarModelos('Desde aquí no se pueden enviar fotos a Claude. Prueba abriendo la página en la app o la web de Claude.'); return; }
+  const faltan = estado.chats.flatMap((c) => c.fotos.filter((f) => !f.modelo).map((f) => ({ c, f })));
+  ctlModelos = new AbortController();
+  $('mod-reconocer').hidden = true; $('mod-parar').hidden = false; $('mod-prog').hidden = false;
+  try {
+    for (let i = 0; i < faltan.length; i += porTanda) {
+      const tanda = faltan.slice(i, i + porTanda);
+      pintarModelos(`Claude está mirando las fotos… ${i} de ${faltan.length}`);
+      $('mod-bar').style.width = `${Math.round((i / faltan.length) * 100)}%`;
+      const lista = tanda.map(({ c, f }, k) => `Foto ${k + 1}: ${contextoFoto(c, f) ? `mensajes cerca: "${contextoFoto(c, f)}"` : 'sin mensajes'}`).join('\n');
+      const r = await claudeSample.json(
+        `Eres experto en zapatillas (tenis). Te muestro ${tanda.length} fotos de un chat de WhatsApp de una tienda, en orden.\n` +
+        `Para cada foto di la marca, el modelo lo más exacto posible (ej. "Air Force 1 Low", "Jordan 1 Mid", "Samba OG") y el color principal en español.\n` +
+        `Usa los mensajes cercanos sólo como pista. Si no estás seguro del modelo, pon el más probable y "duda": true. Si la foto no muestra un tenis, "tenis": false.\n` +
+        `${lista}\n\nResponde sólo con un arreglo JSON, un objeto por foto en el mismo orden: ` +
+        `[{"foto":1,"tenis":true,"marca":"Nike","modelo":"Air Force 1 Low","color":"blanco","duda":false}]`,
+        { images: tanda.map(({ f }) => blobDe(f.thumb)), signal: ctlModelos.signal });
+      const arr = Array.isArray(r) ? r : [];
+      tanda.forEach(({ f }, k) => {
+        const o = arr.find((x) => Number(x?.foto) === k + 1) || arr[k] || {};
+        f.modelo = { tenis: o.tenis !== false && !!(o.marca || o.modelo), marca: String(o.marca || '').slice(0, 40),
+          modelo: String(o.modelo || '').slice(0, 60), color: String(o.color || '').slice(0, 30), duda: !!o.duda };
+      });
+      for (const c of new Set(tanda.map((t) => t.c))) await guardarChat(c);
+    }
+    $('mod-bar').style.width = '100%';
+    pintarModelos();
+  } catch (e) {
+    const copia = { cancelled: 'Pausado. Toca "Seguir reconociendo" cuando quieras.',
+      not_granted: 'No diste permiso para usar Claude, así que no puedo reconocer los modelos.',
+      sampling_disabled: 'Claude no está disponible en esta cuenta para esto.',
+      rate_limited: 'Claude pidió una pausa (límite de uso). Toca "Seguir reconociendo" en un rato.',
+      invalid_json: 'Claude respondió algo raro en una tanda. Toca "Seguir reconociendo" para intentar de nuevo.' };
+    pintarModelos(copia[e?.code] || 'Se cortó la conexión con Claude. Toca "Seguir reconociendo" para seguir donde quedó.');
+    if (e?.code === 'not_granted' || e?.code === 'sampling_disabled') claudeSample = null;
+  } finally {
+    $('mod-parar').hidden = true; $('mod-prog').hidden = true; ctlModelos = null; pintarModelos($('mod-estado').textContent);
+  }
+}
+function buscarPorTexto(q) {
+  const t = normalTxt(q).split(/\s+/).filter(Boolean);
+  const cont = $('mod-res');
+  if (!t.length) { cont.innerHTML = ''; return; }
+  const hits = [];
+  for (const c of estado.chats) for (const f of c.fotos) {
+    const texto = normalTxt([f.modelo?.marca, f.modelo?.modelo, f.modelo?.color, contextoFoto(c, f)].join(' '));
+    if (t.every((x) => texto.includes(x))) hits.push({ chat: c, foto: f });
+  }
+  estado.porTexto = hits;
+  cont.innerHTML = hits.length ? `<p class="nota">${hits.length} foto${hits.length === 1 ? '' : 's'} encontrada${hits.length === 1 ? '' : 's'}</p>
+    <div class="grid">${hits.slice(0, 40).map((r, i) => `<button class="res" data-t="${i}"><img src="${r.foto.thumb}" alt=""><div>
+      ${r.foto.modelo?.tenis ? `<span class="chip-modelo">${esc(nombreModelo(r.foto.modelo))}</span>` : '<small>Por el mensaje del chat</small>'}
+      <small>${esc(r.chat.nombre)}</small><small>${esc([r.foto.fecha, r.foto.hora].filter(Boolean).join(' · '))}</small></div></button>`).join('')}</div>`
+    : '<div class="vacio">No encontré fotos con eso. Prueba con menos palabras, por ejemplo sólo la marca o el color.</div>';
+  cont.querySelectorAll('.res').forEach((b) => b.addEventListener('click', () => abrirChat(hits[+b.dataset.t])));
+}
+$('mod-reconocer').addEventListener('click', () => reconocerModelos());
+$('mod-parar').addEventListener('click', () => ctlModelos?.abort());
+let tq; $('mod-q').addEventListener('input', (e) => { clearTimeout(tq); tq = setTimeout(() => buscarPorTexto(e.target.value), 150); });
+(async () => { try { claudeSample = await window.claude?.use?.('sample'); } catch { claudeSample = null; } pintarModelos(); })();
+
 // ---------- Lista de chats cargados ----------
-const estado = { chats: [], umbral: 70, ultima: null, consulta: [], actualizando: null, ultimoArchivo: null };
+const estado = { chats: [], umbral: 70, ultima: null, consulta: [], actualizando: null, ultimoArchivo: null, porTexto: [] };
 function pintarChats() {
   const l = $('lista-chats');
   if (!estado.chats.length) { l.innerHTML = '<div class="vacio">Todavía no cargaste ningún chat.</div>'; return; }
+  try { pintarModelos(); } catch {}
   l.innerHTML = estado.chats.map((c) => `<div class="chat-item"><div class="avatar">${esc((c.nombre[0] || 'C').toUpperCase())}</div>
     <div><b>${esc(c.nombre)}</b><small>${c.fotos.length} fotos${c.mensajes.length ? ` · ${c.mensajes.length} mensajes` : ''}</small></div>
     <button class="x" data-id="${c.id}" aria-label="Quitar ${esc(c.nombre)}">✕</button></div>`).join('');
