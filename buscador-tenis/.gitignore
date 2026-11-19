@@ -3,3 +3,5 @@ vision_wasm_internal.wasm
 vision_wasm_internal.js
 mediapipe_vision.mjs
 modelo-embedder.b64.txt
+ia/
+ort-wasm-simd-threaded.wasm

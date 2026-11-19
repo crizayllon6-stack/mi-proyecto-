@@ -22,14 +22,3 @@ Otros pendientes:
 - Agregar escenas EVIDENCIA, NOTA y LINEA a los 4 guiones viejos (Somerton, Valentich, Flannan, Hinterkaifeck)
   cuando se trabajen.
 - Verificar con una fuente las 5 líneas del código de Somerton antes de usarlas en una escena NOTA.
-
-# Pendiente: clave "YA SUBÍ CLIP" (Buscador de Tenis)
-El usuario va a subir desde su laptop el modelo CLIP en pedazos a `buscador-tenis/clip/clip.partNN`
-(Xenova/clip-vit-base-patch32, onnx/vision_model_quantized.onnx). Cuando diga "ya subí CLIP":
-1. `git pull`, revisa los pedazos (cada uno < 15 MB) y que juntos formen un .onnx válido.
-2. Cambia el Buscador de Tenis (`buscador-tenis/index.html`) para usar CLIP con onnxruntime-web
-   (wasm publicado junto a la página), uniendo los pedazos en el celular y guardando el modelo en IndexedDB.
-   Preprocesado CLIP: 224x224, recorte al centro, media [0.48145466, 0.4578275, 0.40821073],
-   desviación [0.26862954, 0.26130258, 0.27577711]. Normaliza el vector.
-3. Los chats ya cargados se recalculan con CLIP desde sus miniaturas (guardar vector nuevo aparte).
-4. Prueba, publica en el mismo artifact (https://claude.ai/artifact/Xpa8mAAR2WviZACvVQTYW4) y avisa.

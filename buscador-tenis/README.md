@@ -1,21 +1,27 @@
 # Buscador de Tenis
 
-Página para el celular: cargas un chat de WhatsApp exportado ("Incluir archivos"), sacas foto a un tenis y te dice
-si aparece, con el % de parecido y el chat donde está. Todo se procesa en el celular (IndexedDB), nada se sube.
+Página para el celular: cargas un chat de WhatsApp exportado ("Incluir archivos"), sacas foto a un tenis (o
+varias, de distintos ángulos) y te dice si aparece, con el % y el chat donde está. Todo se procesa en el celular
+(IndexedDB), nada se sube.
 
 Publicada como artifact: https://claude.ai/artifact/Xpa8mAAR2WviZACvVQTYW4
 
-## Cómo funciona
-- Reconocimiento de imágenes: MediaPipe Image Embedder (MobileNet V3 large) de @mediapipe/tasks-vision 1.2.2.
-- Compara la foto (entera y recortada al centro) con cada foto del chat por similitud coseno.
-- Lee el .txt del chat (formato Android y iPhone) para saber de qué mensaje es cada foto.
+## IA
+- **SigLIP B/16-224** de Google (torre de imagen), convertida a ONNX a mano desde el checkpoint de big_vision
+  (`herramientas/convertir.py`, comprobada contra una versión en numpy) y cuantizada a int8
+  (`herramientas/cuantizar.py`, ~96 MB). Reconoce el mismo objeto desde otro ángulo.
+- Corre con onnxruntime-web 1.23.2 (wasm, 1 hilo). La primera vez el celular baja ~130 MB y la guarda en IndexedDB.
+- Preparación: foto a 224x224, colores a [-1, 1]. Vector de 768 normalizado; similitud coseno.
+- El % se calibra frente a todas las fotos del chat (cuánto se destaca), más un mínimo si la similitud es alta.
 
-## Archivos pesados (no están en git)
-Para volver a publicar, bájalos aquí:
+## Rehacer los archivos pesados (no están en git)
 ```
-npm pack @mediapipe/tasks-vision@1.2.2 && tar xzf mediapipe-tasks-vision-1.2.2.tgz
-cp package/wasm/vision_wasm_internal.wasm .
-curl -o embedder.tflite https://storage.googleapis.com/mediapipe-models/image_embedder/mobilenet_v3_large/float32/1/mobilenet_v3_large.tflite
-base64 -w0 embedder.tflite > modelo-embedder.b64.txt
+curl -o siglip_b16.npz https://storage.googleapis.com/big_vision/siglip/webli_en_b16_224_63724782.npz
+pip install numpy onnx onnxruntime
+python herramientas/convertir.py siglip_b16.npz siglip_img.onnx
+python herramientas/cuantizar.py siglip_img.onnx siglip_img_q8.onnx
+mkdir -p ia && base64 -w0 siglip_img_q8.onnx | split -b 14500000 -d -a 2 --additional-suffix=.txt - ia/siglip-q8-parte-
+npm pack onnxruntime-web@1.23.2 && tar xzf onnxruntime-web-1.23.2.tgz && cp package/dist/ort-wasm-simd-threaded.wasm .
 ```
-Se publican junto a index.html: `vision_wasm_internal.wasm` (application/wasm) y `modelo-embedder.b64.txt`.
+Se publican junto a index.html: `ort-wasm-simd-threaded.wasm` (application/wasm) y `ia/siglip-q8-parte-NN.txt`
+(máx. 64 MB por publicación: en varias tandas).
