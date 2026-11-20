@@ -123,6 +123,12 @@ dialog::backdrop { background: rgba(0,0,0,.55) }
 .ep-f.on { background: var(--accent); border-color: var(--accent); color: var(--accent-fg) }
 .ep-f span { opacity: .75; font-weight: 600 }
 .ep-ayuda { color: var(--mut) }
+.ep-acciones { justify-content: flex-start; flex-wrap: wrap; gap: 6px }
+.ep-chip { border: 1.5px solid var(--line); background: var(--bg); color: var(--fg); border-radius: 12px; padding: 7px 12px; font: 700 .85rem var(--f-body); cursor: pointer }
+.ep-chip[aria-pressed="true"] { border-color: var(--accent); color: var(--accent); background: color-mix(in srgb, var(--accent) 10%, var(--card)) }
+.ep-foto .ep-n { position: absolute; right: 6px; top: 6px; font: 900 .8rem var(--f-display); color: #fff; background: rgba(0,0,0,.65); border-radius: 99px; padding: 2px 8px }
+.ep-foto.grupo { box-shadow: 4px 4px 0 -1px var(--card), 4px 4px 0 1px var(--line), 8px 8px 0 -1px var(--card), 8px 8px 0 1px var(--line); overflow: visible }
+.ep-foto.grupo img { border-radius: 12px }
 .ep-grid { flex: 1; overflow-y: auto; padding: 10px; display: grid; grid-template-columns: repeat(auto-fill, minmax(104px, 1fr)); gap: 8px; align-content: start }
 .ep-foto { position: relative; border: 0; padding: 0; border-radius: 12px; overflow: hidden; background: var(--line); cursor: pointer; aspect-ratio: 1;
   -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; transition: transform .12s }
@@ -290,7 +296,11 @@ dialog::backdrop { background: rgba(0,0,0,.55) }
       <button class="ep-f" data-f="todas">Todas</button>
     </div>
     <div class="buscador-texto"><span aria-hidden="true">🔎</span><input id="ep-q" type="search" placeholder="Filtrar por modelo o mensaje" autocomplete="off" aria-label="Filtrar fotos"></div>
-    <small class="ep-ayuda">Toca las fotos que valen lo mismo. Mantén apretada una foto para marcar también las parecidas.</small>
+    <div class="ep-fila ep-acciones">
+      <button class="ep-chip" id="ep-agrupar" aria-pressed="true">🧩 Agrupar repetidos</button>
+      <button class="ep-chip" id="ep-todas">☑️ Marcar todas</button>
+    </div>
+    <small class="ep-ayuda" id="ep-ayuda">Los pares repetidos salen juntos (×3, ×5…). Toca un grupo o varias fotos y elige el precio abajo.</small>
   </div>
   <div class="ep-grid" id="ep-grid"></div>
   <div class="ep-barra" id="ep-barra">
@@ -1011,7 +1021,7 @@ let tq; $('mod-q').addEventListener('input', (e) => { clearTimeout(tq); tq = set
 (async () => { try { claudeSample = await window.claude?.use?.('sample'); } catch { claudeSample = null; } pintarModelos(); })();
 
 // ---------- Editor de precios del catálogo ----------
-const ed = { filtro: 'sin', sel: new Set(), visibles: [] };
+const ed = { filtro: 'sin', sel: new Set(), visibles: [], tiles: [], agrupar: true };
 const fotosCatalogo = () => estado.chats.filter((c) => tipoChat(c) === 'catalogo').flatMap((c) => c.fotos.map((f) => ({ c, f })));
 // precio de la jefa para una foto del catálogo: la foto de los chats de precios más parecida (si se parece mucho)
 function precioJefaPara(f) {
@@ -1029,6 +1039,26 @@ function abrirEditor() {
   for (const { f } of fotosCatalogo()) ed.jefa.set(f, precioJefaPara(f));
   $('editor-precios').showModal(); pintarEditor();
 }
+// Junta los pares repetidos: fotos que la IA ve casi iguales (y del mismo color y modelo, si se sabe)
+function agruparRepetidos(items) {
+  const usado = new Set(), grupos = [];
+  const mod = (f) => normalTxt(f.modelo?.tenis ? `${f.modelo.marca} ${f.modelo.modelo}` : '');
+  for (let i = 0; i < items.length; i++) {
+    if (usado.has(i)) continue;
+    const g = [items[i]]; usado.add(i);
+    const a = items[i].f;
+    if (a.s1) for (let j = i + 1; j < items.length; j++) {
+      if (usado.has(j)) continue;
+      const b = items[j].f;
+      if (!b.s1 || coseno(a.s1, b.s1) < 0.84) continue;
+      if (a.color && b.color && parecidoColor(a.color, b.color) < 0.4) continue;
+      if (mod(a) && mod(b) && mod(a) !== mod(b)) continue;
+      g.push(items[j]); usado.add(j);
+    }
+    grupos.push(g);
+  }
+  return grupos.sort((x, y) => y.length - x.length);
+}
 function pintarEditor() {
   const q = normalTxt($('ep-q').value).split(/\s+/).filter(Boolean);
   const todas = fotosCatalogo();
@@ -1037,10 +1067,16 @@ function pintarEditor() {
   $('ep-n-con').textContent = todas.filter(tiene).length;
   ed.visibles = todas.filter((x) => (ed.filtro === 'todas' || (ed.filtro === 'sin') === !tiene(x)) &&
     (!q.length || q.every((t) => normalTxt([x.f.modelo?.marca, x.f.modelo?.modelo, x.f.modelo?.color, contextoFoto(x.c, x.f)].join(' ')).includes(t))));
-  $('ep-grid').innerHTML = ed.visibles.length ? ed.visibles.map(({ f }, i) => {
-    const j = ed.jefa.get(f);
+  ed.tiles = ed.agrupar ? agruparRepetidos(ed.visibles) : ed.visibles.map((x) => [x]);
+  const grupos = ed.tiles.filter((g) => g.length > 1).length;
+  $('ep-ayuda').textContent = ed.agrupar
+    ? (grupos ? `Junté ${grupos} grupo${grupos === 1 ? '' : 's'} de pares repetidos (×2, ×3…). Toca un grupo o varias fotos y elige el precio abajo.` : 'No encontré pares repetidos aquí. Toca las fotos y elige el precio abajo.')
+    : 'Toca las fotos que valen lo mismo. Mantén apretada una foto para marcar también las parecidas.';
+  $('ep-grid').innerHTML = ed.tiles.length ? ed.tiles.map((g, i) => {
+    const f = g[0].f, j = ed.jefa.get(f);
+    const sel = g.every(({ f: x }) => ed.sel.has(x));
     const etiqueta = f.miPrecio ? `<span class="ep-p">✏️ ${f.miPrecio.valor}</span>` : j ? `<span class="ep-p jefa">💬 ${j.valor}</span>` : '';
-    return `<button class="ep-foto ${ed.sel.has(f) ? 'sel' : ''}" data-i="${i}" aria-pressed="${ed.sel.has(f)}"><img src="${f.thumb}" alt="" loading="lazy">${etiqueta}</button>`;
+    return `<button class="ep-foto ${sel ? 'sel' : ''} ${g.length > 1 ? 'grupo' : ''}" data-i="${i}" aria-pressed="${sel}"><img src="${f.thumb}" alt="" loading="lazy">${etiqueta}${g.length > 1 ? `<span class="ep-n">×${g.length}</span>` : ''}</button>`;
   }).join('') : `<div class="ep-vacio">${ed.filtro === 'sin' ? '🎉 Todas las fotos del catálogo tienen precio.' : 'No hay fotos aquí.'}</div>`;
   pintarBarra();
 }
@@ -1049,6 +1085,8 @@ function pintarBarra() {
   $('ep-sel').textContent = n ? `${n} seleccionada${n === 1 ? '' : 's'}` : 'Toca las fotos para elegirlas';
   $('ep-barra').classList.toggle('vacia', !n);
   $('ep-limpiar').hidden = !n;
+  const todasSel = ed.visibles.length && ed.visibles.every(({ f }) => ed.sel.has(f));
+  $('ep-todas').textContent = todasSel ? '☐ Desmarcar todas' : `☑️ Marcar todas (${ed.visibles.length})`;
 }
 function avisoEditor(t) { const el = $('ep-toast'); el.textContent = t; el.classList.add('on'); clearTimeout(el._t); el._t = setTimeout(() => el.classList.remove('on'), 1800); }
 async function ponerPrecio(valor) {
@@ -1067,8 +1105,8 @@ $('ep-grid').addEventListener('pointerdown', (e) => {
   const b = e.target.closest('.ep-foto'); if (!b) return;
   pulsado = { b, largo: false, t: setTimeout(() => {
     pulsado.largo = true;
-    const f = ed.visibles[+b.dataset.i].f;
-    const parecidas = fotosCatalogo().filter(({ f: g }) => g === f || (f.s1 && g.s1 && coseno(f.s1, g.s1) >= 0.86 && parecidoColor(f.color, g.color) >= 0.4));
+    const f = ed.tiles[+b.dataset.i][0].f;
+    const parecidas = fotosCatalogo().filter(({ f: g }) => g === f || (f.s1 && g.s1 && coseno(f.s1, g.s1) >= 0.84 && parecidoColor(f.color, g.color) >= 0.4));
     for (const { f: g } of parecidas) ed.sel.add(g);
     navigator.vibrate?.(30);
     avisoEditor(`Marcadas ${parecidas.length} parecida${parecidas.length === 1 ? '' : 's'}`);
@@ -1079,8 +1117,12 @@ const soltar = (e) => {
   if (!pulsado) return;
   clearTimeout(pulsado.t);
   if (!pulsado.largo && e.type === 'pointerup') {
-    const f = ed.visibles[+pulsado.b.dataset.i]?.f;
-    if (f) { ed.sel.has(f) ? ed.sel.delete(f) : ed.sel.add(f); pulsado.b.classList.toggle('sel'); pulsado.b.setAttribute('aria-pressed', ed.sel.has(f)); pintarBarra(); }
+    const g = ed.tiles[+pulsado.b.dataset.i];
+    if (g) {
+      const todasSel = g.every(({ f }) => ed.sel.has(f));
+      for (const { f } of g) todasSel ? ed.sel.delete(f) : ed.sel.add(f);
+      pulsado.b.classList.toggle('sel', !todasSel); pulsado.b.setAttribute('aria-pressed', !todasSel); pintarBarra();
+    }
   }
   pulsado = null;
 };
@@ -1098,6 +1140,12 @@ $('ep-borrar').addEventListener('click', () => ponerPrecio(0));
 $('ep-limpiar').addEventListener('click', () => { ed.sel.clear(); pintarEditor(); });
 let tqe; $('ep-q').addEventListener('input', () => { clearTimeout(tqe); tqe = setTimeout(pintarEditor, 150); });
 $('ep-cerrar').addEventListener('click', () => $('editor-precios').close());
+$('ep-agrupar').addEventListener('click', () => { ed.agrupar = !ed.agrupar; $('ep-agrupar').setAttribute('aria-pressed', ed.agrupar); pintarEditor(); });
+$('ep-todas').addEventListener('click', () => {
+  const todasSel = ed.visibles.length && ed.visibles.every(({ f }) => ed.sel.has(f));
+  for (const { f } of ed.visibles) todasSel ? ed.sel.delete(f) : ed.sel.add(f);
+  pintarEditor();
+});
 $('abrir-precios').addEventListener('click', abrirEditor);
 
 // ---------- Lista de chats cargados ----------
