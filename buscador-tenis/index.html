@@ -219,69 +219,141 @@ dialog::backdrop { background: rgba(0,0,0,.55) }
 .duo figcaption { font-size: .8rem; color: var(--mut); overflow: hidden; text-overflow: ellipsis; white-space: nowrap }
 .duo figure:first-child figcaption { color: var(--accent); font-weight: 700 }
 
+/* ---- portada: escáner primero ---- */
+.vh { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap }
+main { gap: 14px; padding-block: 12px 40px }
+.barra-top { display: flex; align-items: center; justify-content: space-between; gap: 10px }
+.marca { display: flex; align-items: center; gap: 10px; min-width: 0; flex: 1 }
+.marca > div { min-width: 0 }
+.marca b { display: block; font: 900 1.15rem/1.1 var(--f-display); letter-spacing: -.01em }
+.marca small { display: block; color: var(--mut); font-size: .8rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis }
+.logo { width: 40px; height: 40px; border-radius: 12px; display: grid; place-items: center; font-size: 1.3rem; flex: none;
+  background: linear-gradient(135deg, var(--accent), var(--accent2)) }
+.btn-mis { flex: none; border: 1.5px solid var(--line); background: var(--card); color: var(--fg); border-radius: 99px; padding: 8px 14px; font: 700 .88rem var(--f-body); cursor: pointer }
+.scan { border-radius: 26px; padding: 18px; display: flex; flex-direction: column; gap: 14px; position: relative; overflow: hidden;
+  background: radial-gradient(90% 70% at 50% 0%, #1d4fb8 0%, transparent 70%), linear-gradient(180deg, #0b1630, #08101f); color: #fff;
+  box-shadow: 0 20px 40px -24px rgba(10,30,80,.8) }
+.visor-grande { position: relative; width: 100%; aspect-ratio: 1 / .9; max-height: 52vh; border-radius: 20px; cursor: pointer; display: grid; place-items: center; overflow: hidden;
+  background: repeating-linear-gradient(0deg, transparent 0 9px, rgba(56,208,255,.06) 9px 10px), rgba(255,255,255,.03); transition: transform .15s; -webkit-tap-highlight-color: transparent }
+.visor-grande:active { transform: scale(.98) }
+.visor-grande .esq { width: 44px; height: 44px; border-width: 5px; border-color: #38d0ff }
+.visor-grande .esq.a { top: 14px; left: 14px } .visor-grande .esq.b { top: 14px; right: 14px }
+.visor-grande .esq.c { bottom: 14px; left: 14px } .visor-grande .esq.d { bottom: 14px; right: 14px }
+.laser-idle { position: absolute; left: 8%; right: 8%; top: 10%; height: 2px; background: #38d0ff; box-shadow: 0 0 18px 4px rgba(56,208,255,.6);
+  animation: idle 2.6s ease-in-out infinite alternate; will-change: transform; opacity: .85 }
+@keyframes idle { from { transform: translateY(0) } to { transform: translateY(calc(var(--h, 300px) * .78)) } }
+.centro { position: relative; z-index: 1; display: flex; flex-direction: column; align-items: center; gap: 6px; text-align: center }
+.centro .icono { width: 84px; height: 84px; border-radius: 50%; display: grid; place-items: center; font-size: 2.2rem;
+  background: linear-gradient(135deg, #2f7dff, #38d0ff); box-shadow: 0 0 0 10px rgba(56,208,255,.15), 0 0 0 22px rgba(56,208,255,.07); animation: latido 2.2s ease-in-out infinite }
+@keyframes latido { 50% { box-shadow: 0 0 0 14px rgba(56,208,255,.2), 0 0 0 30px rgba(56,208,255,.05) } }
+.centro b { font: 900 1.6rem/1.1 var(--f-display); margin-top: 10px; letter-spacing: -.01em }
+.centro small { color: #b8c7e0; font-size: .92rem }
+.scan-acciones { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; justify-content: space-between }
+.pill { border: 1.5px solid rgba(255,255,255,.22); color: #fff; border-radius: 99px; padding: 9px 16px; font: 700 .92rem var(--f-body); cursor: pointer; background: rgba(255,255,255,.06) }
+.scan .ia { background: transparent; border: 0; padding: 0; color: #b8c7e0; font-size: .82rem; flex: 1; min-width: 140px; justify-content: flex-end; text-align: right }
+.scan .ia.listo { color: #5ee08f }
+.scan .ia .prog { background: rgba(255,255,255,.12) }
+.grande-txt { background: var(--card); padding: 6px 14px; border-radius: 16px }
+.vacio-inicio { display: flex; flex-direction: column; gap: 8px; align-items: flex-start; background: var(--card); border: 1.5px dashed var(--line); border-radius: 18px; padding: 16px }
+.vacio-inicio b { font: 800 1.1rem var(--f-display) } .vacio-inicio span { color: var(--mut); font-size: .92rem }
+.btn.ancho { width: 100%; justify-content: center }
+#resultados:empty, #mod-res:empty { display: none }
+/* Mis chats */
+#ajustes { width: 100vw; height: 100vh; height: 100dvh; max-width: none; max-height: none; margin: 0; border-radius: 0; background: var(--bg); display: none; flex-direction: column }
+#ajustes[open] { display: flex; animation: subir .24s cubic-bezier(.2,.8,.2,1) }
+.aj-top { display: flex; align-items: center; justify-content: space-between; padding: calc(10px + env(safe-area-inset-top, 0px)) max(16px, env(safe-area-inset-right, 0px)) 10px max(16px, env(safe-area-inset-left, 0px));
+  background: var(--card); border-bottom: 1px solid var(--line) }
+.aj-top b { font: 900 1.25rem var(--f-display) }
+.aj-cuerpo { flex: 1; overflow-y: auto; padding: 16px max(16px, env(safe-area-inset-right, 0px)) calc(24px + env(safe-area-inset-bottom, 0px)) max(16px, env(safe-area-inset-left, 0px));
+  display: flex; flex-direction: column; gap: 14px; max-width: 640px; width: 100%; margin: 0 auto }
+.aj-grupo { display: flex; flex-direction: column; gap: 8px; background: var(--card); border: 1px solid var(--line); border-radius: 16px; padding: 14px }
+.ayuda { background: var(--card); border: 1px solid var(--line); border-radius: 16px; padding: 12px 14px }
+.ayuda summary { font-weight: 700; cursor: pointer; color: var(--accent) }
+.ayuda[open] summary { margin-bottom: 6px }
+.chat-item { background: var(--card) }
+
 @media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important } }
 </style>
 
 <main>
-  <header class="hero">
-    <h1>Buscador de <span>Tenis</span></h1>
-    <p class="lead">Sácale foto a un tenis y mira si aparece en tus chats de WhatsApp. Todo se procesa en tu celular: tus chats no se suben a ningún lado.</p>
-  </header>
-  <div class="ia" id="ia" role="status"><span id="ia-txt">Preparando el reconocimiento de imágenes…</span><div class="prog"><i id="ia-bar"></i></div></div>
+  <div class="barra-top">
+    <div class="marca"><span class="logo" aria-hidden="true">👟</span><div><b>Buscador de Tenis</b><small id="resumen">Escanea y mira el precio</small></div></div>
+    <button class="btn-mis" id="abrir-ajustes" aria-haspopup="dialog">⚙️ Mis chats</button>
+  </div>
 
-  <section class="card" aria-labelledby="t-chats">
-    <span class="paso">Paso 1</span>
-    <h2 id="t-chats">Carga el chat</h2>
-    <p class="nota">En WhatsApp abre el chat → <b>⋮ → Más → Exportar chat → Incluir archivos</b> → guárdalo en tu celular (Archivos o Drive). Después elígelo aquí. Si te da un .zip, elige el .zip; si te da varios archivos, elígelos todos juntos.</p>
-    <div class="btns">
-      <label class="btn" for="in-chat">📂 Elegir chat exportado</label>
-      <label class="btn sec" for="in-fotos">🖼️ Elegir fotos sueltas</label>
+  <section class="scan" aria-labelledby="t-scan">
+    <h1 id="t-scan" class="vh">Escanear un tenis</h1>
+    <label class="visor-grande" for="in-camara" id="btn-camara">
+      <i class="esq a"></i><i class="esq b"></i><i class="esq c"></i><i class="esq d"></i>
+      <span class="laser-idle" aria-hidden="true"></span>
+      <span class="centro"><span class="icono" aria-hidden="true">📷</span><b>Escanear tenis</b><small>Toca y sácale una foto</small></span>
+    </label>
+    <div class="scan-acciones">
+      <label class="pill" for="in-galeria">🖼️ Elegir de la galería</label>
+      <div class="ia" id="ia" role="status"><span id="ia-txt">Preparando la IA…</span><div class="prog"><i id="ia-bar"></i></div></div>
     </div>
-    <p class="nota">Si al tocar el botón no se abre nada, abre esta página en <b>Chrome</b> (menú ⋮ → Abrir en el navegador) y prueba de nuevo.</p>
+    <input id="in-camara" type="file" accept="image/*" capture="environment">
+    <input id="in-galeria" type="file" accept="image/*" multiple>
+    <input id="in-angulo" type="file" accept="image/*" capture="environment">
+    <input id="in-angulo-gal" type="file" accept="image/*" multiple>
+  </section>
+
+  <div class="buscador-texto grande-txt"><span aria-hidden="true">🔎</span>
+    <input id="mod-q" type="search" placeholder="O escribe: air force blanco, jordan 1…" autocomplete="off" aria-label="Buscar por modelo, marca o color"></div>
+
+  <div class="vacio-inicio" id="sin-chats" hidden>
+    <b>Primero carga tus chats</b>
+    <span>El escáner busca en las fotos y precios de tus chats de WhatsApp.</span>
+    <button class="btn" id="abrir-ajustes-2">⚙️ Cargar mis chats</button>
+  </div>
+
+  <section id="resultados" aria-live="polite"></section>
+  <div id="mod-res"></div>
+
+  <button class="btn sec ancho" id="abrir-precios" hidden>🏷️ Poner precios en la galería</button>
+</main>
+
+<dialog id="ajustes" aria-labelledby="aj-t">
+  <div class="aj-top"><b id="aj-t">Mis chats</b><button class="ep-x" id="aj-cerrar" aria-label="Cerrar">✕</button></div>
+  <div class="aj-cuerpo">
+    <div class="chats" id="lista-chats"></div>
+    <div class="btns">
+      <label class="btn" for="in-chat">📂 Agregar chat exportado</label>
+      <label class="btn sec" for="in-fotos">Fotos sueltas</label>
+    </div>
     <input id="in-chat" type="file" accept=".zip,.txt,image/*,application/zip" multiple>
     <input id="in-fotos" type="file" accept="image/*" multiple>
     <div id="cargando" hidden>
       <p class="nota" id="cargando-txt">Preparando…</p>
       <div class="prog"><i id="cargando-bar"></i></div>
     </div>
-    <div class="chats" id="lista-chats"></div>
-    <button class="btn sec" id="abrir-precios" hidden style="justify-content:center">🖼️ Galería: poner precios</button>
-  </section>
-
-  <section class="card" aria-labelledby="t-buscar">
-    <span class="paso">Paso 2</span>
-    <h2 id="t-buscar">Busca un tenis</h2>
-    <label class="btn grande" for="in-camara" id="btn-camara">📷 Sacar foto al tenis</label>
-    <label class="btn sec" for="in-galeria" style="justify-content:center">o elegir una foto de la galería</label>
-    <input id="in-camara" type="file" accept="image/*" capture="environment">
-    <input id="in-galeria" type="file" accept="image/*" multiple>
-    <input id="in-angulo" type="file" accept="image/*" capture="environment">
-    <input id="in-angulo-gal" type="file" accept="image/*" multiple>
-    <p class="nota">Puedes elegir varias fotos del mismo tenis a la vez (de distintos ángulos): se queda con la que mejor coincida.</p>
-    <div class="ajuste">
-      <label for="umbral">Exigencia</label>
-      <input id="umbral" type="range" min="40" max="95" step="1" value="70">
-      <output id="umbral-v" for="umbral">70%</output>
+    <details class="ayuda">
+      <summary>¿Cómo exporto un chat?</summary>
+      <p class="nota">En WhatsApp abre el chat → <b>⋮ → Más → Exportar chat → Incluir archivos</b> → guárdalo en Archivos o Drive. Después tócalo aquí. Si te da un .zip, elige el .zip.</p>
+      <p class="nota">Toca el botón de cada chat para decir qué es: <b>📒 Catálogo</b> (fotos buenas), <b>💰 Precios</b> (chat con la jefa) o <b>📋 Lista</b> (fotos y después el precio).</p>
+      <p class="nota">Si no se abre nada al tocar, abre esta página en <b>Chrome</b>.</p>
+    </details>
+    <div class="aj-grupo">
+      <b>Exigencia del escáner</b>
+      <div class="ajuste">
+        <label for="umbral">Exigencia</label>
+        <input id="umbral" type="range" min="40" max="95" step="1" value="70">
+        <output id="umbral-v" for="umbral">70%</output>
+      </div>
+      <p class="nota">Si dice "Aparece" con tenis que no son, súbela. Si no encuentra uno que sí está, bájala.</p>
     </div>
-    <p class="nota">El porcentaje mide cuánto se destaca la foto frente a todas las demás del chat. Si te da falsos "Aparece", sube la exigencia; si no encuentra uno que sí está, bájala.</p>
-  </section>
-
-  <section id="resultados" aria-live="polite"></section>
-
-  <section class="card" aria-labelledby="t-modelo">
-    <span class="paso">Paso 3 · opcional</span>
-    <h2 id="t-modelo">Busca por modelo</h2>
-    <p class="nota" id="mod-estado">Claude mira las fotos de tus chats y anota la marca, el modelo y el color de cada tenis. Se hace una sola vez por chat y queda guardado.</p>
-    <div class="prog" id="mod-prog" hidden><i id="mod-bar"></i></div>
-    <div class="btns">
-      <button class="btn" id="mod-reconocer" hidden>🏷️ Reconocer modelos con Claude</button>
-      <button class="btn sec" id="mod-parar" hidden>Parar</button>
+    <div class="aj-grupo">
+      <b>Nombres de modelos</b>
+      <p class="nota" id="mod-estado">Claude mira las fotos y anota marca, modelo y color, para que puedas buscar escribiendo.</p>
+      <div class="prog" id="mod-prog" hidden><i id="mod-bar"></i></div>
+      <div class="btns">
+        <button class="btn" id="mod-reconocer" hidden>🏷️ Reconocer modelos con Claude</button>
+        <button class="btn sec" id="mod-parar" hidden>Parar</button>
+      </div>
     </div>
-    <div class="buscador-texto"><span aria-hidden="true">🔎</span>
-      <input id="mod-q" type="search" placeholder="Ej: air force blanco, jordan 1, puma rojo" autocomplete="off" aria-label="Buscar por modelo, marca o color"></div>
-    <div id="mod-res"></div>
-  </section>
-</main>
+    <p class="nota">Todo se guarda sólo en tu celular. Tus chats no se suben a ningún lado.</p>
+  </div>
+</dialog>
 
 <dialog id="recorte" aria-labelledby="rc-t">
   <div class="rc-top"><b id="rc-t">Marca el tenis</b><small>Arrastra el recuadro y sus esquinas para que quede sólo el tenis.</small></div>
@@ -680,7 +752,7 @@ async function animarEscaneo(thumbQuery, total) {
 async function buscar(files, agregar = false) {
   const res = $('resultados');
   const total = estado.chats.reduce((a, c) => a + c.fotos.length, 0);
-  if (!total) { res.innerHTML = '<div class="vacio">Primero carga un chat en el Paso 1.</div>'; return; }
+  if (!total) { res.innerHTML = '<div class="vacio">Primero carga tus chats en ⚙️ Mis chats (arriba a la derecha).</div>'; return; }
   try {
     if (!agregar) estado.consulta = [];
     const nuevas = [];
@@ -795,8 +867,8 @@ function pintarResultados(animar = false) {
   const otrasCat = u.cat.slice(u.cat.length ? 1 : 0, 9);
   const otrasPre = u.pre.slice(u.cat.length ? 0 : 1, u.cat.length ? 6 : 9);
   $('resultados').innerHTML = `<div class="card resultado ${animar ? 'entra' : ''}">
-    <div class="veredicto ${v[0]}"><div class="v-txt"><b>${v[1]}</b><span>${v[2]}</span></div>${anillo(mejor, c)}</div>
     ${cajaPrecio}
+    <div class="veredicto ${v[0]}"><div class="v-txt"><b>${v[1]}</b><span>${v[2]}</span></div>${anillo(mejor, c)}</div>
     ${best ? `<div class="duo">
       <figure><img src="${estado.consulta[best.cual]?.thumb || ''}" alt="Tu foto"><figcaption>Tu foto</figcaption></figure>
       <figure><img src="${best.foto.thumb}" alt="Foto del chat"><figcaption>${best.foto.modelo?.tenis ? `<span class="chip-modelo">${esc(nombreModelo(best.foto.modelo))}</span><br>` : ''}${u.cat.length ? '📒 ' : ''}${esc(best.chat.nombre)} · ${esc([best.foto.fecha, best.foto.hora].filter(Boolean).join(' '))}</figcaption></figure>
@@ -1225,11 +1297,20 @@ $('ep-todas').addEventListener('click', () => {
   pintarEditor();
 });
 $('abrir-precios').addEventListener('click', abrirEditor);
+const abrirAjustes = () => $('ajustes').showModal();
+$('abrir-ajustes').addEventListener('click', abrirAjustes);
+$('abrir-ajustes-2').addEventListener('click', abrirAjustes);
+$('aj-cerrar').addEventListener('click', () => $('ajustes').close());
+// la línea del láser recorre todo el visor
+try { new ResizeObserver(([e]) => $('btn-camara').style.setProperty('--h', `${e.contentRect.height}px`)).observe($('btn-camara')); } catch {}
 
 // ---------- Lista de chats cargados ----------
 const estado = { chats: [], umbral: 70, ultima: null, consulta: [], actualizando: null, ultimoArchivo: null, porTexto: [] };
 function pintarChats() {
   const l = $('lista-chats');
+  const nFotos = estado.chats.reduce((a, c) => a + c.fotos.length, 0), nPrecio = estado.chats.reduce((a, c) => a + c.fotos.filter((f) => f.precio || f.miPrecio).length, 0);
+  $('sin-chats').hidden = !!estado.chats.length;
+  $('resumen').textContent = estado.chats.length ? `${estado.chats.length} chat${estado.chats.length === 1 ? '' : 's'} · ${nFotos} fotos · ${nPrecio} con precio` : 'Escanea y mira el precio';
   if (!estado.chats.length) { l.innerHTML = '<div class="vacio">Todavía no cargaste ningún chat.</div>'; $('abrir-precios').hidden = true; return; }
   try { pintarModelos(); } catch {}
   $('abrir-precios').hidden = !estado.chats.some((c) => tipoChat(c) === 'catalogo' && c.fotos.length);
