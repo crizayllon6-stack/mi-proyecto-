@@ -109,6 +109,45 @@ dialog::backdrop { background: rgba(0,0,0,.55) }
 .burbuja img { border-radius: 8px; display: block; max-width: 100%; margin: 4px 0 }
 .burbuja.esta { outline: 3px solid var(--accent); outline-offset: 2px }
 .error { color: var(--bad); font-weight: 600 }
+
+/* editor de precios */
+#editor-precios { width: min(640px, 100vw); height: min(94vh, 900px); max-height: 94vh; border-radius: 20px; background: var(--bg); color: var(--fg);
+  display: none; flex-direction: column; overflow: hidden }
+#editor-precios[open] { display: flex; animation: subir .26s cubic-bezier(.2,.8,.2,1) }
+.ep-top { padding: 14px 14px 10px; display: flex; flex-direction: column; gap: 10px; background: var(--card); border-bottom: 1px solid var(--line) }
+.ep-fila { display: flex; align-items: center; gap: 10px; justify-content: space-between }
+.ep-top b { font: 800 1.2rem var(--f-display) }
+.ep-x { border: 0; background: none; color: var(--fg); font-size: 1.4rem; cursor: pointer; padding: 4px 8px }
+.ep-filtros { display: flex; gap: 6px; flex-wrap: wrap }
+.ep-f { border: 1.5px solid var(--line); background: var(--bg); color: var(--fg); border-radius: 99px; padding: 6px 12px; font: 700 .85rem var(--f-body); cursor: pointer }
+.ep-f.on { background: var(--accent); border-color: var(--accent); color: var(--accent-fg) }
+.ep-f span { opacity: .75; font-weight: 600 }
+.ep-ayuda { color: var(--mut) }
+.ep-grid { flex: 1; overflow-y: auto; padding: 10px; display: grid; grid-template-columns: repeat(auto-fill, minmax(104px, 1fr)); gap: 8px; align-content: start }
+.ep-foto { position: relative; border: 0; padding: 0; border-radius: 12px; overflow: hidden; background: var(--line); cursor: pointer; aspect-ratio: 1;
+  -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; transition: transform .12s }
+.ep-foto img { width: 100%; height: 100%; object-fit: cover; display: block; pointer-events: none }
+.ep-foto.sel { outline: 4px solid var(--accent); outline-offset: -4px; transform: scale(.95) }
+.ep-foto.sel::after { content: "✓"; position: absolute; top: 6px; left: 6px; width: 26px; height: 26px; border-radius: 50%; background: var(--accent); color: #fff;
+  display: grid; place-items: center; font-weight: 900; font-size: .9rem; box-shadow: 0 2px 6px rgba(0,0,0,.4) }
+.ep-foto .ep-p { position: absolute; left: 6px; bottom: 6px; font: 800 .78rem var(--f-body); color: #fff; border-radius: 99px; padding: 2px 8px; background: #0f9d58 }
+.ep-foto .ep-p.jefa { background: rgba(0,0,0,.6) }
+.ep-barra { padding: 10px 14px calc(12px + env(safe-area-inset-bottom, 0px)); background: var(--card); border-top: 1px solid var(--line);
+  display: flex; flex-direction: column; gap: 10px; box-shadow: 0 -10px 24px -18px rgba(20,60,140,.6) }
+.ep-barra.vacia .ep-rapidos, .ep-barra.vacia .ep-otro, .ep-barra.vacia #ep-guardar, .ep-barra.vacia #ep-borrar { opacity: .4; pointer-events: none }
+.ep-rapidos { display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px }
+.ep-r { border: 0; border-radius: 12px; padding: 12px 0; font: 900 1.05rem var(--f-display); color: #fff; cursor: pointer;
+  background: linear-gradient(135deg, #0f9d58, #12b886); box-shadow: 0 6px 14px -10px rgba(15,157,88,.9) }
+.ep-r:active { transform: scale(.95) }
+.ep-otro { flex: 1; display: flex; align-items: center; gap: 6px; border: 1.5px solid var(--line); border-radius: 12px; padding: 0 10px; background: var(--bg); min-width: 0 }
+.ep-otro span { font-weight: 800; color: var(--mut) }
+.ep-otro input { flex: 1; min-width: 0; border: 0; background: transparent; color: var(--fg); font: 700 1rem var(--f-body); padding: 11px 0; outline: none }
+.ep-link { border: 0; background: none; color: var(--accent); font: 700 .88rem var(--f-body); cursor: pointer; padding: 6px }
+.ep-link.peligro { color: var(--bad) }
+.ep-toast { position: absolute; left: 50%; bottom: 190px; transform: translate(-50%, 20px); opacity: 0; background: #0f9d58; color: #fff; font-weight: 800;
+  padding: 10px 16px; border-radius: 12px; transition: .25s; pointer-events: none; max-width: 90%; text-align: center }
+.ep-toast.on { opacity: 1; transform: translate(-50%, 0) }
+.ep-vacio { grid-column: 1 / -1; text-align: center; color: var(--mut); padding: 30px 10px }
 /* escáner */
 .escaner { align-items: center }
 .visor { position: relative; width: min(280px, 80%); aspect-ratio: 1; border-radius: 14px; overflow: hidden; background: var(--line) }
@@ -196,6 +235,7 @@ dialog::backdrop { background: rgba(0,0,0,.55) }
       <div class="prog"><i id="cargando-bar"></i></div>
     </div>
     <div class="chats" id="lista-chats"></div>
+    <button class="btn sec" id="abrir-precios" hidden style="justify-content:center">✏️ Poner precios al catálogo</button>
   </section>
 
   <section class="card" aria-labelledby="t-buscar">
@@ -239,6 +279,29 @@ dialog::backdrop { background: rgba(0,0,0,.55) }
     <div class="rc-caja" id="rc-caja"><span data-esq="ia"></span><span data-esq="da"></span><span data-esq="ib"></span><span data-esq="db"></span><div class="barrido"><i class="laser"></i></div></div></div>
   <div class="rc-btns"><button class="btn grande" id="rc-buscar">🔍 Buscar este tenis</button>
     <div class="btns"><button class="btn sec" id="rc-toda">Usar la foto entera</button><button class="btn sec" id="rc-cancelar">Cancelar</button></div></div>
+</dialog>
+
+<dialog id="editor-precios" aria-labelledby="ep-t">
+  <div class="ep-top">
+    <div class="ep-fila"><b id="ep-t">Poner precios</b><button class="ep-x" id="ep-cerrar" aria-label="Cerrar">✕</button></div>
+    <div class="ep-filtros" role="tablist">
+      <button class="ep-f on" data-f="sin">Sin precio <span id="ep-n-sin"></span></button>
+      <button class="ep-f" data-f="con">Con precio <span id="ep-n-con"></span></button>
+      <button class="ep-f" data-f="todas">Todas</button>
+    </div>
+    <div class="buscador-texto"><span aria-hidden="true">🔎</span><input id="ep-q" type="search" placeholder="Filtrar por modelo o mensaje" autocomplete="off" aria-label="Filtrar fotos"></div>
+    <small class="ep-ayuda">Toca las fotos que valen lo mismo. Mantén apretada una foto para marcar también las parecidas.</small>
+  </div>
+  <div class="ep-grid" id="ep-grid"></div>
+  <div class="ep-barra" id="ep-barra">
+    <div class="ep-fila"><b id="ep-sel">0 seleccionadas</b><button class="ep-link" id="ep-limpiar">Quitar selección</button></div>
+    <div class="ep-rapidos">
+      <button class="ep-r" data-v="550">550</button><button class="ep-r" data-v="650">650</button><button class="ep-r" data-v="750">750</button><button class="ep-r" data-v="800">800</button><button class="ep-r" data-v="950">950</button>
+    </div>
+    <div class="ep-fila"><label class="ep-otro"><span>Bs</span><input id="ep-valor" type="number" inputmode="numeric" min="1" placeholder="Otro" aria-label="Otro precio en bolivianos"></label>
+      <button class="btn" id="ep-guardar">Guardar</button><button class="ep-link peligro" id="ep-borrar">Quitar precio</button></div>
+  </div>
+  <div class="ep-toast" id="ep-toast" role="status"></div>
 </dialog>
 
 <dialog id="vista-chat">
@@ -681,13 +744,24 @@ function pintarResultados(animar = false) {
   const tarjeta = (r, lista, k) => {
     const p = pct(r.p);
     return `<button class="res" data-l="${lista}" data-i="${k}"><img src="${r.foto.thumb}" alt=""><div><span class="pct ${clase(p)}">${p}%</span>
-      ${r.foto.precio ? `<span class="chip-precio">${bs(r.foto.precio.valor)}${r.foto.precio.dudoso ? ' ⚠' : ''}</span>` : ''}${r.foto.modelo?.tenis ? `<span class="chip-modelo">${esc(nombreModelo(r.foto.modelo))}</span>` : ''}${r.color < 0.25 ? '<span class="otro-color">⚠ otro color</span>' : ''}<small>${esc(r.chat.nombre)}</small><small>${esc([r.foto.fecha, r.foto.hora].filter(Boolean).join(' · '))}</small></div></button>`;
+      ${r.foto.precio ? `<span class="chip-precio">${bs(r.foto.precio.valor)}${r.foto.precio.dudoso ? ' ⚠' : ''}</span>` : r.foto.miPrecio ? `<span class="chip-precio">✏️ ${bs(r.foto.miPrecio.valor)}</span>` : ''}${r.foto.modelo?.tenis ? `<span class="chip-modelo">${esc(nombreModelo(r.foto.modelo))}</span>` : ''}${r.color < 0.25 ? '<span class="otro-color">⚠ otro color</span>' : ''}<small>${esc(r.chat.nombre)}</small><small>${esc([r.foto.fecha, r.foto.hora].filter(Boolean).join(' · '))}</small></div></button>`;
   };
+  // precio que tú pusiste a las fotos del catálogo que coinciden con este tenis
+  const manual = (() => {
+    if (!u.cat.length || !best || clase(mejor) === 'bad') return null;
+    const corte = Math.max(0.45, best.p * 0.6);
+    const cand = u.cat.filter((r) => (r === best || (r.p >= corte && r.color >= 0.25)) && r.foto.miPrecio);
+    cand.sort((x, y) => (y === best) - (x === best) || y.foto.miPrecio.ts - x.foto.miPrecio.ts);
+    return cand[0]?.foto.miPrecio || null;
+  })();
+  const cajaManual = (m) => `<div class="precio"><span>💰</span><div><b class="monto">${bs(m.valor)}</b>
+    <small>✏️ Precio puesto por ti${m.ts ? ` el ${new Date(m.ts).toLocaleDateString('es-BO')}` : ''}</small></div></div>`;
   const cajaPrecio = (() => {
-    if (!u.pre.length) return '';
-    if (!bp || clase(pct(bp.p)) === 'bad') return `<div class="precio sin"><span>💰</span><div><b>No está en tus chats de precios</b><small>No encontré este tenis en los chats donde te pasaron precios.</small></div></div>`;
+    if (!u.pre.length) return manual ? cajaManual(manual) : '';
+    if (!bp || clase(pct(bp.p)) === 'bad') return manual ? cajaManual(manual) : `<div class="precio sin"><span>💰</span><div><b>No está en tus chats de precios</b><small>No encontré este tenis en los chats donde te pasaron precios.</small></div></div>`;
     const ps = preciosDelTenis(u.pre, bp);
     if (!ps.length) {
+      if (manual) return cajaManual(manual);
       const resp = [bp, ...u.pre.filter((r) => r.p >= Math.max(0.45, bp.p * 0.6) && r.color >= 0.25)].find((r) => r.foto.respuesta)?.foto.respuesta;
       return resp ? `<div class="precio sin"><span>💬</span><div><b>${esc(resp.autor)} dijo: “${esc(resp.texto)}”</b><small>El ${esc(resp.fecha)} a las ${esc(resp.hora)} · no dio precio</small></div></div>`
         : `<div class="precio sin"><span>💰</span><div><b>Sin precio</b><small>Lo encontré en el chat pero no vi un número después de la foto. Mira el chat.</small></div></div>`;
@@ -700,6 +774,7 @@ function pintarResultados(animar = false) {
       ${a.dudoso ? '<small class="aviso">⚠ Verifica en el chat: mandaste varias fotos seguidas y el precio podría ser de otra.</small>' : ''}
       ${ps.length > 1 ? `<div class="historial">${ps.slice(1, 5).map((r) => `<button class="hist" data-h="${u.pre.indexOf(r)}">${bs(r.foto.precio.valor)} <small>${esc(r.foto.precio.fecha)}</small></button>`).join('')}</div>` : ''}
       ${valores.length > 1 ? '<small class="aviso">El precio cambió con el tiempo: te muestro el más reciente.</small>' : ''}
+      ${manual && manual.valor !== a.valor ? `<small class="aviso">✏️ Tú le pusiste ${bs(manual.valor)} en el catálogo.</small>` : ''}
       <button class="ver-precio" id="ver-precio">Ver dónde lo dijo →</button>
     </div></div>`;
   })();
@@ -935,12 +1010,103 @@ $('mod-parar').addEventListener('click', () => ctlModelos?.abort());
 let tq; $('mod-q').addEventListener('input', (e) => { clearTimeout(tq); tq = setTimeout(() => buscarPorTexto(e.target.value), 150); });
 (async () => { try { claudeSample = await window.claude?.use?.('sample'); } catch { claudeSample = null; } pintarModelos(); })();
 
+// ---------- Editor de precios del catálogo ----------
+const ed = { filtro: 'sin', sel: new Set(), visibles: [] };
+const fotosCatalogo = () => estado.chats.filter((c) => tipoChat(c) === 'catalogo').flatMap((c) => c.fotos.map((f) => ({ c, f })));
+// precio de la jefa para una foto del catálogo: la foto de los chats de precios más parecida (si se parece mucho)
+function precioJefaPara(f) {
+  if (!f.s1) return null;
+  let mejor = null, ms = 0.86;
+  for (const c of estado.chats) if (tipoChat(c) === 'precios') for (const g of c.fotos) {
+    if (!g.precio || !g.s1) continue;
+    const x = coseno(f.s1, g.s1);
+    if (x > ms) { ms = x; mejor = g.precio; }
+  }
+  return mejor;
+}
+function abrirEditor() {
+  ed.sel.clear(); ed.jefa = new Map();
+  for (const { f } of fotosCatalogo()) ed.jefa.set(f, precioJefaPara(f));
+  $('editor-precios').showModal(); pintarEditor();
+}
+function pintarEditor() {
+  const q = normalTxt($('ep-q').value).split(/\s+/).filter(Boolean);
+  const todas = fotosCatalogo();
+  const tiene = ({ f }) => !!(f.miPrecio || ed.jefa.get(f));
+  $('ep-n-sin').textContent = todas.filter((x) => !tiene(x)).length;
+  $('ep-n-con').textContent = todas.filter(tiene).length;
+  ed.visibles = todas.filter((x) => (ed.filtro === 'todas' || (ed.filtro === 'sin') === !tiene(x)) &&
+    (!q.length || q.every((t) => normalTxt([x.f.modelo?.marca, x.f.modelo?.modelo, x.f.modelo?.color, contextoFoto(x.c, x.f)].join(' ')).includes(t))));
+  $('ep-grid').innerHTML = ed.visibles.length ? ed.visibles.map(({ f }, i) => {
+    const j = ed.jefa.get(f);
+    const etiqueta = f.miPrecio ? `<span class="ep-p">✏️ ${f.miPrecio.valor}</span>` : j ? `<span class="ep-p jefa">💬 ${j.valor}</span>` : '';
+    return `<button class="ep-foto ${ed.sel.has(f) ? 'sel' : ''}" data-i="${i}" aria-pressed="${ed.sel.has(f)}"><img src="${f.thumb}" alt="" loading="lazy">${etiqueta}</button>`;
+  }).join('') : `<div class="ep-vacio">${ed.filtro === 'sin' ? '🎉 Todas las fotos del catálogo tienen precio.' : 'No hay fotos aquí.'}</div>`;
+  pintarBarra();
+}
+function pintarBarra() {
+  const n = ed.sel.size;
+  $('ep-sel').textContent = n ? `${n} seleccionada${n === 1 ? '' : 's'}` : 'Toca las fotos para elegirlas';
+  $('ep-barra').classList.toggle('vacia', !n);
+  $('ep-limpiar').hidden = !n;
+}
+function avisoEditor(t) { const el = $('ep-toast'); el.textContent = t; el.classList.add('on'); clearTimeout(el._t); el._t = setTimeout(() => el.classList.remove('on'), 1800); }
+async function ponerPrecio(valor) {
+  const n = ed.sel.size; if (!n) return;
+  const ts = Date.now();
+  for (const f of ed.sel) { if (valor) f.miPrecio = { valor, ts }; else delete f.miPrecio; }
+  const chats = new Set(fotosCatalogo().filter(({ f }) => ed.sel.has(f)).map(({ c }) => c));
+  for (const c of chats) await guardarChat(c);
+  ed.sel.clear(); $('ep-valor').value = '';
+  avisoEditor(valor ? `✓ ${bs(valor)} a ${n} foto${n === 1 ? '' : 's'}` : `Precio quitado de ${n} foto${n === 1 ? '' : 's'}`);
+  pintarEditor(); pintarChats(); pintarResultados();
+}
+// tocar = elegir; mantener apretado = elegir también las parecidas
+let pulsado = null;
+$('ep-grid').addEventListener('pointerdown', (e) => {
+  const b = e.target.closest('.ep-foto'); if (!b) return;
+  pulsado = { b, largo: false, t: setTimeout(() => {
+    pulsado.largo = true;
+    const f = ed.visibles[+b.dataset.i].f;
+    const parecidas = fotosCatalogo().filter(({ f: g }) => g === f || (f.s1 && g.s1 && coseno(f.s1, g.s1) >= 0.86 && parecidoColor(f.color, g.color) >= 0.4));
+    for (const { f: g } of parecidas) ed.sel.add(g);
+    navigator.vibrate?.(30);
+    avisoEditor(`Marcadas ${parecidas.length} parecida${parecidas.length === 1 ? '' : 's'}`);
+    pintarEditor();
+  }, 520) };
+});
+const soltar = (e) => {
+  if (!pulsado) return;
+  clearTimeout(pulsado.t);
+  if (!pulsado.largo && e.type === 'pointerup') {
+    const f = ed.visibles[+pulsado.b.dataset.i]?.f;
+    if (f) { ed.sel.has(f) ? ed.sel.delete(f) : ed.sel.add(f); pulsado.b.classList.toggle('sel'); pulsado.b.setAttribute('aria-pressed', ed.sel.has(f)); pintarBarra(); }
+  }
+  pulsado = null;
+};
+$('ep-grid').addEventListener('pointerup', soltar);
+$('ep-grid').addEventListener('pointercancel', soltar);
+$('ep-grid').addEventListener('pointerleave', soltar);
+$('ep-grid').addEventListener('contextmenu', (e) => e.preventDefault());
+document.querySelectorAll('.ep-f').forEach((b) => b.addEventListener('click', () => {
+  document.querySelectorAll('.ep-f').forEach((x) => x.classList.toggle('on', x === b)); ed.filtro = b.dataset.f; pintarEditor();
+}));
+document.querySelectorAll('.ep-r').forEach((b) => b.addEventListener('click', () => ponerPrecio(+b.dataset.v)));
+$('ep-guardar').addEventListener('click', () => { const v = Math.round(+$('ep-valor').value); if (v > 0) ponerPrecio(v); else $('ep-valor').focus(); });
+$('ep-valor').addEventListener('keydown', (e) => { if (e.key === 'Enter') $('ep-guardar').click(); });
+$('ep-borrar').addEventListener('click', () => ponerPrecio(0));
+$('ep-limpiar').addEventListener('click', () => { ed.sel.clear(); pintarEditor(); });
+let tqe; $('ep-q').addEventListener('input', () => { clearTimeout(tqe); tqe = setTimeout(pintarEditor, 150); });
+$('ep-cerrar').addEventListener('click', () => $('editor-precios').close());
+$('abrir-precios').addEventListener('click', abrirEditor);
+
 // ---------- Lista de chats cargados ----------
 const estado = { chats: [], umbral: 70, ultima: null, consulta: [], actualizando: null, ultimoArchivo: null, porTexto: [] };
 function pintarChats() {
   const l = $('lista-chats');
-  if (!estado.chats.length) { l.innerHTML = '<div class="vacio">Todavía no cargaste ningún chat.</div>'; return; }
+  if (!estado.chats.length) { l.innerHTML = '<div class="vacio">Todavía no cargaste ningún chat.</div>'; $('abrir-precios').hidden = true; return; }
   try { pintarModelos(); } catch {}
+  $('abrir-precios').hidden = !estado.chats.some((c) => tipoChat(c) === 'catalogo' && c.fotos.length);
   l.innerHTML = estado.chats.map((c) => `<div class="chat-item"><div class="avatar">${esc((c.nombre[0] || 'C').toUpperCase())}</div>
     <div><b>${esc(c.nombre)}</b><small>${c.fotos.length} fotos${c.mensajes.length ? ` · ${c.mensajes.length} mensajes` : ''}${c.fotos.some((f) => f.precio) ? ` · ${c.fotos.filter((f) => f.precio).length} con precio (de ${esc(c.jefa || c.jefaAuto)})` : ''}</small></div>
     <button class="tipo-chat ${tipoChat(c)}" data-tipo="${c.id}" title="Toca para cambiar">${tipoChat(c) === 'precios' ? '💰 Precios' : '📒 Catálogo'}</button>
