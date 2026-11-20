@@ -778,10 +778,12 @@ function pintarResultados(animar = false) {
     }
     const a = ps[0].foto.precio;
     const valores = [...new Set(ps.map((r) => r.foto.precio.valor))];
+    const veces = ps.length;
     return `<div class="precio ${a.dudoso ? 'duda' : ''}"><span>💰</span><div>
       <b class="monto">${bs(a.valor)}</b>
-      <small>Te lo dijo ${esc(a.autor)} el ${esc(a.fecha)} a las ${esc(a.hora)}${ps.length > 1 ? ` · preguntaste ${ps.length} veces` : ''}</small>
+      <small>${a.lista ? `📋 De tu lista de precios (${esc(a.fecha)})` : `Te lo dijo ${esc(a.autor)} el ${esc(a.fecha)} a las ${esc(a.hora)}`}${veces > 1 ? ` · aparece ${veces} veces` : ''}</small>
       ${a.dudoso ? '<small class="aviso">⚠ Verifica en el chat: mandaste varias fotos seguidas y el precio podría ser de otra.</small>' : ''}
+      ${(() => { const vistos = new Set([`${a.valor}|${a.fecha}`]); ps.splice(1, ps.length, ...ps.slice(1).filter((r) => { const k = `${r.foto.precio.valor}|${r.foto.precio.fecha}`; if (vistos.has(k)) return false; vistos.add(k); return true; })); return ''; })()}
       ${ps.length > 1 ? `<div class="historial">${ps.slice(1, 5).map((r) => `<button class="hist" data-h="${u.pre.indexOf(r)}">${bs(r.foto.precio.valor)} <small>${esc(r.foto.precio.fecha)}</small></button>`).join('')}</div>` : ''}
       ${valores.length > 1 ? '<small class="aviso">El precio cambió con el tiempo: te muestro el más reciente.</small>' : ''}
       ${manual && manual.valor !== a.valor ? `<small class="aviso">✏️ Tú le pusiste ${bs(manual.valor)} en el catálogo.</small>` : ''}
@@ -887,8 +889,29 @@ function quienDaPrecios(c) {
   for (const m of c.mensajes) if (m.autor && !m.archivo && numerosPrecio(m.texto).length) cuenta.set(m.autor, (cuenta.get(m.autor) || 0) + 1);
   return [...cuenta.entries()].sort((a, b) => b[1] - a[1])[0]?.[0] || null;
 }
+// Lista de precios: un chat donde sólo escribes tú (fotos y después "750"):
+// el número vale para TODAS las fotos mandadas desde el número anterior.
+function esListaPrecios(c) {
+  const autores = new Set(c.mensajes.filter((m) => m.autor).map((m) => m.autor));
+  return autores.size === 1 && c.mensajes.some((m) => !m.archivo && numerosPrecio(m.texto).length);
+}
 function calcularPrecios(c) {
   if (!c.mensajes?.length) return;
+  if (esListaPrecios(c)) {
+    c.lista = true; c.jefaAuto = 'tu lista';
+    for (const f of c.fotos) { delete f.precio; delete f.respuesta; }
+    const porArchivo = new Map(c.fotos.map((f) => [f.archivo, f]));
+    let tanda = [];
+    c.mensajes.forEach((m, i) => {
+      if (m.archivo) { const f = porArchivo.get(m.archivo); if (f) tanda.push(f); return; }
+      const nums = numerosPrecio(m.texto);
+      if (!nums.length || !tanda.length) return;
+      for (const f of tanda) f.precio = { valor: nums[0], fecha: m.fecha, hora: m.hora, autor: 'Tu lista', idx: i, dudoso: false, lista: true };
+      tanda = [];
+    });
+    return;
+  }
+  c.lista = false;
   const jefa = c.jefa || quienDaPrecios(c); c.jefaAuto = jefa;
   if (!jefa) return;
   const porArchivo = new Map(c.fotos.map((f) => [f.archivo, f]));
@@ -1156,8 +1179,8 @@ function pintarChats() {
   try { pintarModelos(); } catch {}
   $('abrir-precios').hidden = !estado.chats.some((c) => tipoChat(c) === 'catalogo' && c.fotos.length);
   l.innerHTML = estado.chats.map((c) => `<div class="chat-item"><div class="avatar">${esc((c.nombre[0] || 'C').toUpperCase())}</div>
-    <div><b>${esc(c.nombre)}</b><small>${c.fotos.length} fotos${c.mensajes.length ? ` · ${c.mensajes.length} mensajes` : ''}${c.fotos.some((f) => f.precio) ? ` · ${c.fotos.filter((f) => f.precio).length} con precio (de ${esc(c.jefa || c.jefaAuto)})` : ''}</small></div>
-    <button class="tipo-chat ${tipoChat(c)}" data-tipo="${c.id}" title="Toca para cambiar">${tipoChat(c) === 'precios' ? '💰 Precios' : '📒 Catálogo'}</button>
+    <div><b>${esc(c.nombre)}</b><small>${c.fotos.length} fotos${c.mensajes.length ? ` · ${c.mensajes.length} mensajes` : ''}${c.fotos.some((f) => f.precio) ? ` · ${c.fotos.filter((f) => f.precio).length} con precio (${c.lista ? 'tu lista' : 'de ' + esc(c.jefa || c.jefaAuto)})` : ''}</small></div>
+    <button class="tipo-chat ${tipoChat(c)}" data-tipo="${c.id}" title="Toca para cambiar">${c.lista && tipoChat(c) === 'precios' ? '📋 Lista' : tipoChat(c) === 'precios' ? '💰 Precios' : '📒 Catálogo'}</button>
     <button class="x" data-id="${c.id}" aria-label="Quitar ${esc(c.nombre)}">✕</button></div>`).join('');
   l.querySelectorAll('.tipo-chat').forEach((b) => b.addEventListener('click', async () => {
     const c = estado.chats.find((x) => x.id === b.dataset.tipo); if (!c) return;
