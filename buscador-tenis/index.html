@@ -129,8 +129,8 @@ dialog::backdrop { background: rgba(0,0,0,.55) }
 .ep-foto .ep-n { position: absolute; right: 6px; top: 6px; font: 900 .8rem var(--f-display); color: #fff; background: rgba(0,0,0,.65); border-radius: 99px; padding: 2px 8px }
 .ep-foto.grupo { box-shadow: 4px 4px 0 -1px var(--card), 4px 4px 0 1px var(--line), 8px 8px 0 -1px var(--card), 8px 8px 0 1px var(--line); overflow: visible }
 .ep-foto.grupo img { border-radius: 12px }
-.ep-grid { flex: 1; overflow-y: auto; padding: 10px; display: grid; grid-template-columns: repeat(auto-fill, minmax(104px, 1fr)); gap: 8px; align-content: start }
-.ep-foto { position: relative; border: 0; padding: 0; border-radius: 12px; overflow: hidden; background: var(--line); cursor: pointer; aspect-ratio: 1;
+.ep-grid { flex: 1; overflow-y: auto; padding: 10px; display: grid; grid-template-columns: repeat(auto-fill, minmax(104px, 1fr)); gap: 8px; align-content: start; grid-auto-rows: max-content }
+.ep-foto { position: relative; border: 0; padding: 0; min-height: 0; height: auto; border-radius: 12px; overflow: hidden; background: var(--line); cursor: pointer; aspect-ratio: 1;
   -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; transition: transform .12s }
 .ep-foto img { width: 100%; height: 100%; object-fit: cover; display: block; pointer-events: none }
 .ep-foto.sel { outline: 4px solid var(--accent); outline-offset: -4px; transform: scale(.95) }
@@ -153,6 +153,8 @@ dialog::backdrop { background: rgba(0,0,0,.55) }
 .ep-toast { position: absolute; left: 50%; bottom: 190px; transform: translate(-50%, 20px); opacity: 0; background: #0f9d58; color: #fff; font-weight: 800;
   padding: 10px 16px; border-radius: 12px; transition: .25s; pointer-events: none; max-width: 90%; text-align: center }
 .ep-toast.on { opacity: 1; transform: translate(-50%, 0) }
+.ep-grid.arrastrando { touch-action: none }
+.ep-foto { -webkit-touch-callout: none; user-select: none; -webkit-user-select: none }
 .ep-vacio { grid-column: 1 / -1; text-align: center; color: var(--mut); padding: 30px 10px }
 /* escáner */
 .escaner { align-items: center }
@@ -241,7 +243,7 @@ dialog::backdrop { background: rgba(0,0,0,.55) }
       <div class="prog"><i id="cargando-bar"></i></div>
     </div>
     <div class="chats" id="lista-chats"></div>
-    <button class="btn sec" id="abrir-precios" hidden style="justify-content:center">✏️ Poner precios al catálogo</button>
+    <button class="btn sec" id="abrir-precios" hidden style="justify-content:center">🖼️ Galería: poner precios</button>
   </section>
 
   <section class="card" aria-labelledby="t-buscar">
@@ -289,7 +291,7 @@ dialog::backdrop { background: rgba(0,0,0,.55) }
 
 <dialog id="editor-precios" aria-labelledby="ep-t">
   <div class="ep-top">
-    <div class="ep-fila"><b id="ep-t">Poner precios</b><button class="ep-x" id="ep-cerrar" aria-label="Cerrar">✕</button></div>
+    <div class="ep-fila"><b id="ep-t">🖼️ Galería de precios</b><button class="ep-x" id="ep-cerrar" aria-label="Cerrar">✕</button></div>
     <div class="ep-filtros" role="tablist">
       <button class="ep-f on" data-f="sin">Sin precio <span id="ep-n-sin"></span></button>
       <button class="ep-f" data-f="con">Con precio <span id="ep-n-con"></span></button>
@@ -300,7 +302,7 @@ dialog::backdrop { background: rgba(0,0,0,.55) }
       <button class="ep-chip" id="ep-agrupar" aria-pressed="true">🧩 Agrupar repetidos</button>
       <button class="ep-chip" id="ep-todas">☑️ Marcar todas</button>
     </div>
-    <small class="ep-ayuda" id="ep-ayuda">Los pares repetidos salen juntos (×3, ×5…). Toca un grupo o varias fotos y elige el precio abajo.</small>
+    <small class="ep-ayuda" id="ep-ayuda">Los pares repetidos salen juntos (×3, ×5…). Toca las fotos o mantén apretada una y desliza el dedo para marcar muchas. Luego toca el precio.</small>
   </div>
   <div class="ep-grid" id="ep-grid"></div>
   <div class="ep-barra" id="ep-barra">
@@ -1093,8 +1095,8 @@ function pintarEditor() {
   ed.tiles = ed.agrupar ? agruparRepetidos(ed.visibles) : ed.visibles.map((x) => [x]);
   const grupos = ed.tiles.filter((g) => g.length > 1).length;
   $('ep-ayuda').textContent = ed.agrupar
-    ? (grupos ? `Junté ${grupos} grupo${grupos === 1 ? '' : 's'} de pares repetidos (×2, ×3…). Toca un grupo o varias fotos y elige el precio abajo.` : 'No encontré pares repetidos aquí. Toca las fotos y elige el precio abajo.')
-    : 'Toca las fotos que valen lo mismo. Mantén apretada una foto para marcar también las parecidas.';
+    ? (grupos ? `Junté ${grupos} grupo${grupos === 1 ? '' : 's'} de pares repetidos (×2, ×3…). Para muchas: mantén apretada una y desliza el dedo. Luego toca el precio.` : 'No encontré pares repetidos aquí. Toca las fotos y elige el precio abajo.')
+    : 'Toca las fotos que valen lo mismo. Para muchas: mantén apretada una y desliza el dedo.';
   $('ep-grid').innerHTML = ed.tiles.length ? ed.tiles.map((g, i) => {
     const f = g[0].f, j = ed.jefa.get(f);
     const sel = g.every(({ f: x }) => ed.sel.has(x));
@@ -1122,29 +1124,80 @@ async function ponerPrecio(valor) {
   avisoEditor(valor ? `✓ ${bs(valor)} a ${n} foto${n === 1 ? '' : 's'}` : `Precio quitado de ${n} foto${n === 1 ? '' : 's'}`);
   pintarEditor(); pintarChats(); pintarResultados();
 }
-// tocar = elegir; mantener apretado = elegir también las parecidas
-let pulsado = null;
-$('ep-grid').addEventListener('pointerdown', (e) => {
-  const b = e.target.closest('.ep-foto'); if (!b) return;
-  pulsado = { b, largo: false, t: setTimeout(() => {
-    pulsado.largo = true;
-    const f = ed.tiles[+b.dataset.i][0].f;
+// tocar = elegir · mantener apretado y deslizar = elegir muchas de una (como la galería del celular)
+// mantener apretado sin mover = elegir también las parecidas
+let pulsado = null, arrastre = null;
+const tileEn = (x, y) => document.elementFromPoint(x, y)?.closest?.('.ep-foto');
+function pintarTile(i) {
+  const b = $('ep-grid').querySelector(`.ep-foto[data-i="${i}"]`); if (!b) return;
+  const sel = ed.tiles[i].every(({ f }) => ed.sel.has(f));
+  b.classList.toggle('sel', sel); b.setAttribute('aria-pressed', sel);
+}
+function moverArrastre(x, y) {
+  if (!arrastre) return;
+  arrastre.y = y;
+  const b = tileEn(x, y); if (!b) return;
+  const cur = +b.dataset.i; if (cur === arrastre.cur) return;
+  arrastre.cur = cur; arrastre.movido = true;
+  const [lo, hi] = [Math.min(arrastre.inicio, cur), Math.max(arrastre.inicio, cur)];
+  const antes = new Set(ed.sel);
+  ed.sel = new Set(arrastre.base);
+  for (let i = lo; i <= hi; i++) for (const { f } of ed.tiles[i]) arrastre.marcar ? ed.sel.add(f) : ed.sel.delete(f);
+  for (let i = 0; i < ed.tiles.length; i++) if (ed.tiles[i].some(({ f }) => antes.has(f) !== ed.sel.has(f))) pintarTile(i);
+  pintarBarra();
+}
+function autoScroll() {   // si llevas el dedo al borde, la galería baja o sube sola
+  if (!arrastre) return;
+  const g = $('ep-grid'), r = g.getBoundingClientRect(), y = arrastre.y ?? 0, m = 70;
+  const v = y > r.bottom - m ? (y - (r.bottom - m)) / 3 : y < r.top + m ? -((r.top + m) - y) / 3 : 0;
+  if (v) { g.scrollTop += v; moverArrastre(arrastre.x, y); }
+  requestAnimationFrame(autoScroll);
+}
+function terminarArrastre() {
+  const a = arrastre; arrastre = null; $('ep-grid').classList.remove('arrastrando');
+  if (!a) return;
+  if (!a.movido && a.marcar) {    // no deslizó: marca también las parecidas
+    const f = ed.tiles[a.inicio][0].f;
     const parecidas = fotosCatalogo().filter(({ f: g }) => g === f || (f.s1 && g.s1 && coseno(f.s1, g.s1) >= 0.84 && parecidoColor(f.color, g.color) >= 0.4));
     for (const { f: g } of parecidas) ed.sel.add(g);
-    navigator.vibrate?.(30);
-    avisoEditor(`Marcadas ${parecidas.length} parecida${parecidas.length === 1 ? '' : 's'}`);
+    if (parecidas.length > 1) avisoEditor(`Marcadas ${parecidas.length} parecidas · desliza el dedo para marcar más`);
     pintarEditor();
-  }, 520) };
+  } else if (a.movido) avisoEditor(`${ed.sel.size} seleccionadas`);
+}
+$('ep-grid').addEventListener('pointerdown', (e) => {
+  const b = e.target.closest('.ep-foto'); if (!b) return;
+  pulsado = { b, x: e.clientX, y: e.clientY, largo: false, t: setTimeout(() => {
+    if (!pulsado) return;
+    pulsado.largo = true;
+    const i = +b.dataset.i, marcar = !ed.tiles[i].every(({ f }) => ed.sel.has(f));
+    arrastre = { inicio: i, cur: i, marcar, base: new Set(ed.sel), movido: false, x: pulsado.x, y: pulsado.y };
+    for (const { f } of ed.tiles[i]) marcar ? ed.sel.add(f) : ed.sel.delete(f);
+    pintarTile(i); pintarBarra();
+    $('ep-grid').classList.add('arrastrando');
+    navigator.vibrate?.(30);
+    requestAnimationFrame(autoScroll);
+  }, 380) };
 });
+$('ep-grid').addEventListener('pointermove', (e) => {
+  if (arrastre) { arrastre.x = e.clientX; moverArrastre(e.clientX, e.clientY); return; }
+  if (pulsado && !pulsado.largo && Math.hypot(e.clientX - pulsado.x, e.clientY - pulsado.y) > 10) { clearTimeout(pulsado.t); pulsado = null; }  // está bajando la galería
+});
+// mientras eliges deslizando, la galería no se mueve con el dedo
+$('ep-grid').addEventListener('touchmove', (e) => {
+  if (!arrastre) return;
+  e.preventDefault();
+  const t = e.touches[0]; arrastre.x = t.clientX; moverArrastre(t.clientX, t.clientY);
+}, { passive: false });
 const soltar = (e) => {
+  if (arrastre) { if (e.type !== 'pointercancel' && e.type !== 'pointerleave') { pulsado = null; terminarArrastre(); } return; }
   if (!pulsado) return;
   clearTimeout(pulsado.t);
-  if (!pulsado.largo && e.type === 'pointerup') {
-    const g = ed.tiles[+pulsado.b.dataset.i];
+  if (e.type === 'pointerup') {
+    const i = +pulsado.b.dataset.i, g = ed.tiles[i];
     if (g) {
       const todasSel = g.every(({ f }) => ed.sel.has(f));
       for (const { f } of g) todasSel ? ed.sel.delete(f) : ed.sel.add(f);
-      pulsado.b.classList.toggle('sel', !todasSel); pulsado.b.setAttribute('aria-pressed', !todasSel); pintarBarra();
+      pintarTile(i); pintarBarra();
     }
   }
   pulsado = null;
@@ -1152,6 +1205,8 @@ const soltar = (e) => {
 $('ep-grid').addEventListener('pointerup', soltar);
 $('ep-grid').addEventListener('pointercancel', soltar);
 $('ep-grid').addEventListener('pointerleave', soltar);
+$('ep-grid').addEventListener('touchend', () => { if (arrastre) { pulsado = null; terminarArrastre(); } });
+window.addEventListener('pointerup', () => { if (arrastre) { pulsado = null; terminarArrastre(); } });
 $('ep-grid').addEventListener('contextmenu', (e) => e.preventDefault());
 document.querySelectorAll('.ep-f').forEach((b) => b.addEventListener('click', () => {
   document.querySelectorAll('.ep-f').forEach((x) => x.classList.toggle('on', x === b)); ed.filtro = b.dataset.f; pintarEditor();
