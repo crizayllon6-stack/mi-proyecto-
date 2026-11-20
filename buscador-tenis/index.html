@@ -111,28 +111,30 @@ dialog::backdrop { background: rgba(0,0,0,.55) }
 .error { color: var(--bad); font-weight: 600 }
 
 /* editor de precios */
-#editor-precios { width: min(640px, 100vw); height: min(94vh, 900px); max-height: 94vh; border-radius: 20px; background: var(--bg); color: var(--fg);
+#editor-precios { width: 100vw; height: 100vh; height: 100dvh; max-width: none; max-height: none; margin: 0; border: 0; padding: 0; border-radius: 0; background: var(--bg); color: var(--fg);
   display: none; flex-direction: column; overflow: hidden }
 #editor-precios[open] { display: flex; animation: subir .26s cubic-bezier(.2,.8,.2,1) }
-.ep-top { padding: 14px 14px 10px; display: flex; flex-direction: column; gap: 10px; background: var(--card); border-bottom: 1px solid var(--line) }
+.ep-top { padding: calc(8px + env(safe-area-inset-top, 0px)) 12px 8px; display: flex; flex-direction: column; gap: 8px; background: var(--card); border-bottom: 1px solid var(--line) }
 .ep-fila { display: flex; align-items: center; gap: 10px; justify-content: space-between }
 .ep-top b { font: 800 1.2rem var(--f-display) }
 .ep-x { border: 0; background: none; color: var(--fg); font-size: 1.4rem; cursor: pointer; padding: 4px 8px }
-.ep-filtros { display: flex; gap: 6px; flex-wrap: wrap }
+.ep-filtros { display: flex; gap: 6px; overflow-x: auto; scrollbar-width: none; margin: 0 -12px; padding: 0 12px }
+.ep-filtros::-webkit-scrollbar { display: none }
+.ep-filtros > * { flex: none }
 .ep-f { border: 1.5px solid var(--line); background: var(--bg); color: var(--fg); border-radius: 99px; padding: 6px 12px; font: 700 .85rem var(--f-body); cursor: pointer }
 .ep-f.on { background: var(--accent); border-color: var(--accent); color: var(--accent-fg) }
 .ep-f span { opacity: .75; font-weight: 600 }
 .ep-ayuda { color: var(--mut) }
 .ep-acciones { justify-content: flex-start; flex-wrap: wrap; gap: 6px }
-.ep-chip { border: 1.5px solid var(--line); background: var(--bg); color: var(--fg); border-radius: 12px; padding: 7px 12px; font: 700 .85rem var(--f-body); cursor: pointer }
+.ep-chip { border: 1.5px solid var(--line); background: var(--bg); color: var(--fg); border-radius: 99px; padding: 6px 12px; white-space: nowrap; font: 700 .85rem var(--f-body); cursor: pointer }
 .ep-chip[aria-pressed="true"] { border-color: var(--accent); color: var(--accent); background: color-mix(in srgb, var(--accent) 10%, var(--card)) }
 .ep-foto .ep-n { position: absolute; right: 6px; top: 6px; font: 900 .8rem var(--f-display); color: #fff; background: rgba(0,0,0,.65); border-radius: 99px; padding: 2px 8px }
 .ep-foto.grupo { box-shadow: 4px 4px 0 -1px var(--card), 4px 4px 0 1px var(--line), 8px 8px 0 -1px var(--card), 8px 8px 0 1px var(--line); overflow: visible }
 .ep-foto.grupo img { border-radius: 12px }
-.ep-grid { flex: 1; overflow-y: auto; padding: 10px; display: grid; grid-template-columns: repeat(auto-fill, minmax(104px, 1fr)); gap: 8px; align-content: start; grid-auto-rows: max-content }
+.ep-grid { flex: 1; overflow-y: auto; padding: 10px; display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 10px; align-content: start; grid-auto-rows: max-content }
 .ep-foto { position: relative; border: 0; padding: 0; min-height: 0; height: auto; border-radius: 12px; overflow: hidden; background: var(--line); cursor: pointer; aspect-ratio: 1;
   -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; transition: transform .12s }
-.ep-foto img { width: 100%; height: 100%; object-fit: cover; display: block; pointer-events: none }
+.ep-foto img { width: 100%; height: 100%; object-fit: contain; background: #fff; display: block; pointer-events: none }
 .ep-foto.sel { outline: 4px solid var(--accent); outline-offset: -4px; transform: scale(.95) }
 .ep-foto.sel::after { content: "✓"; position: absolute; top: 6px; left: 6px; width: 26px; height: 26px; border-radius: 50%; background: var(--accent); color: #fff;
   display: grid; place-items: center; font-weight: 900; font-size: .9rem; box-shadow: 0 2px 6px rgba(0,0,0,.4) }
@@ -296,12 +298,10 @@ dialog::backdrop { background: rgba(0,0,0,.55) }
       <button class="ep-f on" data-f="sin">Sin precio <span id="ep-n-sin"></span></button>
       <button class="ep-f" data-f="con">Con precio <span id="ep-n-con"></span></button>
       <button class="ep-f" data-f="todas">Todas</button>
+      <button class="ep-chip" id="ep-todas">☑️ Marcar todas</button>
+      <button class="ep-chip" id="ep-agrupar" aria-pressed="true">🧩 Juntar repetidos</button>
     </div>
     <div class="buscador-texto"><span aria-hidden="true">🔎</span><input id="ep-q" type="search" placeholder="Filtrar por modelo o mensaje" autocomplete="off" aria-label="Filtrar fotos"></div>
-    <div class="ep-fila ep-acciones">
-      <button class="ep-chip" id="ep-agrupar" aria-pressed="true">🧩 Agrupar repetidos</button>
-      <button class="ep-chip" id="ep-todas">☑️ Marcar todas</button>
-    </div>
     <small class="ep-ayuda" id="ep-ayuda">Los pares repetidos salen juntos (×3, ×5…). Toca las fotos o mantén apretada una y desliza el dedo para marcar muchas. Luego toca el precio.</small>
   </div>
   <div class="ep-grid" id="ep-grid"></div>
@@ -1095,7 +1095,7 @@ function pintarEditor() {
   ed.tiles = ed.agrupar ? agruparRepetidos(ed.visibles) : ed.visibles.map((x) => [x]);
   const grupos = ed.tiles.filter((g) => g.length > 1).length;
   $('ep-ayuda').textContent = ed.agrupar
-    ? (grupos ? `Junté ${grupos} grupo${grupos === 1 ? '' : 's'} de pares repetidos (×2, ×3…). Para muchas: mantén apretada una y desliza el dedo. Luego toca el precio.` : 'No encontré pares repetidos aquí. Toca las fotos y elige el precio abajo.')
+    ? (grupos ? `Junté ${grupos} grupo${grupos === 1 ? '' : 's'} de repetidos. Mantén apretada una foto y desliza para marcar muchas.` : 'No encontré pares repetidos aquí. Toca las fotos y elige el precio abajo.')
     : 'Toca las fotos que valen lo mismo. Para muchas: mantén apretada una y desliza el dedo.';
   $('ep-grid').innerHTML = ed.tiles.length ? ed.tiles.map((g, i) => {
     const f = g[0].f, j = ed.jefa.get(f);
